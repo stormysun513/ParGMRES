@@ -1,3 +1,27 @@
+## Project Overview
+
+Briefly describe the project here.
+
+## Learning Objectives
+
+How do we apply material we learned this semester in the project.
+
+## Methodology 
+
+Describe the strategy or methodology we will use in this project.
+
+## Deliverables
+
+Describe what are expected after we finish the project.
+
+## Milestones
+
+Divide the tasks into subtasks and assign a reasonable time for each subtask.
+
+## Reference
+
+[1] I am reference 1
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/stormysun513/pcap-final/edit/gh-pages/README.md) to maintain and preview the content for your website in Markdown files.
