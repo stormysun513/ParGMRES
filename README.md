@@ -5,7 +5,7 @@ Parallel GMRES: A parallel linear solver.
 
 Parallel GMRES: A parallel linear solver.
 
-## Team Member
+## TEAM MEMBER
 
 - Yu-Lun Tsai (yulunt@andrew)
 - Chih-Wei Chang (cchang3@andrew)
@@ -18,11 +18,22 @@ GPU-CPU heterogeneous platform.
 
 ## BACKGROUND
 
-If your project involves accelerating a compute-intensive application, describe
-the application or piece of the application you are going to implement in more
-detail. This description need only be a few paragraphs. It might be helpful to
-include a block diagram or pseudocode of the basic idea. An important detail is
-what aspects of the problem might benefit from parallelism? and why?
+We try to build a parallel version implementation of GMRES. GMRES is one of the
+mostly used algorithm in solving large sparse linear system. Solving a linear
+system efficiently can be crucial in that many computate-intensive applications,
+such as machine learning or scientific computation, involve solving different
+kind of linear systems. GMRES is by itself an iterative method, in which the
+main flow of the algorithm is inherently sequential. However, the Arnoldi
+process, the most time-consuming part in GMRES, is consisted of generating basis
+and orthogonalization, which is potentially paralleizable. Hence, we belive a
+well-designed Parallel GMRES should have the chance to out-perform the
+sequential GMRES by a significant scale.
+
+<!-- If your project involves accelerating a compute-intensive application, describe -->
+<!-- the application or piece of the application you are going to implement in more -->
+<!-- detail. This description need only be a few paragraphs. It might be helpful to -->
+<!-- include a block diagram or pseudocode of the basic idea. An important detail is -->
+<!-- what aspects of the problem might benefit from parallelism? and why? -->
 
 
 ## THE CHALLENGE
