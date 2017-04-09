@@ -49,12 +49,11 @@ the project?
   the workload to it challenging?
 
 ## RESOURCES
-Describe the resources (type of computers, starter code, etc.) you will use.
-What code base will you start from? Are you starting from scratch or using an
-existing piece of code? Is there a book or paper that you are using as a
-reference (if so, provide a citation)? Are there any other resources you need,
-but haven't figured out how to obtain yet? Could you benefit from access to any
-special machines?
+
+We will build our implementation on multiple multiple GPU-CPU platforms, with
+OpenMPI for communication. We will follow the main idea in [A PARALLEL GMRES VERSION FOR GENERAL SPARSE MATRICES](https://www.irisa.fr/sage/jocelyne/publis/1990/etna-1995.pdf)
+to implement the parallelized version, and then try to improve the performance
+by utilizing GPU and OpenMPI.
 
 ## GOALS AND DELIVERABLES
 
