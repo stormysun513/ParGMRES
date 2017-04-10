@@ -1,22 +1,22 @@
-Parallel GMRES: A parallel linear solver.
-============
+Project Proposal
+======================
 
-## TITLE
+## Title
 
-Parallel GMRES: A parallel linear solver.
+ParGMRES: A parallel linear solver
 
-## TEAM MEMBER
+## Team member
 
-- Yu-Lun Tsai (yulunt@andrew)
-- Chih-Wei Chang (cchang3@andrew)
+- Yu-Lun Tsai (yulunt)
+- Chih-Wei Chang (cchang3)
 
-## SUMMARY
+## Summary
 
 We propose to implement a parallelized GMRES (Generalized Minimal RESidual
 method), which is a commonly used solver for large sparse linear system, on
 GPU-CPU heterogeneous platform.
 
-## BACKGROUND
+## Background
 
 We try to build a parallel version implementation of GMRES. GMRES is one of the
 mostly used algorithm in solving large sparse linear system. Solving a linear
@@ -36,7 +36,33 @@ sequential GMRES by a significant scale.
 <!-- what aspects of the problem might benefit from parallelism? and why? -->
 
 
-## THE CHALLENGE
+## The Challenge
+
+Our first challenge is to identify which part we should parallelize. The GMRES is an 
+iterative algorithm for solving large linear system. The algorithm can be divided into two parts. 
+The first one is the Arnoldi process, which takes the current guess of result and the 
+target matrix as arguements to construct Krylov subspace. Krylov suspace is an orthonomal set with 
+at most the same dimension as the target matrix. This process is typically sequential because each
+vector should be orthogonal to previous vectors. The second part is to update current
+result based on the orthonomal basis. We can see that both parts have high data dependency
+due to intrinsic of iterative method. Only the matrix operations are likely to be parallelized.
+
+The second challenge is to determine how to parallelize codes. We know matrix operations can
+be parallelized using either GPU or OpenMP. Although GPU can create a bunch of kernel
+threads for computation, it has an overhead about moving data between CPU and GPU.
+If the matrix operation is too simple, the overheads will dominate the overall latency 
+just like what we encountered in SAXPY assignment. Some experiments are needed for this issue.
+
+
+The third challenge is to scale the computation when the target matrix is very large.
+Some scientific computation require solving a large linear system. Sometimes, the matrix
+is unable to fit in a RAM and memory swarpping is required. Disk I/O is always expensive so
+we may utilize multiple nodes for parallel computation. We have to design synchronization 
+mechanism among nodes. The GMRES is an iterative method, which requires a significant 
+amount of communication. An effective way to communicate with other nodes is quite
+important.
+
+
 
 Describe why the problem is challenging. What aspects of the problem might make
 it difficult to parallelize? In other words, what to you hope to learn by doing
@@ -48,14 +74,14 @@ the project?
 - Describe constraints: What are the properties of the system that make mapping
   the workload to it challenging?
 
-## RESOURCES
+## Resources
 
 We will build our implementation on multiple multiple GPU-CPU platforms, with
 OpenMPI for communication. We will follow the main idea in [A PARALLEL GMRES VERSION FOR GENERAL SPARSE MATRICES](https://www.irisa.fr/sage/jocelyne/publis/1990/etna-1995.pdf)
 to implement the parallelized version, and then try to improve the performance
 by utilizing GPU and OpenMPI.
 
-## GOALS AND DELIVERABLES
+## Goals and Deliverables
 
 This is by far the most important section of the proposal:
 
@@ -86,12 +112,12 @@ This is by far the most important section of the proposal:
   for your project. Then, for the rest of your project you always have the
   ability to run your optimized code and obtain a comparison.
 
-## PLATFORM CHOICE
+## Platform Choice
 Describe why the platform (computer and/or language) you have chosen is a good
 one for your needs. Why does it make sense to use this parallel system for the
 workload you have chosen?
 
-## SCHEDULE
+## Schedule
 Produce a schedule for your project. Your schedule should have at least one item
 to do per week. List what you plan to get done each week from now until the
 parallelism competition in order to meet your project goals. Keep in mind that
