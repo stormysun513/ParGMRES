@@ -146,12 +146,12 @@ workload you have chosen?
 
 ## Schedule
 
-**Monday, April 10** - Revise the project proposal
-**Monday, April 17** - Implement the sequential version
-**Thursday, April 20** - Achieve parallelism using OpenMP framework
-**Tuesday, April 25** - Achieve parallelism using CUDA
-**Monday, May 1** - Work one multi-node version
-**Sunday, May 7** - Organize result and complete project page, 
+**Monday, April 10** - Revise the project proposal  
+**Monday, April 17** - Implement the sequential version  
+**Thursday, April 20** - Achieve parallelism using OpenMP framework  
+**Tuesday, April 25** - Achieve parallelism using CUDA  
+**Monday, May 1** - Work one multi-node version  
+**Sunday, May 7** - Organize result and complete the project page  
 
 
 <!--
