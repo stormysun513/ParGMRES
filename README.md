@@ -83,34 +83,53 @@ by utilizing GPU and OpenMPI.
 
 ## Goals and Deliverables
 
-This is by far the most important section of the proposal:
+We plan to perform an analysis on various parallelism of GMRES against different
+scales. We are going to build sequential version, OpenMP version, GPU version,
+and CPU-GPU mixed version with OpenMPI. The ultimate goal is to improve the
+sequential GMRES by different parallel strategies and to analyze which strategy
+might be better under different circumstances.
 
-- Separate your goals into what you PLAN TO ACHIEVE (what you believe you must
-  get done to have a successful project and get the grade you expect) and an
-  extra goal or two that you HOPE TO ACHIEVE if the project goes really well and
-  you get ahead of schedule. It may not be possible to state precise performance
-  goals at this time, but we encourage you be as precise as possible. If you do
-  state a goal, give some justification of why you think you can achieve it.
-  (e.g., I hope to speed up my starter code 10x, because if I did it would run
-  in real-time.)
-- If applicable, describe the demo you plan to show at the parallelism
-  computation (will it be an interactive demo? will you show an output of the
-  program that is really neat? will you show speedup graphs?). Specifically,
-  what will you show us that will demonstrate you did a good job?
-- If your project is an analysis project, what are you hoping to learn about the
-  workload or system being studied? What question(s) do you plan to answer in
-  your analysis?
-- Systems project proposals should describe what the system will be capable of
-  and what performance is hoped to be achieved.
-- IN GENERAL: Imagine that I didn't give you a grading script on assignments 2,
-  3, or 4. Imagine you did the entire assignment, made it as fast as you could,
-  and then turned it in. You wouldn't have any idea if you'd done a good job!!!
-  That's the situation you are in for the final project. And that's the
-  situation I'm in when grading your final project. As part of your project
-  plan, and ONE OF THE FIRST THINGS YOU SHOULD DO WHEN YOU GET STARTED WORKING
-  is implement the test harnesses and/or baseline "reference" implementations
-  for your project. Then, for the rest of your project you always have the
-  ability to run your optimized code and obtain a comparison.
+The expected demo of this project will be a set of comparisons on the gains from
+parallelism for each strategy. Speedup graph on different scale will be
+demonstrated for each strategy as well.
+
+We would like to know about what might cause a parallelization strategy be
+inefficient in one setting while be efficient in another setting. Besides, we
+would like to learn how to dynamically decide which strategy to apply on a
+randomly given linear system.
+
+For evaluation, we will test our implementations on different scale (in terms of
+matrix size). The baseline will be sequential implementation, and parallel versions
+are expected to beat the baseline in every scales.
+
+<!-- This is by far the most important section of the proposal: -->
+
+<!-- - Separate your goals into what you PLAN TO ACHIEVE (what you believe you must -->
+<!--   get done to have a successful project and get the grade you expect) and an -->
+<!--   extra goal or two that you HOPE TO ACHIEVE if the project goes really well and -->
+<!--   you get ahead of schedule. It may not be possible to state precise performance -->
+<!--   goals at this time, but we encourage you be as precise as possible. If you do -->
+<!--   state a goal, give some justification of why you think you can achieve it. -->
+<!--   (e.g., I hope to speed up my starter code 10x, because if I did it would run -->
+<!--   in real-time.) -->
+<!-- - If applicable, describe the demo you plan to show at the parallelism -->
+<!--   computation (will it be an interactive demo? will you show an output of the -->
+<!--   program that is really neat? will you show speedup graphs?). Specifically, -->
+<!--   what will you show us that will demonstrate you did a good job? -->
+<!-- - If your project is an analysis project, what are you hoping to learn about the -->
+<!--   workload or system being studied? What question(s) do you plan to answer in -->
+<!--   your analysis? -->
+<!-- - Systems project proposals should describe what the system will be capable of -->
+<!--   and what performance is hoped to be achieved. -->
+<!-- - IN GENERAL: Imagine that I didn't give you a grading script on assignments 2, -->
+<!--   3, or 4. Imagine you did the entire assignment, made it as fast as you could, -->
+<!--   and then turned it in. You wouldn't have any idea if you'd done a good job!!! -->
+<!--   That's the situation you are in for the final project. And that's the -->
+<!--   situation I'm in when grading your final project. As part of your project -->
+<!--   plan, and ONE OF THE FIRST THINGS YOU SHOULD DO WHEN YOU GET STARTED WORKING -->
+<!--   is implement the test harnesses and/or baseline "reference" implementations -->
+<!--   for your project. Then, for the rest of your project you always have the -->
+<!--   ability to run your optimized code and obtain a comparison. -->
 
 ## Platform Choice
 Describe why the platform (computer and/or language) you have chosen is a good
