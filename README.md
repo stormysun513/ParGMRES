@@ -12,7 +12,7 @@ ParGMRES: A parallel linear solver
 
 ## Summary
 
-We propose to implement a parallelized GMRES (Generalized Minimal RESidual
+We propose to implement a parallelized GMRES (Generalized Minimal Residual
 method), which is a commonly used solver for large sparse linear system, on
 GPU-CPU heterogeneous platform.
 
@@ -38,29 +38,32 @@ sequential GMRES by a significant scale.
 
 ## The Challenge
 
-Our first challenge is to identify which part we should parallelize. The GMRES is an 
-iterative algorithm for solving large linear system. The algorithm can be divided into two parts. 
-The first one is the Arnoldi process, which takes the current guess of result and the 
-target matrix as arguements to construct Krylov subspace. Krylov suspace is an orthonomal set with 
-at most the same dimension as the target matrix. This process is typically sequential because each
-vector should be orthogonal to previous vectors. The second part is to update current
-result based on the orthonomal basis. We can see that both parts have high data dependency
-due to intrinsic of iterative method. Only the matrix operations are likely to be parallelized.
+Our first challenge is to identify which part has potential to be parallelized. The GMRES is an 
+iterative algorithm in solving large linear system. The algorithm is divided into two parts: basis
+constructon and updates. The first part uses the Arnoldi process, which takes a current guess of 
+result and the target matrix as arguements to construct Krylov subspace. Krylov suspace is an 
+orthonomal vector set with at most the same dimension as the target matrix. This process 
+is typically sequential because each vector must be orthogonal to previous vectors. The second 
+part is to update current result based on the orthonomal basis. We can see that both parts 
+have high data dependency due to intrinsic of iterative method. The benefit of parallel computation
+may be insignificant. Currently, we identify some matrix-vector multiplication as candidates to be 
+parallelized.
 
-The second challenge is to determine how to parallelize codes. We know matrix operations can
-be parallelized using either GPU or OpenMP. Although GPU can create a bunch of kernel
-threads for computation, it has an overhead about moving data between CPU and GPU.
-If the matrix operation is too simple, the overheads will dominate the overall latency 
-just like what we encountered in SAXPY assignment. Some experiments are needed for this issue.
+The second challenge is how to parallelize codes. We know matrix operations can
+be parallelized using either GPU or OpenMP. Although GPU is able to create a bunch of kernel
+threads for computation, it has an overhead for moving data between CPU and GPU.
+If the matrix operation is too simple, the overheads dominate the overall latency and
+the benefit provided by GPU is compromised. It is similar with what we encountered in 
+SAXPY assignment. Therefore, we have to do some experiment on this issue.
 
 
-The third challenge is to scale the computation when the target matrix is very large.
-Some scientific computation require solving a large linear system. Sometimes, the matrix
-is unable to fit in a RAM and memory swarpping is required. Disk I/O is always expensive so
-we may utilize multiple nodes for parallel computation. We have to design synchronization 
-mechanism among nodes. The GMRES is an iterative method, which requires a significant 
-amount of communication. An effective way to communicate with other nodes is quite
-important.
+The third challenge is how to scale the computation when the target matrix is very large.
+It is common that a scientific problem requires solving a large linear system. Sometimes, 
+the matrix size is too large to fit in a RAM, so memory swarpping occurs frequently. Disk 
+I/O is always expensive so that we have to utilize multiple nodes to prevent this issue. 
+A proper synchronization mechanism among nodes becomes important. The GMRES is an iterative 
+method. Namely, it will require a significant amount of communication. We should reduce the
+cost of communication or there is no benefit to run on multiple nodes.
 
 
 <!-- Describe why the problem is challenging. What aspects of the problem might make --> 
@@ -132,7 +135,7 @@ are expected to beat the baseline in every scales.
 
 ## Platform Choice
 
-We will be implement the parallel linear solver on the latesday cluster, where we can
+We will be implementing the parallel linear solver on the latesday cluster, where we can
 test CUDA, OpenMP, and multi-node parallelism. 
 
 <!--
@@ -144,20 +147,10 @@ workload you have chosen?
 ## Schedule
 
 **Monday, April 10** - Revise the project proposal
-
-
 **Monday, April 17** - Implement the sequential version
-
-
 **Thursday, April 20** - Achieve parallelism using OpenMP framework
-
-
 **Tuesday, April 25** - Achieve parallelism using CUDA
-
-
 **Monday, May 1** - Work one multi-node version
-
-
 **Sunday, May 7** - Organize result and complete project page, 
 
 
@@ -176,7 +169,7 @@ do (establish the dependencies!).
 
 ## Reference
 
-[1] I am reference 1
+[1] Saad, Yousef. Iterative methods for sparse linear systems. Society for Industrial and Applied Mathematics, 2003.
 
 <!-- ## Welcome to GitHub Pages -->
 
