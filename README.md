@@ -63,16 +63,14 @@ amount of communication. An effective way to communicate with other nodes is qui
 important.
 
 
-
-Describe why the problem is challenging. What aspects of the problem might make
-it difficult to parallelize? In other words, what to you hope to learn by doing
-the project?
-
-- Describe the workload: what are the dependencies, what are its memory access
-  characteristics? (is there locality? is there a high communication to
-  computation ratio?), is there divergent execution?
-- Describe constraints: What are the properties of the system that make mapping
-  the workload to it challenging?
+<!-- Describe why the problem is challenging. What aspects of the problem might make --> 
+<!-- it difficult to parallelize? In other words, what to you hope to learn by doing -->
+<!-- the project?                                                                    -->
+<!-- - Describe the workload: what are the dependencies, what are its memory access  -->
+<!--   characteristics? (is there locality? is there a high communication to         -->
+<!--   computation ratio?), is there divergent execution?                            -->
+<!-- - Describe constraints: What are the properties of the system that make mapping -->
+<!--   the workload to it challenging? -->
 
 ## Resources
 
