@@ -75,7 +75,8 @@ important.
 ## Resources
 
 We will build our implementation on multiple multiple GPU-CPU platforms, with
-OpenMPI for communication. We will follow the main idea in [A PARALLEL GMRES VERSION FOR GENERAL SPARSE MATRICES](https://www.irisa.fr/sage/jocelyne/publis/1990/etna-1995.pdf)
+OpenMPI for communication. We will follow the main idea in 
+[A PARALLEL GMRES VERSION FOR GENERAL SPARSE MATRICES](https://www.irisa.fr/sage/jocelyne/publis/1990/etna-1995.pdf)
 to implement the parallelized version, and then try to improve the performance
 by utilizing GPU and OpenMPI.
 
@@ -130,11 +131,37 @@ are expected to beat the baseline in every scales.
 <!--   ability to run your optimized code and obtain a comparison. -->
 
 ## Platform Choice
+
+We will be implement the parallel linear solver on the latesday cluster, where we can
+test CUDA, OpenMP, and multi-node parallelism. 
+
+<!--
 Describe why the platform (computer and/or language) you have chosen is a good
 one for your needs. Why does it make sense to use this parallel system for the
 workload you have chosen?
+-->
 
 ## Schedule
+
+**Monday, April 10** - Revise the project proposal
+
+
+**Monday, April 17** - Implement the sequential version
+
+
+**Thursday, April 20** - Achieve parallelism using OpenMP framework
+
+
+**Tuesday, April 25** - Achieve parallelism using CUDA
+
+
+**Monday, May 1** - Work one multi-node version
+
+
+**Sunday, May 7** - Organize result and complete project page, 
+
+
+<!--
 Produce a schedule for your project. Your schedule should have at least one item
 to do per week. List what you plan to get done each week from now until the
 parallelism competition in order to meet your project goals. Keep in mind that
@@ -145,6 +172,7 @@ checkpoint deadline is April 25th. In your schedule we encourage you to be
 precise as precise as possible. It's often helpful to work backward in time from
 your deliverables and goals, writing down all the little things you'll need to
 do (establish the dependencies!).
+-->
 
 ## Reference
 
