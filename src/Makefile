@@ -1,5 +1,5 @@
 CXX=g++ -m64
-CXXFLAGS=-Icommon -Iobjs/ -O2 -Wall
+CXXFLAGS=-std=c++11 -Icommon -Iobjs/ -O2 -Wall
 # CXXFLAGS=-I../common -Iobjs/ -O2 -Wall -mavx2 -mfma
 
 APP_NAME=pgmres
