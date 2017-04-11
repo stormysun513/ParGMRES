@@ -140,7 +140,9 @@ which can be considered as a extremely optimized sequential version.
 ## Platform Choice
 
 We will be implementing the parallel linear solver on the latesday cluster, where we can
-test CUDA, OpenMP, and multi-node parallelism. 
+test CUDA, OpenMP, and multi-node parallelism on a single platform. The advantage of 
+latedays is that it is properly configured and we can focus on development of parallel
+code without being bothered by platform configuration.
 
 <!--
 Describe why the platform (computer and/or language) you have chosen is a good
