@@ -101,8 +101,12 @@ would like to learn how to dynamically decide which strategy to apply on a
 randomly given linear system.
 
 For evaluation, we will test our implementations on different scale (in terms of
-matrix size). The baseline will be sequential implementation, and parallel versions
-are expected to beat the baseline in every scales.
+matrix size). The baseline will be sequential implementation, and parallel
+versions are expected to beat the baseline in every scales. Additionally, we
+will make comparison to
+the
+[PETSc's implementation of GMRES](http://www.mcs.anl.gov/petsc/petsc-current/docs/manualpages/KSP/KSPGMRES.html),
+which can be considered as a extremely optimized sequential version.
 
 <!-- This is by far the most important section of the proposal: -->
 
