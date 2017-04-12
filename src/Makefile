@@ -13,16 +13,16 @@ default: $(APP_NAME)
 .PHONY: dirs clean
 
 dirs:
-		/bin/mkdir -p $(OBJDIR)/
+	/bin/mkdir -p $(OBJDIR)/
 
 clean:
-		/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(APP_NAME).da
+	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(APP_NAME).da
 
 # OBJS=$(OBJDIR)/main.o $(OBJDIR)/sin.o
 OBJS=$(OBJDIR)/main.o
 
 $(APP_NAME): dirs $(OBJS)
-		$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
 
 # $(APP_NAME).da: $(APP_NAME)
 # 	objdump -d $(APP_NAME) > $(APP_NAME).da
@@ -31,7 +31,7 @@ $(APP_NAME): dirs $(OBJS)
 # 	$(CXX) $(CXXFLAGS) -S $(CFILE).cpp
 
 $(OBJDIR)/%.o: %.cpp
-		$(CXX) $< $(CXXFLAGS) -c -o $@
+	$(CXX) $< $(CXXFLAGS) -c -o $@
 
 # $(OBJDIR)/%.o: $(COMMONDIR)/%.cpp
 # 	$(CXX) $< $(CXXFLAGS) -c -o $@
