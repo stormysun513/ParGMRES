@@ -93,7 +93,7 @@ gmres(const vector<vector<double>>& A,
 
     while(nit < maxit){
         auto H = generateMatrix(m+1, m);
-        auto Z = generateMatrix(dim, m);
+        auto Z = generateMatrix(m, dim);
         auto V = generateMatrix(m+1, dim);
          
         // TODO: the GMRES algorithm       
