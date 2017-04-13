@@ -11,7 +11,7 @@
 using namespace std;
 
 vector<double>
-mvAx(const vector<vector<double>>& A, const vector<double>& x){
+mvAx(const vector<vector<double>>& A, const vector<double>& x) {
     vector<double> b(x.size());
 
     for (size_t i = 0; i < A.size(); ++i) {
@@ -24,62 +24,62 @@ mvAx(const vector<vector<double>>& A, const vector<double>& x){
 }
 
 vector<double>
-vMul(const vector<double>& vec, double scale){
+vMul(const vector<double>& vec, double scale) {
     vector<double> ans(vec.size());
 
-    for(size_t i = 0; i < vec.size(); i++){
+    for (size_t i = 0; i < vec.size(); i++){
         ans[i] = scale * vec[i];
     }
     return ans;
 }
 
 vector<double>
-vSub(const vector<double>& vec1, const vector<double>& vec2){
+vSub(const vector<double>& vec1, const vector<double>& vec2) {
     vector<double> ans(vec1.size());
 
-    for(size_t i = 0; i < vec1.size(); i++){
+    for (size_t i = 0; i < vec1.size(); i++) {
         ans[i] = vec1[i] - vec2[i];
     }
     return ans;
 }
 
-double norm(const vector<double>& vec){
+double
+norm(const vector<double>& vec) {
     double res = .0f;
 
-    for(double num: vec){
-        res += num;
+    for (double num: vec) {
+        res += num * num;
     }
     return sqrt(res);
 }
 
 vector<vector<double>>
-generateMatrix(int m, int n){
+generateMatrix(int m, int n) {
     vector<vector<double>> matrix(m);
 
-    for(size_t i = 0; i < m; i++){
+    for (size_t i = 0; i < m; i++) {
         matrix[i] = vector<double>(n);
     }
     return matrix;
 }
 
-void setRow(vector<vector<double>>& mat, const vector<double>& vec, int row){
+void
+setRow(vector<vector<double>>& mat, const vector<double>& vec, int row) {
 
     size_t length = vec.size();
 
     assert(mat.size() > row);
     assert(mat[0].size() == length);
 
-    for(int i = 0; i < length; i++){
+    for (int i = 0; i < length; i++) {
         mat[row][i] = vec[i];
     }
 }
 
 vector<double>
-gmres(const vector<vector<double>>& A, 
-        const vector<double>& b, 
-        size_t m, 
-        size_t tol, 
-        size_t maxit){
+gmres(const vector<vector<double>>& A,
+      const vector<double>& b,
+      size_t m, size_t tol, size_t maxit) {
 
     size_t dim = A[0].size();
     size_t nit = 0;
@@ -91,27 +91,27 @@ gmres(const vector<vector<double>>& A,
     assert(m > 0);
     assert(maxit > 0);
 
-    while(nit < maxit){
+    while (nit < maxit) {
         auto H = generateMatrix(m+1, m);
         auto Z = generateMatrix(m, dim);
         auto V = generateMatrix(m+1, dim);
-         
-        // TODO: the GMRES algorithm       
+
+        // TODO: the GMRES algorithm
         auto r0 = vSub(b, mvAx(A, x0));
         double beta = norm(r0);
         vector<double> x(dim);
         setRow(V, vMul(r0, 1/beta), 0);
- 
+
         // TODO: get krylov space
         for(int j = 0; j < m; j++){
-            
+
         }
 
         x0 = x;
         nit++;
     }
     return x0;
-} 
+}
 
 int main(int argc, char *argv[])
 {
