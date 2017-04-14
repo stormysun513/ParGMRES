@@ -19,7 +19,7 @@ clean:
 	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(APP_NAME).da
 
 # OBJS=$(OBJDIR)/main.o $(OBJDIR)/sin.o
-OBJS=$(OBJDIR)/main.o
+OBJS=$(OBJDIR)/main.o $(OBJDIR)/utils.o
 
 $(APP_NAME): dirs $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
@@ -36,5 +36,5 @@ $(OBJDIR)/%.o: %.cpp
 # $(OBJDIR)/%.o: $(COMMONDIR)/%.cpp
 # 	$(CXX) $< $(CXXFLAGS) -c -o $@
 
-$(OBJDIR)/main.o: main.hpp
-# $(OBJDIR)/sin.o: sin.h Makefile
+$(OBJDIR)/main.o: main.hpp Makefile
+$(OBJDIR)/utils.o: utils.hpp

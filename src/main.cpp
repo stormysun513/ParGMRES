@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <vector>
@@ -10,47 +11,37 @@
 
 using namespace std;
 
-vector<double>
-mvAx(const vector<vector<double>>& A, const vector<double>& x) {
-    vector<double> b(x.size());
+Vector
+mvAx(const vector<vector<double>>& A, const Vector& x) {
+    Vector b(x.size());
 
     for (size_t i = 0; i < A.size(); ++i) {
-        b[i] = 0;
+        b.set(i, 0);
         for (size_t j = 0; j < A[0].size(); ++j) {
-            b[i] += A[i][j] * x[j];
+            b.set(i, b.get(i) + A[i][j] * x.get(j));
         }
     }
     return b;
 }
 
-vector<double>
-vMul(const vector<double>& vec, double scale) {
-    vector<double> ans(vec.size());
+Vector
+vMul(const Vector& vec, double scale) {
+    Vector ans(vec.size());
 
     for (size_t i = 0; i < vec.size(); i++){
-        ans[i] = scale * vec[i];
+        ans.set(i, scale * vec.get(i));
     }
     return ans;
 }
 
-vector<double>
-vSub(const vector<double>& vec1, const vector<double>& vec2) {
-    vector<double> ans(vec1.size());
+Vector
+vSub(const Vector& vec1, const Vector& vec2) {
+    Vector ans(vec1.size());
 
     for (size_t i = 0; i < vec1.size(); i++) {
-        ans[i] = vec1[i] - vec2[i];
+        ans.set(i, vec1.get(i) - vec2.get(i));
     }
     return ans;
-}
-
-double
-norm(const vector<double>& vec) {
-    double res = .0f;
-
-    for (double num: vec) {
-        res += num * num;
-    }
-    return sqrt(res);
 }
 
 vector<vector<double>>
@@ -63,8 +54,20 @@ generateMatrix(int m, int n) {
     return matrix;
 }
 
+vector<vector<double>>
+identityMatrix(size_t size) {
+    vector<vector<double>> matrix(size);
+
+    for (size_t i = 0; i < size; i++) {
+        matrix[i] = vector<double>(size);
+        matrix[i][i] = 1.0;
+    }
+
+    return matrix;
+}
+
 void
-setRow(vector<vector<double>>& mat, const vector<double>& vec, int row) {
+setRow(vector<vector<double>>& mat, const Vector& vec, int row) {
 
     size_t length = vec.size();
 
@@ -72,18 +75,49 @@ setRow(vector<vector<double>>& mat, const vector<double>& vec, int row) {
     assert(mat[0].size() == length);
 
     for (int i = 0; i < length; i++) {
-        mat[row][i] = vec[i];
+        mat[row][i] = vec.get(i);
     }
 }
 
-vector<double>
+void
+setCol(vector<vector<double>>& mat, const Vector& vec, size_t col_idx) {
+
+    size_t length = vec.size();
+
+    assert(mat[0].size() > col_idx);
+    assert(mat.size() == length);
+
+    for (size_t i = 0; i < length; i++) {
+        mat[i][col_idx] = vec.get(i);
+    }
+}
+
+Vector
+getCol(vector<vector<double>>& mat, size_t col_idx) {
+    size_t dim = mat.size();
+
+    assert(dim > col_idx);
+
+    Vector col(mat.size());
+
+    for (size_t i = 0; i < dim; i++) {
+        col.set(i, mat[i][col_idx]);
+    }
+
+    return col;
+}
+
+Vector
 gmres(const vector<vector<double>>& A,
-      const vector<double>& b,
+      const Vector& b,
       size_t m, size_t tol, size_t maxit) {
 
     size_t dim = A[0].size();
     size_t nit = 0;
-    vector<double> x0(dim);
+    Vector x0(dim);
+
+    // Use trivial preconditioner for now
+    auto Prcnd = identityMatrix(dim);
 
     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
@@ -98,13 +132,13 @@ gmres(const vector<vector<double>>& A,
 
         // TODO: the GMRES algorithm
         auto r0 = vSub(b, mvAx(A, x0));
-        double beta = norm(r0);
-        vector<double> x(dim);
-        setRow(V, vMul(r0, 1/beta), 0);
+        double beta = r0.norm2();
+        Vector x(dim);
+        setCol(V, vMul(r0, 1.0 / beta), 0);
 
         // TODO: get krylov space
         for(int j = 0; j < m; j++){
-
+            setCol(Z, mvAx(Prcnd, getCol(V, j)), j);
         }
 
         x0 = x;
