@@ -166,7 +166,7 @@ leastSquare(vector<vector<double>>& H, size_t size, double beta) {
 Vector
 gmres(const vector<vector<double>>& A,
       const Vector& b,
-      size_t m, size_t tol, size_t maxit) {
+      size_t m, double tol, size_t maxit) {
 
     size_t dim = A[0].size();
     size_t nit = 0;
@@ -183,6 +183,7 @@ gmres(const vector<vector<double>>& A,
     assert(m > 0);
     assert(maxit > 0);
 
+    Vector x(dim);
     while (nit < maxit) {
         auto H = generateMatrix(m+1, m);
         auto Z = generateMatrix(dim, m);
@@ -191,7 +192,6 @@ gmres(const vector<vector<double>>& A,
         // TODO: the GMRES algorithm
         auto r0 = b.sub(mvAx(A, x0));
         double beta = r0.norm2();
-        Vector x(dim);
         setCol(V, r0.mulS(1.0 / beta), 0);
 
         // TODO: get krylov space
@@ -216,15 +216,22 @@ gmres(const vector<vector<double>>& A,
 
             auto res_norm = mvAx(A, x).sub(b).norm2();
 
-            cout << "#" << j <<
-                " Residual=" << res_norm << endl;
+            if (res_norm < tol * b.norm2()) {
+                cout << "FGMRES converged to relative tolerance: "
+                     << res_norm / b.norm2()
+                     << " at iteration "
+                     << nit << endl;
+                return x;
+            }
 
+            // cout << "#" << j <<
+            //     " Residual=" << res_norm << endl;
         }
 
         x0 = x;
         nit++;
     }
-    return x0;
+    return x;
 }
 
 int main(int argc, char *argv[])
@@ -237,9 +244,15 @@ int main(int argc, char *argv[])
     b.set(0, 1.0);
 
     int m = 100;
-    int maxit = 10;
+    int maxit = 100;
+    double tol = 1e-3;
 
-    gmres(A, b, m, 0, maxit);
+    cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
+    gmres(A, b, m, tol, maxit);
+
+    tol = 1e-9;
+    cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
+    gmres(A, b, m, tol, maxit);
 
     return 0;
 }
