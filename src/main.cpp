@@ -212,7 +212,7 @@ gmres(const vector<vector<double>>& A,
             // cout << "---" << endl;
 
             auto y = leastSquare(H, j+1, beta);
-            auto x = x0.add(mvZy(Z, y, j+1));
+            x = x0.add(mvZy(Z, y, j+1));
 
             auto res_norm = mvAx(A, x).sub(b).norm2();
 
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
     auto b = Vector(A.size());
     b.set(0, 1.0);
 
-    int m = 10;
+    int m = 100;
     int maxit = 10;
 
     gmres(A, b, m, 0, maxit);
