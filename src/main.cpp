@@ -223,8 +223,6 @@ gmres(const vector<vector<double>>& A,
 
         x0 = x;
         nit++;
-
-        break;
     }
     return x0;
 }
@@ -238,7 +236,10 @@ int main(int argc, char *argv[])
     auto b = Vector(A.size());
     b.set(0, 1.0);
 
-    gmres(A, b, 10, 0, 10);
+    int m = 10;
+    int maxit = 10;
+
+    gmres(A, b, m, 0, maxit);
 
     return 0;
 }
