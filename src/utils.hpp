@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <cassert>
 
 class Vector
 {
@@ -32,6 +33,83 @@ public:
             res += num * num;
         }
         return sqrt(res);
+    }
+
+    double dotV(Vector other) const {
+        double sum = .0f;
+
+        assert(data.size() == other.size());
+
+        for (size_t i = 0; i < data.size(); i++) {
+            sum += data[i] * other.get(i);
+        }
+
+        return sum;
+    }
+
+    Vector add(Vector other) const {
+        assert(data.size() == other.size());
+
+        Vector res(data.size());
+
+        for (size_t i = 0; i < data.size(); i++) {
+            res.set(i, data[i] + other.get(i));
+        }
+
+        return res;
+    }
+
+    // same as add, but inplace
+    Vector iadd(Vector other) {
+        assert(data.size() == other.size());
+
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] += other.get(i);
+        }
+
+        return *this;
+    }
+
+    Vector sub(Vector other) const {
+        assert(data.size() == other.size());
+
+        Vector res(data.size());
+
+        for (size_t i = 0; i < data.size(); i++) {
+            res.set(i, data[i] - other.get(i));
+        }
+
+        return res;
+    }
+
+    // same as sub, but inplace
+    Vector isub(Vector other) {
+        assert(data.size() == other.size());
+
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] -= other.get(i);
+        }
+
+        return *this;
+    }
+
+    Vector mulS(double scaler) const {
+        Vector res(data.size());
+
+        for (size_t i = 0; i < data.size(); i++) {
+            res.set(i, data[i] * scaler);
+        }
+
+        return res;
+    }
+
+    // same as mulS, but inplace
+    Vector imulS(double scaler) {
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] *= scaler;
+        }
+
+        return *this;
     }
 
     ~Vector() {};
