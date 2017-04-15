@@ -42,26 +42,6 @@ mvZy(const vector<vector<double>>& Z, const Vector& y, size_t j) {
     return ret;
 }
 
-Vector
-vMul(const Vector& vec, double scale) {
-    Vector ans(vec.size());
-
-    for (size_t i = 0; i < vec.size(); i++){
-        ans.set(i, scale * vec.get(i));
-    }
-    return ans;
-}
-
-Vector
-vSub(const Vector& vec1, const Vector& vec2) {
-    Vector ans(vec1.size());
-
-    for (size_t i = 0; i < vec1.size(); i++) {
-        ans.set(i, vec1.get(i) - vec2.get(i));
-    }
-    return ans;
-}
-
 vector<vector<double>>
 generateMatrix(int m, int n) {
     vector<vector<double>> matrix(m);
@@ -161,7 +141,7 @@ printMatrix(vector<vector<double>>& mat,
 Vector
 leastSquare(vector<vector<double>>& H, size_t size, double beta) {
     Eigen::MatrixXf A(size+1, size);
-    Eigen::VectorXf b(size+1);
+    Eigen::VectorXf b = Eigen::VectorXf::Zero(size+1);
     Eigen::VectorXf y_(size);
     Vector y(size);
 
@@ -209,7 +189,7 @@ gmres(const vector<vector<double>>& A,
         auto V = generateMatrix(dim, m+1);
 
         // TODO: the GMRES algorithm
-        auto r0 = vSub(b, mvAx(A, x0));
+        auto r0 = b.sub(mvAx(A, x0));
         double beta = r0.norm2();
         Vector x(dim);
         setCol(V, r0.mulS(1.0 / beta), 0);
@@ -239,8 +219,6 @@ gmres(const vector<vector<double>>& A,
             cout << "#" << j <<
                 " Residual=" << res_norm << endl;
 
-            if (j == 7)
-                break;
         }
 
         x0 = x;
