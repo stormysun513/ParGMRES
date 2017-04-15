@@ -13,7 +13,7 @@ using namespace std;
 
 Vector
 mvAx(const vector<vector<double>>& A, const Vector& x) {
-    Vector b(x.size());
+    Vector b(A.size());
 
     for (size_t i = 0; i < A.size(); ++i) {
         b.set(i, 0);
@@ -66,6 +66,20 @@ identityMatrix(size_t size) {
     return matrix;
 }
 
+Vector
+unityVector(size_t size, size_t idx){
+    Vector vec(size);
+    
+    assert(size > idx);
+    for(size_t i = 0; i < size; i++){
+        if(i == idx) 
+            vec.set(i, 1.0f);
+        else 
+            vec.set(i, 0);
+    }
+    return vec;
+}
+
 void
 setRow(vector<vector<double>>& mat, const Vector& vec, int row) {
 
@@ -93,10 +107,10 @@ setCol(vector<vector<double>>& mat, const Vector& vec, size_t col_idx) {
 }
 
 Vector
-getCol(vector<vector<double>>& mat, size_t col_idx) {
+getCol(const vector<vector<double>>& mat, size_t col_idx) {
     size_t dim = mat.size();
 
-    assert(dim > col_idx);
+    assert(mat[0].size() > col_idx);
 
     Vector col(mat.size());
 
@@ -105,6 +119,19 @@ getCol(vector<vector<double>>& mat, size_t col_idx) {
     }
 
     return col;
+}
+
+double 
+dotProduct(const Vector& vec1, const Vector& vec2){
+    double res = 0.0f;
+    size_t size = vec1.size();
+
+    assert(size == vec2.size());
+
+    for(size_t i = 0; i < size; i++){
+        res += (vec1.get(i) * vec2.get(i));
+    }
+    return res;
 }
 
 Vector
@@ -127,8 +154,8 @@ gmres(const vector<vector<double>>& A,
 
     while (nit < maxit) {
         auto H = generateMatrix(m+1, m);
-        auto Z = generateMatrix(m, dim);
-        auto V = generateMatrix(m+1, dim);
+        auto Z = generateMatrix(dim, m);
+        auto V = generateMatrix(dim, m+1);
 
         // TODO: the GMRES algorithm
         auto r0 = vSub(b, mvAx(A, x0));
@@ -139,6 +166,23 @@ gmres(const vector<vector<double>>& A,
         // TODO: get krylov space
         for(int j = 0; j < m; j++){
             setCol(Z, mvAx(Prcnd, getCol(V, j)), j);
+            auto w = mvAx(A, getCol(Z, j));
+
+            for(int i = 0; i <= j; i++){
+                auto col = getCol(V, i);
+                H[i][j] = dotProduct(w, col);
+                w = vSub(w, vMul(col, H[i][j]));
+            }
+            H[j+1][j] = w.norm2();
+            setCol(V, vMul(w, 1.0/H[j+1][j]), j+1);
+            auto e1 = unityVector(j+1, 0);
+            
+            // TODO
+            // pseudo code if( j == m-1 )
+            // y = H(1 : j+1, 1:j)\(beta*e1);
+            // x = x0 + Z(:, 1:j)*y;
+            // resnorm = norm(b-Afct(x));
+            // print relative residual
         }
 
         x0 = x;
