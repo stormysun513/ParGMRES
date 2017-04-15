@@ -1,4 +1,4 @@
-#include "loadmtx.h"
+#include "loadmtx.hpp"
 
 #include <vector>
 #include <string>
