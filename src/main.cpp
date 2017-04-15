@@ -111,10 +111,10 @@ setCol(vector<vector<double>>& mat, const Vector& vec, size_t col_idx) {
 }
 
 Vector
-getCol(vector<vector<double>>& mat, size_t col_idx) {
+getCol(const vector<vector<double>>& mat, size_t col_idx) {
     size_t dim = mat.size();
 
-    assert(dim > col_idx);
+    assert(mat[0].size() > col_idx);
 
     Vector col(mat.size());
 
@@ -236,11 +236,11 @@ gmres(const vector<vector<double>>& A,
 
             auto res_norm = mvAx(A, x).sub(b).norm2();
 
-            cout << res_norm << endl;
+            cout << "#" << j <<
+                " Residual=" << res_norm << endl;
 
             if (j == 7)
                 break;
-            // auto y = H^{-1} \ beta * e1;
         }
 
         x0 = x;
@@ -253,7 +253,7 @@ gmres(const vector<vector<double>>& A,
 
 int main(int argc, char *argv[])
 {
-    cout << "Hello, world!" << endl;
+    cout << "A = ../data/cage4.mtx" << endl;
 
     auto A = loadMTXFile("../data/cage4.mtx");
 
