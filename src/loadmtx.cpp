@@ -4,8 +4,8 @@
 #include <vector>
 #include <string>
 
-#include "loadmtx.hpp"
-#include "mtxvec.hpp"
+#include "loadmtx.h"
+#include "mtxvec.h"
 
 using namespace std;
 

@@ -1,13 +1,13 @@
-#include "utils.hpp"
-#include "loadmtx.hpp"
-#include "mtxvec.hpp"
-
 #include <iostream>
 #include <vector>
 #include <cassert>
 #include <cmath>
 
 #include "Eigen/Dense"
+
+#include "utils.h"
+#include "loadmtx.h"
+#include "mtxvec.h"
 
 #define MAX_KRYLOV_DIM  500
 #define MAX_ITERS       100

@@ -1,9 +1,9 @@
-#include "loadmtx.hpp"
-
 #include <vector>
 #include <string>
 #include <iostream>
 #include <iomanip>
+
+#include "loadmtx.h"
 
 using namespace std;
 
