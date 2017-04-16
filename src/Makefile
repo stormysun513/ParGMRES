@@ -1,42 +1,29 @@
 CXX=g++ -m64
 CXXFLAGS=-std=c++11 -Icommon -Iobjs/ -IEigen/ -O2 -Wall
-# CXXFLAGS=-I../common -Iobjs/ -O2 -Wall -mavx2 -mfma
 
 APP_NAME=pgmres
+TEST_NAME=test
 OBJDIR=objs
-
-
-default: $(APP_NAME)
+SRCS=utils.cpp loadmtx.cpp mtxvec.cpp main.cpp
+OBJS=$(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
 .PHONY: dirs clean
+
+default: $(APP_NAME)
 
 dirs:
 	/bin/mkdir -p $(OBJDIR)/
 
 clean:
-	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(APP_NAME).da
-
-OBJS=$(OBJDIR)/main.o $(OBJDIR)/utils.o $(OBJDIR)/loadmtx.o $(OBJDIR)/mtxvec.o
+	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(TEST_NAME)
 
 $(APP_NAME): dirs $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
 
-# $(APP_NAME).da: $(APP_NAME)
-# 	objdump -d $(APP_NAME) > $(APP_NAME).da
+$(OBJDIR)/%.o: %.cpp $(DEPS)
+	$(CXX) -MMD $(CXXFLAGS) -c -o $@ $<
 
-# $(CFILE).s: $(CFILE).cpp
-# 	$(CXX) $(CXXFLAGS) -S $(CFILE).cpp
-
-# $(OBJDIR)/%.o: $(COMMONDIR)/%.cpp
-# 	$(CXX) $< $(CXXFLAGS) -c -o $@
-
-$(OBJDIR)/%.o: %.cpp
-	$(CXX) $< $(CXXFLAGS) -c -o $@
-
-$(OBJDIR)/main.o: main.hpp loadmtx.hpp mtxvec.hpp Makefile
-$(OBJDIR)/utils.o: utils.hpp
-$(OBJDIR)/loadmtx.o: loadmtx.hpp
-$(OBJDIR)/mtxvec.o: mtxvec.hpp
+-include $(OBJDIR)/*.d
 
 test: test.cpp loadmtx.cpp
 	g++ -std=c++11 -o test test.cpp loadmtx.cpp
