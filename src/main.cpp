@@ -4,8 +4,8 @@
 #include <cmath>
 
 #include "Eigen/Dense"
+#include "CycleTimer.h"
 
-#include "utils.h"
 #include "loadmtx.h"
 #include "mtxvec.h"
 
@@ -45,7 +45,6 @@ printMatrix(Matrix& mat,
                 sprintf(buf, "%s[", buf);
 
             sprintf(buf, "%s%.4f", buf, mat.get(i, j));
-
             if (j == col_end-1)
                 sprintf(buf, "%s]", buf);
             else
@@ -53,7 +52,6 @@ printMatrix(Matrix& mat,
         }
         sprintf(buf, "%s\n", buf);
     }
-
     cout << buf;
 }
 
@@ -99,11 +97,11 @@ gmres(const Matrix& A,
     assert(m > 0);
     assert(maxit > 0);
 
-    Vector x(dim);
     while (nit < maxit) {
         Matrix H = Matrix(m+1, m);
         Matrix Z = Matrix(dim, m);
         Matrix V = Matrix(dim, m+1);
+        Vector x(dim);
 
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
@@ -127,7 +125,6 @@ gmres(const Matrix& A,
             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             // printMatrix(H, 0, j+1, 0, j);
-            // cout << "---" << endl;
 
             Vector y = leastSquare(H, j+1, beta);
             x = x0.add(Z.mulPartial(y, j+1));
@@ -142,11 +139,10 @@ gmres(const Matrix& A,
                 return x;
             }
         }
-
         x0 = x;
         nit++;
     }
-    return x;
+    return x0;
 }
 
 int main(int argc, char *argv[])
@@ -154,19 +150,31 @@ int main(int argc, char *argv[])
     int m = 100;
     int maxit = 100;
     double tol = 1e-3;
+    double start_time;
+    double end_time;
+    char buf[1024];
 
     Matrix A = loadMTXFile("../data/cage4.mtx");
     Vector b = Vector(A.nCols());
 
-    cout << "A = ../data/cage4.mtx" << endl;
+    cout << "A: cage4.mtx" << endl;
     b.set(0, 1.0);
 
+
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
+    start_time =CycleTimer::currentSeconds(); 
     gmres(A, b, m, tol, maxit);
+    end_time =CycleTimer::currentSeconds();
+    sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
+    cout << buf;
 
     tol = 1e-9;
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
+    start_time =CycleTimer::currentSeconds(); 
     gmres(A, b, m, tol, maxit);
+    end_time =CycleTimer::currentSeconds();
+    sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
+    cout << buf;
 
     return 0;
 }

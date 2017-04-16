@@ -8,15 +8,15 @@ OBJS=$(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
 .PHONY: dirs clean
 
-default: $(APP_NAME)
+default: dirs $(APP_NAME)
 
 dirs:
-	@/bin/mkdir -p $(OBJDIR)/
+	@/bin/mkdir -p $(OBJDIR)
 
 clean:
 	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME)
 
-$(APP_NAME): dirs $(OBJS)
+$(APP_NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
 
 $(OBJDIR)/%.o: %.cpp $(DEPS)
