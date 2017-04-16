@@ -2,6 +2,9 @@
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include <string>
+#include <random>
+#include <ctime>
 
 #include "Eigen/Dense"
 #include "CycleTimer.h"
@@ -145,36 +148,40 @@ gmres(const Matrix& A,
     return x0;
 }
 
-int main(int argc, char *argv[])
-{
-    int m = 100;
+void runExp(const string& mat_name) {
+    int m = 500;
     int maxit = 100;
     double tol = 1e-3;
     double start_time;
     double end_time;
     char buf[1024];
 
-    Matrix A = loadMTXFile("../data/cage4.mtx");
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+
+    Matrix A = loadMTXFile(mat_name);
     Vector b = Vector(A.nCols());
 
-    cout << "A: cage4.mtx" << endl;
-    b.set(0, 1.0);
+    for (size_t i = 0; i < A.nCols(); ++i) {
+        b.set(i, distribution(generator));
+    }
 
+    cout << "A: " << mat_name << " "
+         << A.nRows() << "x" << A.nCols() << endl;
 
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
-    start_time =CycleTimer::currentSeconds(); 
+    start_time = CycleTimer::currentSeconds();
     gmres(A, b, m, tol, maxit);
-    end_time =CycleTimer::currentSeconds();
+    end_time = CycleTimer::currentSeconds();
     sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
     cout << buf;
+}
 
-    tol = 1e-9;
-    cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
-    start_time =CycleTimer::currentSeconds(); 
-    gmres(A, b, m, tol, maxit);
-    end_time =CycleTimer::currentSeconds();
-    sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
-    cout << buf;
+int main(int argc, char *argv[])
+{
+    runExp("../data/cage4.mtx");
+    runExp("../data/bcspwr01.mtx");
+    runExp("../data/bcspwr03.mtx");
 
     return 0;
 }
