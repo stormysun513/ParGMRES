@@ -10,7 +10,7 @@
 using namespace std;
 
 Matrix loadMTXFile(const string& filename){
-    
+
     ifstream infile(filename);
     Matrix mat;
 
@@ -19,7 +19,7 @@ Matrix loadMTXFile(const string& filename){
         bool matSize = false;
 
         while(getline(infile, line)){
-            
+
             if(line.at(0) == '%')
                 continue;
 
@@ -45,7 +45,7 @@ Matrix loadMTXFile(const string& filename){
 }
 
 void writeMTXFile(const string& filename, vector<vector<double>> mat){
-    
+
     ofstream outfile(filename);
 
     int rowNum = mat.size();
@@ -55,7 +55,7 @@ void writeMTXFile(const string& filename, vector<vector<double>> mat){
         outfile << rowNum << " " << colNum << " " << rowNum*colNum << endl;
 
         for(int i = 1; i <= rowNum; i++){
-            for(int j = 1; j <= colNum; j++){ 
+            for(int j = 1; j <= colNum; j++){
                 outfile << i << " " << j << " " << mat[i-1][j-1] << endl;
             }
         }
@@ -64,7 +64,3 @@ void writeMTXFile(const string& filename, vector<vector<double>> mat){
         cerr << "Failed to open file: " << filename << endl;
     }
 }
-
-
-
-

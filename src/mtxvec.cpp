@@ -115,9 +115,9 @@ void Matrix::resize(size_t m, size_t n){
     data.resize(m);
     n_rows = m;
     n_cols = n;
-    for(int i = 0; i < m; i++){
+    for(int i = 0; i < m; i++) {
         data[i] = std::vector<double>(n);
-    }      
+    }
 }
 
 void Matrix::setRow(size_t row_idx, const Vector& vec) {
