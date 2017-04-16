@@ -4,10 +4,8 @@ CXXFLAGS=-std=c++11 -Icommon -Iobjs/ -IEigen/ -O2 -Wall
 
 APP_NAME=pgmres
 OBJDIR=objs
-CFILE=sin
 
 
-# default: $(APP_NAME) $(APP_NAME).da $(CFILE).s
 default: $(APP_NAME)
 
 .PHONY: dirs clean
@@ -18,8 +16,7 @@ dirs:
 clean:
 	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(APP_NAME).da
 
-# OBJS=$(OBJDIR)/main.o $(OBJDIR)/sin.o
-OBJS=$(OBJDIR)/main.o $(OBJDIR)/utils.o $(OBJDIR)/loadmtx.o
+OBJS=$(OBJDIR)/main.o $(OBJDIR)/utils.o $(OBJDIR)/loadmtx.o $(OBJDIR)/mtxvec.o
 
 $(APP_NAME): dirs $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -lm -lpthread
@@ -30,15 +27,16 @@ $(APP_NAME): dirs $(OBJS)
 # $(CFILE).s: $(CFILE).cpp
 # 	$(CXX) $(CXXFLAGS) -S $(CFILE).cpp
 
-$(OBJDIR)/%.o: %.cpp
-	$(CXX) $< $(CXXFLAGS) -c -o $@
-
 # $(OBJDIR)/%.o: $(COMMONDIR)/%.cpp
 # 	$(CXX) $< $(CXXFLAGS) -c -o $@
 
-$(OBJDIR)/main.o: main.hpp loadmtx.hpp Makefile
+$(OBJDIR)/%.o: %.cpp
+	$(CXX) $< $(CXXFLAGS) -c -o $@
+
+$(OBJDIR)/main.o: main.hpp loadmtx.hpp mtxvec.hpp Makefile
 $(OBJDIR)/utils.o: utils.hpp
 $(OBJDIR)/loadmtx.o: loadmtx.hpp
+$(OBJDIR)/mtxvec.o: mtxvec.hpp
 
 test: test.cpp loadmtx.cpp
 	g++ -std=c++11 -o test test.cpp loadmtx.cpp
