@@ -1,4 +1,3 @@
-#include "main.hpp"
 #include "utils.hpp"
 #include "loadmtx.hpp"
 #include "mtxvec.hpp"
@@ -17,15 +16,13 @@ using namespace std;
 
 Matrix
 identityMatrix(size_t size) {
-    Matrix mat(size);
+    Matrix mat(size, size);
 
     for (size_t i = 0; i < size; i++) {
         mat.set(i, i, 1.0);
     }
-
     return mat;
 }
-
 
 void
 printMatrix(Matrix& mat,
@@ -68,16 +65,13 @@ leastSquare(Matrix& H, size_t size, double beta) {
     Vector y(size);
 
     b(0) = beta;
-
     for (int i = 0; i < size+1; i++) {
         for (int j = 0; j < size; j++) {
             A(i, j) = H.get(i, j);
         }
     }
 
-
     y_ = (A.transpose() * A).ldlt().solve(A.transpose() * b);
-
     for (int i = 0; i < size; i++) {
         y.set(i, y_(i));
     }
@@ -157,16 +151,15 @@ gmres(const Matrix& A,
 
 int main(int argc, char *argv[])
 {
-    cout << "A = ../data/cage4.mtx" << endl;
-
-    auto A = loadMTXFile("../data/cage4.mtx");
-
-    auto b = Vector(A.nCols());
-    b.set(0, 1.0);
-
     int m = 100;
     int maxit = 100;
     double tol = 1e-3;
+
+    Matrix A = loadMTXFile("../data/cage4.mtx");
+    Vector b = Vector(A.nCols());
+
+    cout << "A = ../data/cage4.mtx" << endl;
+    b.set(0, 1.0);
 
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
     gmres(A, b, m, tol, maxit);

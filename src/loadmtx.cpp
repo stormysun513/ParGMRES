@@ -4,12 +4,15 @@
 #include <vector>
 #include <string>
 
+#include "loadmtx.hpp"
+#include "mtxvec.hpp"
+
 using namespace std;
 
-vector<vector<double>> loadMTXFile(string filename){
+Matrix loadMTXFile(string filename){
     
     ifstream infile(filename);
-    vector<vector<double>> mat;
+    Matrix mat;
 
     if(infile.is_open()){
         string line;
@@ -24,18 +27,14 @@ vector<vector<double>> loadMTXFile(string filename){
             if(!matSize){
                 int rowNum, colNum, total;
                 iss >> rowNum >> colNum >> total;
-                mat.reserve(rowNum);
-
-                for(int i = 0; i < rowNum; i++){
-                    mat.push_back(vector<double>(colNum));
-                }
+                mat.resize(rowNum, colNum);
                 matSize = true;
             }
             else{
                 int r, c;
                 double entry;
                 iss >> r >> c >> entry;
-                mat[r-1][c-1] = entry;
+                mat.set(r-1, c-1, entry);
             }
         }
     }

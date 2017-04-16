@@ -14,15 +14,15 @@ public:
         data = std::vector<double>(size);
     }
 
-    void set(size_t idx, double val) {
+    inline void set(size_t idx, double val) {
         data[idx] = val;
     }
 
-    double get(size_t idx) const {
+    inline double get(size_t idx) const {
         return data[idx];
     }
 
-    size_t size() const {
+    inline size_t size() const {
         return data.size();
     }
 
@@ -118,26 +118,39 @@ public:
 class Matrix
 {
 private:
-    std::vector<vector<double>> data;
+    std::vector<std::vector<double>> data;
     size_t n_rows;
     size_t n_cols;
 public:
+    Matrix():n_rows(0),n_cols(0){}
+
     Matrix(size_t m, size_t n) {
-        data = std::vector<double>(m);
+        data.reserve(m);
         n_rows = m;
         n_cols = n;
-        for (int i = 0; i < m; i++)
+        for (int i = 0; i < m; i++){
             data[i] = std::vector<double>(n);
+        }
     }
 
-    size_t nRows() const { return n_rows; }
-    size_t nCols() const { return n_cols; }
+    void resize(size_t m, size_t n){
+        data.resize(m);
+        n_rows = m;
+        n_cols = n;
+        for(int i = 0; i < m; i++){
+            data[i] = std::vector<double>(n);
+        }      
+    }
 
-    void set(size_t row_idx, size_t col_idx, double val) {
+    inline size_t nRows() const { return n_rows; }
+    
+    inline size_t nCols() const { return n_cols; }
+
+    inline void set(size_t row_idx, size_t col_idx, double val) {
         data[row_idx][col_idx] = val;
     }
 
-    double get(size_t row_idx, size_t col_idx) const {
+    inline double get(size_t row_idx, size_t col_idx) const {
         return data[row_idx][col_idx];
     }
 
@@ -161,7 +174,7 @@ public:
         assert(len == n_rows);
 
         for (size_t i = 0; i < len; ++i) {
-            data[i][row_idx] = vec.get(i);
+            data[i][col_idx] = vec.get(i);
         }
     }
 
@@ -189,7 +202,7 @@ public:
     }
 
     Vector mulPartial(const Vector& vec, size_t n_cols_) const {
-        assert(n_cols == vec.size());
+        assert(n_cols >= vec.size());
         Vector ret(n_rows);
 
         for (size_t i = 0; i < n_rows; ++i) {

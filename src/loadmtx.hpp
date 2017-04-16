@@ -4,7 +4,9 @@
 #include <vector>
 #include <string>
 
-std::vector<std::vector<double>> loadMTXFile(std::string);
+#include "mtxvec.hpp"
+
+Matrix loadMTXFile(std::string);
 void writeMTXFile(std::string, std::vector<std::vector<double>>);
 
 #endif
