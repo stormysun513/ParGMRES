@@ -86,6 +86,8 @@ gmres(const Matrix& A,
 
     size_t dim = A.nCols();
     size_t nit = 0;
+    size_t innit = 0;
+    size_t outnit = 0;
     Vector x0(dim);
 
     assert(dim == b.size());
@@ -109,6 +111,7 @@ gmres(const Matrix& A,
         double beta = r0.norm2();
         V.setCol(0, r0.mulS(1.0 / beta));
 
+        innit = 0;
         // Generate krylov subspace
         for(int j = 0; j < m; j++) {
             // Z[:, j] = P * V[:, j]
@@ -133,23 +136,36 @@ gmres(const Matrix& A,
 
             double res_norm = A.mul(x).sub(b).norm2();
 
+            nit++;
+            innit++;
             if (res_norm < tol * b.norm2()) {
                 cout << "FGMRES converged to relative tolerance: "
                      << res_norm / b.norm2()
                      << " at iteration "
-                     << nit << endl;
+                     << nit 
+                     << "(out: "
+                     << outnit
+                     << ", in: "
+                     << innit
+                     << ")"
+                     << endl;
                 return x;
             }
         }
         x0 = x;
-        nit++;
+        outnit++;
     }
+    
+    double res_norm = A.mul(x0).sub(b).norm2();
+    cout << "FGMRES is not converged: "
+         << res_norm / b.norm2()
+         << endl;
     return x0;
 }
 
 void runExp(const string& mat_name) {
     int m = 500;
-    int maxit = 100;
+    int maxit = 1000000;
     double tol = 1e-3;
     double start_time;
     double end_time;
@@ -181,6 +197,5 @@ int main(int argc, char *argv[])
     runExp("../data/cage4.mtx");
     runExp("../data/bcspwr01.mtx");
     runExp("../data/bcspwr03.mtx");
-
     return 0;
 }

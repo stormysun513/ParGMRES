@@ -56,7 +56,7 @@ end
 X = [];
 nit = 1;
 while (nit <= maxit)
-    disp('Starting new FGMRES cycle')
+%     disp('Starting new FGMRES cycle')
     H = zeros(m+1, m);
     r0 = b - Afct(x0);
     beta = norm(r0);
@@ -80,8 +80,8 @@ while (nit <= maxit)
             X = [X,x];
         end
         resnorm = norm(b-Afct(x));
-        disp(['k= ', num2str(nit), ...
-            ', relative residual= ', num2str(resnorm/norm(b))])
+%         disp(['k= ', num2str(nit), ...
+%             ', relative residual= ', num2str(resnorm/norm(b))])
         if (resnorm < tol*norm(b))
             disp(['FGMRES converged to relative tolerance ', ...
                 num2str(resnorm/norm(b)), ...

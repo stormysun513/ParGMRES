@@ -1,5 +1,5 @@
 CXX=g++ -m64
-CXXFLAGS=-g -std=c++11 -Icommon -Iobjs/ -IEigen/ -O3 -Wall
+CXXFLAGS=-std=c++11 -Icommon -Iobjs/ -IEigen/ -O3 -Wall
 
 APP_NAME=pgmres
 OBJDIR=objs
