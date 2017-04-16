@@ -4,7 +4,6 @@
 #include <cmath>
 #include <string>
 #include <random>
-#include <ctime>
 
 #include "Eigen/Dense"
 #include "CycleTimer.h"
