@@ -9,7 +9,7 @@
 
 using namespace std;
 
-Matrix loadMTXFile(string filename){
+Matrix loadMTXFile(const string& filename){
     
     ifstream infile(filename);
     Matrix mat;
@@ -44,7 +44,7 @@ Matrix loadMTXFile(string filename){
     return mat;
 }
 
-void writeMTXFile(string filename, vector<vector<double>> mat){
+void writeMTXFile(const string& filename, vector<vector<double>> mat){
     
     ofstream outfile(filename);
 

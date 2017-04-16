@@ -6,7 +6,7 @@
 
 #include "mtxvec.hpp"
 
-Matrix loadMTXFile(std::string);
-void writeMTXFile(std::string, std::vector<std::vector<double>>);
+Matrix loadMTXFile(const std::string&);
+void writeMTXFile(const std::string&, std::vector<std::vector<double>>);
 
 #endif

@@ -1,5 +1,5 @@
 CXX=g++ -m64
-CXXFLAGS=-std=c++11 -Icommon -Iobjs/ -IEigen/ -O2 -Wall
+CXXFLAGS=-g -std=c++11 -Icommon -Iobjs/ -IEigen/ -O0 -Wall
 
 APP_NAME=pgmres
 TEST_NAME=test
@@ -12,7 +12,7 @@ OBJS=$(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 default: $(APP_NAME)
 
 dirs:
-	/bin/mkdir -p $(OBJDIR)/
+	@/bin/mkdir -p $(OBJDIR)/
 
 clean:
 	/bin/rm -rf $(OBJDIR) *~ $(APP_NAME) $(TEST_NAME)

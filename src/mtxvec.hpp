@@ -11,7 +11,7 @@ private:
     std::vector<double> data;
 public:
     Vector(size_t size) {
-        data = std::vector<double>(size);
+        data.resize(size);
     }
 
     inline void set(size_t idx, double val) {
@@ -35,7 +35,7 @@ public:
         return sqrt(res);
     }
 
-    double dotV(Vector other) const {
+    double dotV(const Vector& other) const {
         double sum = .0f;
 
         assert(data.size() == other.size());
@@ -47,7 +47,7 @@ public:
         return sum;
     }
 
-    Vector add(Vector other) const {
+    Vector add(const Vector& other) const {
         assert(data.size() == other.size());
 
         Vector res(data.size());
@@ -60,7 +60,7 @@ public:
     }
 
     // same as add, but inplace
-    Vector iadd(Vector other) {
+    Vector iadd(const Vector& other) {
         assert(data.size() == other.size());
 
         for (size_t i = 0; i < data.size(); i++) {
@@ -70,7 +70,7 @@ public:
         return *this;
     }
 
-    Vector sub(Vector other) const {
+    Vector sub(const Vector& other) const {
         assert(data.size() == other.size());
 
         Vector res(data.size());
@@ -83,7 +83,7 @@ public:
     }
 
     // same as sub, but inplace
-    Vector isub(Vector other) {
+    Vector isub(const Vector& other) {
         assert(data.size() == other.size());
 
         for (size_t i = 0; i < data.size(); i++) {
@@ -111,8 +111,6 @@ public:
 
         return *this;
     }
-
-    ~Vector() {};
 };
 
 class Matrix
@@ -125,7 +123,7 @@ public:
     Matrix():n_rows(0),n_cols(0){}
 
     Matrix(size_t m, size_t n) {
-        data.reserve(m);
+        data.resize(m);
         n_rows = m;
         n_cols = n;
         for (int i = 0; i < m; i++){
@@ -214,8 +212,6 @@ public:
 
         return ret;
     }
-
-    ~Matrix() {};
 };
 
 #endif  // MTXVEC_H
