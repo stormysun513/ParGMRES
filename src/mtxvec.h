@@ -84,9 +84,13 @@ private:
     size_t n_cols;
 
     bool posInData(size_t i, size_t j, size_t& ret) const;
+    void construct(std::vector<std::tuple<double, size_t, size_t>> raw_data,
+                   size_t n_rows, size_t n_cols);
 public:
     SparseMatrix(std::vector<std::tuple<double, size_t, size_t>> raw_data,
                  size_t n_rows, size_t n_cols);
+
+    SparseMatrix(Matrix dense);
 
     size_t nnz() const;
     size_t nRows() const;
@@ -94,8 +98,6 @@ public:
     double get(size_t row_idx, size_t col_idx) const;
     bool set(size_t row_idx, size_t col_idx, double val);
 
-    void setRow(size_t row_idx, const Vector& vec);
-    void setCol(size_t col_idx, const Vector& vec);
     Vector getCol(size_t col_idx) const;
     Vector mul(const Vector& vec) const;
     Vector mulPartial(const Vector& vec, size_t n_cols_) const;

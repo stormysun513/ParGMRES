@@ -17,6 +17,18 @@
 
 using namespace std;
 
+SparseMatrix
+identitySparseMatrix(size_t size) {
+
+    vector<tuple<double, size_t, size_t>> raw_data;
+    for (size_t i = 0; i < size; ++i) {
+        raw_data.push_back(make_tuple(1, i, i));
+    }
+
+    SparseMatrix mat_csc = SparseMatrix(raw_data, size, size);
+    return mat_csc;
+}
+
 Matrix
 identityMatrix(size_t size) {
     Matrix mat(size, size);
@@ -183,87 +195,87 @@ gmres(const Matrix& A,
     return x0;
 }
 
-// Vector
-// sparseGmres(const SparseMatrix& A,
-//             const Vector& b,
-//             size_t m, double tol, size_t maxit) {
+Vector
+sparseGmres(const SparseMatrix& A,
+            const Vector& b,
+            size_t m, double tol, size_t maxit) {
 
-//     size_t dim = A.nCols();
-//     size_t nit = 0;
-//     size_t innit = 0;
-//     size_t outnit = 0;
-//     Vector x0(dim);
+    size_t dim = A.nCols();
+    size_t nit = 0;
+    size_t innit = 0;
+    size_t outnit = 0;
+    Vector x0(dim);
 
-//     assert(dim == b.size());
+    assert(dim == b.size());
 
-//     // Use trivial preconditioner for now
-//     auto Prcnd = identityMatrix(dim);
+    // Use trivial preconditioner for now
+    auto Prcnd = identitySparseMatrix(dim);
 
-//     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
-//     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
+    m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
+    maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
 
-//     assert(m > 0);
-//     assert(maxit > 0);
+    assert(m > 0);
+    assert(maxit > 0);
 
-//     while (nit < maxit) {
-//         Matrix H = Matrix(m+1, m);
-//         Matrix Z = Matrix(dim, m);
-//         Matrix V = Matrix(dim, m+1);
-//         Vector x(dim);
+    while (nit < maxit) {
+        Matrix H = Matrix(m+1, m);
+        Matrix Z = Matrix(dim, m);
+        Matrix V = Matrix(dim, m+1);
+        Vector x(dim);
 
-//         Vector r0 = b.sub(A.mul(x0));
-//         double beta = r0.norm2();
-//         V.setCol(0, r0.mulS(1.0 / beta));
+        Vector r0 = b.sub(A.mul(x0));
+        double beta = r0.norm2();
+        V.setCol(0, r0.mulS(1.0 / beta));
 
-//         innit = 0;
-//         // Generate krylov subspace
-//         for(int j = 0; j < m; j++) {
-//             // Z[:, j] = P * V[:, j]
-//             Z.setCol(j, Prcnd.mul(V.getCol(j)));
+        innit = 0;
+        // Generate krylov subspace
+        for(int j = 0; j < m; j++) {
+            // Z[:, j] = P * V[:, j]
+            Z.setCol(j, Prcnd.mul(V.getCol(j)));
 
-//             // w = A * Z[:, j]
-//             Vector w = A.mul(Z.getCol(j));
+            // w = A * Z[:, j]
+            Vector w = A.mul(Z.getCol(j));
 
-//             for (size_t i = 0; i < j; i++) {
-//                 Vector v = V.getCol(i);
-//                 H.set(i, j, w.dotV(v));
-//                 w.isub(v.mulS(H.get(i, j)));
-//             }
+            for (size_t i = 0; i < j; i++) {
+                Vector v = V.getCol(i);
+                H.set(i, j, w.dotV(v));
+                w.isub(v.mulS(H.get(i, j)));
+            }
 
-//             H.set(j+1, j, w.norm2());
-//             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
+            H.set(j+1, j, w.norm2());
+            V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
-//             Vector y = leastSquare(H, j+1, beta);
-//             x = x0.add(Z.mulPartial(y, j+1));
+            Vector y = leastSquare(H, j+1, beta);
+            x = x0.add(Z.mulPartial(y, j+1));
 
-//             double res_norm = A.mul(x).sub(b).norm2();
+            double res_norm = A.mul(x).sub(b).norm2();
 
-//             nit++;
-//             innit++;
-//             if (res_norm < tol * b.norm2()) {
-//                 cout << "FGMRES converged to relative tolerance: "
-//                      << res_norm / b.norm2()
-//                      << " at iteration "
-//                      << nit
-//                      << "(out: "
-//                      << outnit
-//                      << ", in: "
-//                      << innit
-//                      << ")"
-//                      << endl;
-//                 return x;
-//             }
-//         }
-//         x0 = x;
-//         outnit++;
-//     }
+            nit++;
+            innit++;
+            if (res_norm < tol * b.norm2()) {
+                cout << "FGMRES converged to relative tolerance: "
+                     << res_norm / b.norm2()
+                     << " at iteration "
+                     << nit
+                     << "(out: "
+                     << outnit
+                     << ", in: "
+                     << innit
+                     << ")"
+                     << endl;
+                return x;
+            }
+        }
+        x0 = x;
+        outnit++;
+    }
 
-//     double res_norm = A.mul(x0).sub(b).norm2();
-//     cout << "FGMRES is not converged: "
-//          << res_norm / b.norm2()
-//          << endl;
-//     return x0;
-// }
+    double res_norm = A.mul(x0).sub(b).norm2();
+    cout << "FGMRES is not converged: "
+         << res_norm / b.norm2()
+         << endl;
+    return x0;
+}
 
 void runExp(const string& mat_name) {
     int m = 100;
@@ -277,6 +289,7 @@ void runExp(const string& mat_name) {
     std::uniform_real_distribution<double> distribution(-1.0, 1.0);
 
     Matrix A = loadMTXToMatrix(mat_name);
+    SparseMatrix A_csc(A);
     Vector b = Vector(A.nCols());
 
     for (size_t i = 0; i < A.nCols(); ++i) {
@@ -292,50 +305,19 @@ void runExp(const string& mat_name) {
     end_time = CycleTimer::currentSeconds();
     sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
     cout << buf;
+
+    start_time = CycleTimer::currentSeconds();
+    sparseGmres(A_csc, b, m, tol, maxit);
+    end_time = CycleTimer::currentSeconds();
+    sprintf(buf, "[%.3f] ms (Sparse GMRES) \n\n", (end_time - start_time) * 1000);
+    cout << buf;
 }
 
 int main(int argc, char *argv[])
 {
-    // runExp("../data/cage4.mtx");
-    // runExp("../data/bcspwr01.mtx");
-    // runExp("../data/bcspwr03.mtx");
-
-    Matrix A = loadMTXToMatrix("../data/cage4.mtx");
-    // printMatrix(A, 0, A.nRows(), 0, A.nCols());
-
-    vector<tuple<double, size_t, size_t>> raw_data;
-    // raw_data.push_back(make_tuple(1, 3, 2));
-    // raw_data.push_back(make_tuple(2, 3, 4));
-    // raw_data.push_back(make_tuple(3, 5, 2));
-    // raw_data.push_back(make_tuple(3, 5, 5));
-    for (size_t i = 0; i < A.nRows(); ++i) {
-        for (size_t j = 0; j < A.nCols(); ++j) {
-            if (A.get(i, j) != 0) {
-                raw_data.push_back(make_tuple(A.get(i, j), i, j));
-            }
-        }
-    }
-
-    SparseMatrix A_csc = SparseMatrix(raw_data, 9, 9);
-    Vector b(9);
-
-    for (size_t i = 0; i < A.nCols(); ++i) {
-        b.set(i, i);
-    }
-
-    cout << "b: ";
-    for (size_t i = 0; i < A.nCols(); ++i) {
-        cout << b.get(i) << ", ";
-    }
-    cout << endl;
-
-    auto Ab = A_csc.mul(b);
-
-    cout << "b: ";
-    for (size_t i = 0; i < A.nCols(); ++i) {
-        cout << Ab.get(i) << ", ";
-    }
-    cout << endl;
+    runExp("../data/cage4.mtx");
+    runExp("../data/bcspwr01.mtx");
+    runExp("../data/bcspwr03.mtx");
 
     return 0;
 }

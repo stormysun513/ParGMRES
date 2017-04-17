@@ -195,10 +195,9 @@ Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
     return ret;
 }
 
-SparseMatrix::SparseMatrix(
-    std::vector<std::tuple<double, size_t, size_t>> raw_data,
-    size_t n_rows_, size_t n_cols_) {
-
+void
+SparseMatrix::construct(std::vector<std::tuple<double, size_t, size_t>> raw_data,
+                        size_t n_rows_, size_t n_cols_) {
     n_rows = n_rows_;
     n_cols = n_cols_;
 
@@ -223,18 +222,74 @@ SparseMatrix::SparseMatrix(
     while (indptr.size() <= n_cols) {
         indptr.push_back(data.size());
     }
-
-    // for (size_t i = 0; i < indptr.size(); ++i) {
-    //     cout << indptr[i] << endl;
-    // }
 }
 
-Vector SparseMatrix::mul(const Vector& vec) const {
+SparseMatrix::SparseMatrix(
+    std::vector<std::tuple<double, size_t, size_t>> raw_data,
+    size_t n_rows_, size_t n_cols_) {
+
+    construct(raw_data, n_rows_, n_cols_);
+
+}
+
+SparseMatrix::SparseMatrix(Matrix dense) {
+    vector<tuple<double, size_t, size_t>> raw_data;
+    for (size_t i = 0; i < dense.nRows(); ++i) {
+        for (size_t j = 0; j < dense.nCols(); ++j) {
+            if (dense.get(i, j) != 0) {
+                raw_data.push_back(make_tuple(dense.get(i, j), i, j));
+            }
+        }
+    }
+
+    construct(raw_data, dense.nRows(), dense.nCols());
+}
+
+Vector
+SparseMatrix::getCol(size_t col_idx) const {
+    Vector ret(n_rows);
+
+    size_t start_idx = indptr[col_idx];
+    size_t end_idx = indptr[col_idx+1];
+
+    for (size_t k = start_idx; k < end_idx; ++k) {
+        size_t i = indices[k];
+        double mat_val = data[k];
+        ret.set(i, mat_val);
+    }
+
+    return ret;
+}
+
+Vector
+SparseMatrix::mul(const Vector& vec) const {
     assert(n_cols == vec.size());
 
     Vector ret(vec.size());
 
-    for (size_t j = 0; j < vec.size(); ++j) {
+    for (size_t j = 0; j < n_cols; ++j) {
+        size_t start_idx = indptr[j];
+        size_t end_idx = indptr[j+1];
+        double vec_val = vec.get(j);
+
+        for (size_t k = start_idx; k < end_idx; ++k) {
+            size_t i = indices[k];
+            double mat_val = data[k];
+
+            ret.set(i, ret.get(i) + mat_val * vec_val);
+        }
+    }
+
+    return ret;
+};
+
+Vector
+SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {
+    assert(n_cols_ == vec.size());
+
+    Vector ret(vec.size());
+
+    for (size_t j = 0; j < n_cols_; ++j) {
         size_t start_idx = indptr[j];
         size_t end_idx = indptr[j+1];
         double vec_val = vec.get(j);
