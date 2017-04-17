@@ -229,6 +229,27 @@ SparseMatrix::SparseMatrix(
     // }
 }
 
+Vector SparseMatrix::mul(const Vector& vec) const {
+    assert(n_cols == vec.size());
+
+    Vector ret(vec.size());
+
+    for (size_t j = 0; j < vec.size(); ++j) {
+        size_t start_idx = indptr[j];
+        size_t end_idx = indptr[j+1];
+        double vec_val = vec.get(j);
+
+        for (size_t k = start_idx; k < end_idx; ++k) {
+            size_t i = indices[k];
+            double mat_val = data[k];
+
+            ret.set(i, ret.get(i) + mat_val * vec_val);
+        }
+    }
+
+    return ret;
+};
+
 bool
 SparseMatrix::posInData(size_t i, size_t j, size_t& ret) const {
     assert(0 <= i); assert(i < n_rows);

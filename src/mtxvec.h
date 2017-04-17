@@ -2,8 +2,9 @@
 #define __MTXVEC_H__
 
 #include <vector>
-#include <cmath>
 #include <tuple>
+#include <map>
+#include <cmath>
 
 class Vector
 {
@@ -91,6 +92,7 @@ public:
     size_t nRows() const;
     size_t nCols() const;
     double get(size_t row_idx, size_t col_idx) const;
+    bool set(size_t row_idx, size_t col_idx, double val);
 
     void setRow(size_t row_idx, const Vector& vec);
     void setCol(size_t col_idx, const Vector& vec);
@@ -106,6 +108,17 @@ inline double SparseMatrix::get(size_t i, size_t j) const {
     else
         return 0.0;
 }
+
+inline bool SparseMatrix::set(size_t i, size_t j, double val) {
+    size_t idx;
+    if (posInData(i, j, idx)) {
+        data[idx] = val;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 inline size_t SparseMatrix::nnz() const { return data.size(); }
 inline size_t SparseMatrix::nRows() const { return n_rows; }
 inline size_t SparseMatrix::nCols() const { return n_cols; }

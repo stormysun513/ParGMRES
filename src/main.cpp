@@ -183,6 +183,88 @@ gmres(const Matrix& A,
     return x0;
 }
 
+// Vector
+// sparseGmres(const SparseMatrix& A,
+//             const Vector& b,
+//             size_t m, double tol, size_t maxit) {
+
+//     size_t dim = A.nCols();
+//     size_t nit = 0;
+//     size_t innit = 0;
+//     size_t outnit = 0;
+//     Vector x0(dim);
+
+//     assert(dim == b.size());
+
+//     // Use trivial preconditioner for now
+//     auto Prcnd = identityMatrix(dim);
+
+//     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
+//     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
+
+//     assert(m > 0);
+//     assert(maxit > 0);
+
+//     while (nit < maxit) {
+//         Matrix H = Matrix(m+1, m);
+//         Matrix Z = Matrix(dim, m);
+//         Matrix V = Matrix(dim, m+1);
+//         Vector x(dim);
+
+//         Vector r0 = b.sub(A.mul(x0));
+//         double beta = r0.norm2();
+//         V.setCol(0, r0.mulS(1.0 / beta));
+
+//         innit = 0;
+//         // Generate krylov subspace
+//         for(int j = 0; j < m; j++) {
+//             // Z[:, j] = P * V[:, j]
+//             Z.setCol(j, Prcnd.mul(V.getCol(j)));
+
+//             // w = A * Z[:, j]
+//             Vector w = A.mul(Z.getCol(j));
+
+//             for (size_t i = 0; i < j; i++) {
+//                 Vector v = V.getCol(i);
+//                 H.set(i, j, w.dotV(v));
+//                 w.isub(v.mulS(H.get(i, j)));
+//             }
+
+//             H.set(j+1, j, w.norm2());
+//             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
+
+//             Vector y = leastSquare(H, j+1, beta);
+//             x = x0.add(Z.mulPartial(y, j+1));
+
+//             double res_norm = A.mul(x).sub(b).norm2();
+
+//             nit++;
+//             innit++;
+//             if (res_norm < tol * b.norm2()) {
+//                 cout << "FGMRES converged to relative tolerance: "
+//                      << res_norm / b.norm2()
+//                      << " at iteration "
+//                      << nit
+//                      << "(out: "
+//                      << outnit
+//                      << ", in: "
+//                      << innit
+//                      << ")"
+//                      << endl;
+//                 return x;
+//             }
+//         }
+//         x0 = x;
+//         outnit++;
+//     }
+
+//     double res_norm = A.mul(x0).sub(b).norm2();
+//     cout << "FGMRES is not converged: "
+//          << res_norm / b.norm2()
+//          << endl;
+//     return x0;
+// }
+
 void runExp(const string& mat_name) {
     int m = 100;
     int maxit = 1000000;
@@ -235,10 +317,25 @@ int main(int argc, char *argv[])
     }
 
     SparseMatrix A_csc = SparseMatrix(raw_data, 9, 9);
+    Vector b(9);
 
-    for (size_t i = 0; i < A.nRows(); ++i) {
-        cout << A_csc.get(i, 0) << endl;;
+    for (size_t i = 0; i < A.nCols(); ++i) {
+        b.set(i, i);
     }
+
+    cout << "b: ";
+    for (size_t i = 0; i < A.nCols(); ++i) {
+        cout << b.get(i) << ", ";
+    }
+    cout << endl;
+
+    auto Ab = A_csc.mul(b);
+
+    cout << "b: ";
+    for (size_t i = 0; i < A.nCols(); ++i) {
+        cout << Ab.get(i) << ", ";
+    }
+    cout << endl;
 
     return 0;
 }
