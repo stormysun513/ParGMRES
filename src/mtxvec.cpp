@@ -3,6 +3,12 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#include <tuple>
+
+#include <iostream>
+using namespace std;
+
+static void sortRawData(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
 
 /*
  * Vector member funciton
@@ -187,4 +193,52 @@ Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
     }
 
     return ret;
+}
+
+SparseMatrix::SparseMatrix(
+    std::vector<std::tuple<double, size_t, size_t>> raw_data,
+    size_t n_rows, size_t n_cols) {
+
+    sortRawData(raw_data);
+
+    indptr.push_back(0);
+
+    for (size_t i = 0; i < raw_data.size(); ++i) {
+        double val = std::get<0>(raw_data[i]);
+        size_t row_idx = std::get<1>(raw_data[i]);
+        size_t col_idx = std::get<2>(raw_data[i]);
+
+        data.push_back(val);
+        indices.push_back(row_idx);
+
+        while (indptr.size() <= col_idx) {
+            indptr.push_back(i);
+        }
+
+    }
+
+    while (indptr.size() <= n_cols) {
+        indptr.push_back(data.size());
+    }
+
+    // for (size_t i = 0; i < indptr.size(); ++i) {
+    //     cout << indptr[i] << endl;
+    // }
+}
+
+// --- Helpers ---
+
+void sortRawData(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
+    std::sort(
+        raw_data.begin(), raw_data.end(),
+        [](const std::tuple<double, size_t, size_t> &left,
+           const std::tuple<double, size_t, size_t> &right) {
+            if (std::get<2>(left) < std::get<2>(right)) {
+                return true;
+            } else if (std::get<2>(left) > std::get<2>(right)) {
+                return false;
+            } else {
+                return std::get<1>(left) < std::get<1>(right);
+            }
+        });
 }

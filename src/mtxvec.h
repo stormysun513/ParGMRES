@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <tuple>
 
 class Vector
 {
@@ -65,5 +66,33 @@ inline void Matrix::set(size_t row_idx, size_t col_idx, double val) {
 inline double Matrix::get(size_t row_idx, size_t col_idx) const {
     return data[row_idx][col_idx];
 }
+
+// CSC format
+class SparseMatrix
+{
+private:
+    std::vector<double> data;
+
+    // row indices
+    std::vector<size_t> indices;
+
+    // col start
+    std::vector<size_t> indptr;
+
+    size_t posInData(size_t i, size_t j) const;
+public:
+    SparseMatrix(std::vector<std::tuple<double, size_t, size_t>> raw_data,
+                 size_t n_rows, size_t n_cols);
+
+    size_t nRows() const;
+    size_t nCols() const;
+    double get(size_t row_idx, size_t col_idx) const;
+
+    void setRow(size_t row_idx, const Vector& vec);
+    void setCol(size_t col_idx, const Vector& vec);
+    Vector getCol(size_t col_idx) const;
+    Vector mul(const Vector& vec) const;
+    Vector mulPartial(const Vector& vec, size_t n_cols_) const;
+};
 
 #endif  // MTXVEC_H
