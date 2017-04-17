@@ -3,12 +3,53 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <cassert>
 
 #include "loadmtx.h"
 
 using namespace std;
 
-Matrix loadMTXFile(const string& filename){
+Vector loadMTXToVector(const string& filename){
+
+    ifstream infile(filename);
+    Vector vec;
+
+    if(infile.is_open()){
+        string line;
+        bool check = false;
+
+        while(getline(infile, line)){
+            if(line.at(0) == '%')
+                continue;
+
+            istringstream iss(line);
+            if(!check){
+                int rowNum, colNum, total;
+                iss >> rowNum >> colNum >> total;
+        
+                assert(colNum == 1);
+
+                vec.resize(rowNum);
+                check = true;
+            }
+            else{
+                int r, c;
+                double entry;
+                iss >> r >> c >> entry;
+
+                assert(c == 1);
+
+                vec.set(r-1, entry);
+            }
+        }
+    }
+    else {
+        cerr << "Failed to open file: " << filename << endl;
+    }
+    return vec;
+}
+
+Matrix loadMTXToMatrix(const string& filename){
 
     ifstream infile(filename);
     Matrix mat;

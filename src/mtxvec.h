@@ -9,8 +9,10 @@ class Vector
 private:
     std::vector<double> data;
 public:
+    Vector();
     Vector(size_t size);
 
+    void resize(size_t size);
     void set(size_t idx, double val);
     double get(size_t idx) const;
     size_t size() const;

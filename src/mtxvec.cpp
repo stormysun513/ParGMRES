@@ -7,7 +7,13 @@
 /*
  * Vector member funciton
  */
+Vector::Vector(){}
+
 Vector::Vector(size_t size) {
+    data.resize(size);
+}
+
+void Vector::resize(size_t size){
     data.resize(size);
 }
 

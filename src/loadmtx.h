@@ -6,7 +6,8 @@
 
 #include "mtxvec.h"
 
-Matrix loadMTXFile(const std::string&);
+Vector loadMTXToVector(const std::string&);
+Matrix loadMTXToMatrix(const std::string&);
 void writeVecToMTXFile(const std::string&, const Vector&);
 void writeMatToMTXFile(const std::string&, const Matrix&);
 
