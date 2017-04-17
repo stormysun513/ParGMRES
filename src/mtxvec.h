@@ -48,9 +48,11 @@ public:
 
     void setRow(size_t row_idx, const Vector& vec);
     void setCol(size_t col_idx, const Vector& vec);
+    Vector getRow(size_t row_idx) const;
     Vector getCol(size_t col_idx) const;
     Vector mul(const Vector& vec) const;
     Vector mulPartial(const Vector& vec, size_t n_cols_) const;
+    Vector mulPartialT(const Vector& vec, size_t n_rows_) const;
 };
 
 

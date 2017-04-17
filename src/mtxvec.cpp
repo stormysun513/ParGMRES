@@ -156,6 +156,16 @@ void Matrix::setCol(size_t col_idx, const Vector& vec) {
     }
 }
 
+Vector Matrix::getRow(size_t row_idx) const {
+    Vector row(n_cols);
+
+    for (int i = 0; i < n_cols; ++i) {
+        row.set(i, data[row_idx][i]);
+    }
+
+    return row;
+}
+
 Vector Matrix::getCol(size_t col_idx) const {
     Vector col(n_rows);
 
@@ -181,7 +191,7 @@ Vector Matrix::mul(const Vector& vec) const {
 }
 
 Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
-    assert(n_cols >= vec.size());
+    assert(n_cols_ == vec.size());
     Vector ret(n_rows);
 
     for (size_t i = 0; i < n_rows; ++i) {
@@ -190,6 +200,21 @@ Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
             temp += data[i][j] * vec.get(j);
         }
         ret.set(i, temp);
+    }
+
+    return ret;
+}
+
+Vector Matrix::mulPartialT(const Vector& vec, size_t n_rows_) const {
+    assert(n_rows_ == vec.size());
+    Vector ret(n_cols);
+
+    for (size_t j = 0; j < n_cols; ++j) {
+        double temp = .0f;
+        for (size_t i = 0; i < n_rows_; ++i) {
+            temp += data[i][j] * vec.get(i);
+        }
+        ret.set(j, temp);
     }
 
     return ret;

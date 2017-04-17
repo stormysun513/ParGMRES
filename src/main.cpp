@@ -219,34 +219,35 @@ sparseGmres(const SparseMatrix& A,
 
     while (nit < maxit) {
         Matrix H = Matrix(m+1, m);
-        Matrix Z = Matrix(dim, m);
-        Matrix V = Matrix(dim, m+1);
+
+        Matrix Z = Matrix(m, dim);
+        Matrix V = Matrix(m+1, dim);
         Vector x(dim);
 
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
-        V.setCol(0, r0.mulS(1.0 / beta));
+        V.setRow(0, r0.mulS(1.0 / beta));
 
         innit = 0;
         // Generate krylov subspace
         for(int j = 0; j < m; j++) {
-            // Z[:, j] = P * V[:, j]
-            Z.setCol(j, Prcnd.mul(V.getCol(j)));
+            // Z[j, :] = P * V[j, :]
+            Z.setRow(j, Prcnd.mul(V.getRow(j)));
 
-            // w = A * Z[:, j]
-            Vector w = A.mul(Z.getCol(j));
+            // w = A * Z[j, :]
+            Vector w = A.mul(Z.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
-                Vector v = V.getCol(i);
+                Vector v = V.getRow(i);
                 H.set(i, j, w.dotV(v));
                 w.isub(v.mulS(H.get(i, j)));
             }
 
             H.set(j+1, j, w.norm2());
-            V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
+            V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             Vector y = leastSquare(H, j+1, beta);
-            x = x0.add(Z.mulPartial(y, j+1));
+            x = x0.add(Z.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
 
@@ -318,6 +319,7 @@ int main(int argc, char *argv[])
     runExp("../data/cage4.mtx");
     runExp("../data/bcspwr01.mtx");
     runExp("../data/bcspwr03.mtx");
+    runExp("../data/bcspwr06.mtx");
 
     return 0;
 }
