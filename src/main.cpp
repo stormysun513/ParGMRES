@@ -27,6 +27,27 @@ identityMatrix(size_t size) {
 }
 
 void
+printVector(const Vector& vec){
+    size_t length = vec.size();
+
+    char buf[1024];
+    sprintf(buf, "");
+
+    for (size_t j = 0; j < length; j++) {
+        if (j == 0)
+            sprintf(buf, "%s[", buf);
+
+        sprintf(buf, "%s%.4f", buf, vec.get(j));
+        if (j == length-1)
+            sprintf(buf, "%s]", buf);
+        else
+            sprintf(buf, "%s, ", buf);
+    }
+    sprintf(buf, "%s\n", buf);
+    cout << buf;
+}
+
+void
 printMatrix(Matrix& mat,
             size_t row_start, size_t row_end,
             size_t col_start, size_t col_end) {
