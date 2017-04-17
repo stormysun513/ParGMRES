@@ -135,12 +135,19 @@ Matrix::Matrix(size_t m, size_t n) {
 }
 
 void Matrix::resize(size_t m, size_t n){
+    
     data.resize(m);
+
+    if(m > n_rows){
+        for(int i = n_rows; i < m; i++){
+            data[i] = std::vector<double>(n);
+        } 
+    }
+    for(int i = 0; i < n_rows; i++){
+        data[i].resize(n);
+    }
     n_rows = m;
     n_cols = n;
-    for(int i = 0; i < m; i++) {
-        data[i] = std::vector<double>(n);
-    }
 }
 
 void Matrix::setRow(size_t row_idx, const Vector& vec) {
