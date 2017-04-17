@@ -164,10 +164,11 @@ Vector Matrix::mul(const Vector& vec) const {
     Vector ret(n_rows);
 
     for (size_t i = 0; i < n_rows; ++i) {
-        ret.set(i, 0.0);
+        double temp = .0f;
         for (size_t j = 0; j < n_cols; ++j) {
-            ret.set(i, ret.get(i) + data[i][j] * vec.get(j));
+            temp += data[i][j] * vec.get(j);
         }
+        ret.set(i, temp);
     }
 
     return ret;
@@ -178,10 +179,11 @@ Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
     Vector ret(n_rows);
 
     for (size_t i = 0; i < n_rows; ++i) {
-        ret.set(i, 0.0);
+        double temp = .0f;
         for (size_t j = 0; j < n_cols_; ++j) {
-            ret.set(i, ret.get(i) + data[i][j] * vec.get(j));
+            temp += data[i][j] * vec.get(j);
         }
+        ret.set(i, temp);
     }
 
     return ret;

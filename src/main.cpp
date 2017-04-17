@@ -131,7 +131,7 @@ gmres(const Matrix& A,
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
         V.setCol(0, r0.mulS(1.0 / beta));
-
+        
         innit = 0;
         // Generate krylov subspace
         for(int j = 0; j < m; j++) {
@@ -185,7 +185,7 @@ gmres(const Matrix& A,
 void runExp(const string& mat_name) {
     int m = 100;
     int maxit = 1000000;
-    double tol = 1e-3;
+    double tol = 1e-6;
     double start_time;
     double end_time;
     char buf[1024];
@@ -195,11 +195,11 @@ void runExp(const string& mat_name) {
 
     Matrix A = loadMTXToMatrix(mat_name);
     Vector b = Vector(A.nCols());
-
+    
     for (size_t i = 0; i < A.nCols(); ++i) {
         b.set(i, distribution(generator));
     }
-
+    
     cout << "A: " << mat_name << " "
          << A.nRows() << "x" << A.nCols() << endl;
 

@@ -73,7 +73,15 @@ Matrix loadMTXToMatrix(const string& filename){
             else{
                 int r, c;
                 double entry;
-                iss >> r >> c >> entry;
+                iss >> r >> c;
+                bool eof = iss.eof();
+
+                if(eof){
+                    entry = 1;
+                }
+                else{
+                    iss >> entry;
+                } 
                 mat.set(r-1, c-1, entry);
             }
         }
