@@ -193,7 +193,7 @@ void runExp(const string& mat_name) {
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(-1.0, 1.0);
 
-    Matrix A = loadMTXFile(mat_name);
+    Matrix A = loadMTXToMatrix(mat_name);
     Vector b = Vector(A.nCols());
 
     for (size_t i = 0; i < A.nCols(); ++i) {
