@@ -24,11 +24,11 @@ public:
     double dotV(const Vector& other) const;
 
     Vector add(const Vector& other) const;
-    Vector iadd(const Vector& other); // same as add, but inplace
+    Vector& iadd(const Vector& other); // same as add, but inplace
     Vector sub(const Vector& other) const;
-    Vector isub(const Vector& other); // same as sub, but inplace
+    Vector& isub(const Vector& other); // same as sub, but inplace
     Vector mulS(double scaler) const;
-    Vector imulS(double scaler); // same as mulS, but inplace
+    Vector& imulS(double scaler); // same as mulS, but inplace
 };
 
 class Matrix

@@ -68,7 +68,7 @@ Vector Vector::add(const Vector& other) const {
 }
 
 // same as add, but inplace
-Vector Vector::iadd(const Vector& other) {
+Vector& Vector::iadd(const Vector& other) {
     assert(data.size() == other.size());
 
     for (size_t i = 0; i < data.size(); i++) {
@@ -91,7 +91,7 @@ Vector Vector::sub(const Vector& other) const {
 }
 
 // same as sub, but inplace
-Vector Vector::isub(const Vector& other) {
+Vector& Vector::isub(const Vector& other) {
     assert(data.size() == other.size());
 
     for (size_t i = 0; i < data.size(); i++) {
@@ -112,7 +112,7 @@ Vector Vector::mulS(double scaler) const {
 }
 
 // same as mulS, but inplace
-Vector Vector::imulS(double scaler) {
+Vector& Vector::imulS(double scaler) {
     for (size_t i = 0; i < data.size(); i++) {
         data[i] *= scaler;
     }
