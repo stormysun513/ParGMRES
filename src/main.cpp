@@ -12,7 +12,7 @@
 #include "mtxvec.h"
 
 #define MAX_KRYLOV_DIM  500
-#define MAX_ITERS       100
+#define MAX_ITERS       100000
 
 using namespace std;
 
@@ -129,8 +129,6 @@ gmres(const Matrix& A,
             H.set(j+1, j, w.norm2());
             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
-            // printMatrix(H, 0, j+1, 0, j);
-
             Vector y = leastSquare(H, j+1, beta);
             x = x0.add(Z.mulPartial(y, j+1));
 
@@ -164,7 +162,7 @@ gmres(const Matrix& A,
 }
 
 void runExp(const string& mat_name) {
-    int m = 500;
+    int m = 100;
     int maxit = 1000000;
     double tol = 1e-3;
     double start_time;

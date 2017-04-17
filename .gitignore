@@ -2,3 +2,5 @@ src/objs
 src/pgmres
 src/test
 *.orig
+
+.DS_Store
