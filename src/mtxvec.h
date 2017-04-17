@@ -18,6 +18,7 @@ public:
     void set(size_t idx, double val);
     double get(size_t idx) const;
     size_t size() const;
+    void copy(const Vector& other);
 
     double norm2() const;
     double dotV(const Vector& other) const;

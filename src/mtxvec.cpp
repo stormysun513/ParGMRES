@@ -23,6 +23,17 @@ void Vector::resize(size_t size){
     data.resize(size);
 }
 
+void Vector::copy(const Vector& other){
+    
+    size_t size = other.size();
+
+    assert(size == this->size());
+
+    for(int i = 0; i < size; i++){
+        this->set(i, other.get(i)); 
+    }
+}
+
 double Vector::norm2() const {
     double res = .0f;
 
