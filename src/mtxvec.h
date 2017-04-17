@@ -79,11 +79,15 @@ private:
     // col start
     std::vector<size_t> indptr;
 
-    size_t posInData(size_t i, size_t j) const;
+    size_t n_rows;
+    size_t n_cols;
+
+    bool posInData(size_t i, size_t j, size_t& ret) const;
 public:
     SparseMatrix(std::vector<std::tuple<double, size_t, size_t>> raw_data,
                  size_t n_rows, size_t n_cols);
 
+    size_t nnz() const;
     size_t nRows() const;
     size_t nCols() const;
     double get(size_t row_idx, size_t col_idx) const;
@@ -94,5 +98,16 @@ public:
     Vector mul(const Vector& vec) const;
     Vector mulPartial(const Vector& vec, size_t n_cols_) const;
 };
+
+inline double SparseMatrix::get(size_t i, size_t j) const {
+    size_t idx;
+    if (posInData(i, j, idx))
+        return data[idx];
+    else
+        return 0.0;
+}
+inline size_t SparseMatrix::nnz() const { return data.size(); }
+inline size_t SparseMatrix::nRows() const { return n_rows; }
+inline size_t SparseMatrix::nCols() const { return n_cols; }
 
 #endif  // MTXVEC_H

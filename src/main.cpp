@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <cassert>
 #include <cmath>
 #include <string>
@@ -131,7 +132,7 @@ gmres(const Matrix& A,
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
         V.setCol(0, r0.mulS(1.0 / beta));
-        
+
         innit = 0;
         // Generate krylov subspace
         for(int j = 0; j < m; j++) {
@@ -161,7 +162,7 @@ gmres(const Matrix& A,
                 cout << "FGMRES converged to relative tolerance: "
                      << res_norm / b.norm2()
                      << " at iteration "
-                     << nit 
+                     << nit
                      << "(out: "
                      << outnit
                      << ", in: "
@@ -174,7 +175,7 @@ gmres(const Matrix& A,
         x0 = x;
         outnit++;
     }
-    
+
     double res_norm = A.mul(x0).sub(b).norm2();
     cout << "FGMRES is not converged: "
          << res_norm / b.norm2()
@@ -195,11 +196,11 @@ void runExp(const string& mat_name) {
 
     Matrix A = loadMTXToMatrix(mat_name);
     Vector b = Vector(A.nCols());
-    
+
     for (size_t i = 0; i < A.nCols(); ++i) {
         b.set(i, distribution(generator));
     }
-    
+
     cout << "A: " << mat_name << " "
          << A.nRows() << "x" << A.nCols() << endl;
 
@@ -213,8 +214,31 @@ void runExp(const string& mat_name) {
 
 int main(int argc, char *argv[])
 {
-    runExp("../data/cage4.mtx");
-    runExp("../data/bcspwr01.mtx");
-    runExp("../data/bcspwr03.mtx");
+    // runExp("../data/cage4.mtx");
+    // runExp("../data/bcspwr01.mtx");
+    // runExp("../data/bcspwr03.mtx");
+
+    Matrix A = loadMTXToMatrix("../data/cage4.mtx");
+    // printMatrix(A, 0, A.nRows(), 0, A.nCols());
+
+    vector<tuple<double, size_t, size_t>> raw_data;
+    // raw_data.push_back(make_tuple(1, 3, 2));
+    // raw_data.push_back(make_tuple(2, 3, 4));
+    // raw_data.push_back(make_tuple(3, 5, 2));
+    // raw_data.push_back(make_tuple(3, 5, 5));
+    for (size_t i = 0; i < A.nRows(); ++i) {
+        for (size_t j = 0; j < A.nCols(); ++j) {
+            if (A.get(i, j) != 0) {
+                raw_data.push_back(make_tuple(A.get(i, j), i, j));
+            }
+        }
+    }
+
+    SparseMatrix A_csc = SparseMatrix(raw_data, 9, 9);
+
+    for (size_t i = 0; i < A.nRows(); ++i) {
+        cout << A_csc.get(i, 0) << endl;;
+    }
+
     return 0;
 }

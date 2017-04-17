@@ -197,7 +197,10 @@ Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
 
 SparseMatrix::SparseMatrix(
     std::vector<std::tuple<double, size_t, size_t>> raw_data,
-    size_t n_rows, size_t n_cols) {
+    size_t n_rows_, size_t n_cols_) {
+
+    n_rows = n_rows_;
+    n_cols = n_cols_;
 
     sortRawData(raw_data);
 
@@ -224,6 +227,23 @@ SparseMatrix::SparseMatrix(
     // for (size_t i = 0; i < indptr.size(); ++i) {
     //     cout << indptr[i] << endl;
     // }
+}
+
+bool
+SparseMatrix::posInData(size_t i, size_t j, size_t& ret) const {
+    assert(0 <= i); assert(i < n_rows);
+    assert(0 <= j); assert(j < n_cols);
+
+    size_t start = indptr[j];
+    size_t end = indptr[j+1];
+
+    for (size_t k = start; k < end; ++k) {
+        if (indices[k] == i) {
+            ret = k;
+            return true;
+        }
+    }
+    return false;
 }
 
 // --- Helpers ---
