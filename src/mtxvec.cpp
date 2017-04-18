@@ -84,6 +84,16 @@ Vector& Vector::normalize(){
     return *this;
 }
 
+Vector& Vector::inverse(){
+    
+    size_t size = data.size();
+
+    for(size_t i = 0; i < size; i++){
+        data[i] = 1.0/data[i];
+    }
+    return *this;
+}
+
 Vector Vector::add(const Vector& other) const {
     assert(data.size() == other.size());
 
@@ -296,6 +306,19 @@ Matrix& Matrix::imulS(double scalar){
     return *this;
 }
 
+Matrix& Matrix::iRowMulS(const Vector& other){
+   
+    assert(n_rows == other.size());
+
+    for(size_t i = 0; i < n_rows; i++){
+        double scalar = other.get(i);
+        for(size_t j = 0; j < n_cols; j++){
+            data[i][j] *= scalar;
+        }
+    }
+    return *this;
+}
+
 Matrix Matrix::covariance() const {
     
     Matrix mat(n_cols, n_cols);
@@ -310,6 +333,18 @@ Matrix Matrix::covariance() const {
         }
     }
     return mat;
+}
+
+Matrix Matrix::transpose() const {
+    
+    Matrix transpose(n_cols, n_rows);
+
+    for(size_t i = 0; i < n_rows; i++){
+        for(size_t j = 0; j < n_cols; j++){
+            transpose.set(j, i, data[i][j]);
+        }
+    }
+    return transpose;
 }
 
 void

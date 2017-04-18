@@ -19,7 +19,7 @@
 using namespace std;
 
 Vector
-leastSquare(Matrix& H, size_t size, double beta) {
+leastSquare(const Matrix& H, size_t size, double beta) {
     Eigen::MatrixXf A(size+1, size);
     Eigen::VectorXf b = Eigen::VectorXf::Zero(size+1);
     Eigen::VectorXf y_(size);

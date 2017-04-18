@@ -26,6 +26,7 @@ public:
     double dotV(const Vector& other) const;
     Matrix crossV(const Vector& other) const;
     Vector& normalize();
+    Vector& inverse();
 
     Vector add(const Vector& other) const;
     Vector& iadd(const Vector& other); // same as add, but inplace
@@ -62,8 +63,10 @@ public:
     Matrix& isub(const Matrix& other);
     Matrix& iadd(const Matrix& other);
     Matrix& imulS(double scaler); // same as mulS, but inplace
+    Matrix& iRowMulS(const Vector& other);
 
     Matrix covariance() const;
+    Matrix transpose() const;
 };
 
 
