@@ -62,6 +62,8 @@ public:
     Matrix& isub(const Matrix& other);
     Matrix& iadd(const Matrix& other);
     Matrix& imulS(double scaler); // same as mulS, but inplace
+
+    Matrix covariance() const;
 };
 
 

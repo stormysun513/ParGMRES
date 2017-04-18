@@ -296,6 +296,22 @@ Matrix& Matrix::imulS(double scalar){
     return *this;
 }
 
+Matrix Matrix::covariance() const {
+    
+    Matrix mat(n_cols, n_cols);
+
+    for(size_t i = 0; i < n_cols; i++){
+        for(size_t j = 0; j < n_cols; j++){
+            double sum = 0.0f;
+            for(size_t k = 0; k < n_rows; k++){
+                sum += data[k][i] * data[k][j];
+            }
+            mat.set(i, j, sum);
+        }
+    }
+    return mat;
+}
+
 void
 SparseMatrix::construct(std::vector<std::tuple<double, size_t, size_t>> raw_data,
                         size_t n_rows_, size_t n_cols_) {
