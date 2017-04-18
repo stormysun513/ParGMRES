@@ -35,6 +35,7 @@ void Vector::copy(const Vector& other){
 }
 
 double Vector::norm2() const {
+    
     double res = .0f;
 
     for (double num: data) {
@@ -44,15 +45,43 @@ double Vector::norm2() const {
 }
 
 double Vector::dotV(const Vector& other) const {
+
     double sum = .0f;
+    size_t size = data.size();
 
-    assert(data.size() == other.size());
+    assert(size == other.size());
 
-    for (size_t i = 0; i < data.size(); i++) {
+    for (size_t i = 0; i < size; i++) {
         sum += data[i] * other.get(i);
     }
-
     return sum;
+}
+
+Matrix Vector::crossV(const Vector& other) const {
+    
+    size_t m = this->size();
+    size_t n = other.size();
+    Matrix mat(m, n);
+
+    for(size_t i = 0; i < m; i++){
+        for(size_t j = 0; j < n; j++){
+            mat.set(i, j, this->get(i)*other.get(j));
+        }
+    }
+    return mat;
+}
+
+Vector& Vector::normalize(){
+    
+    double norm = this->norm2();
+    size_t size = data.size();
+
+    assert(norm != 0);
+
+    for(size_t i = 0; i < size; i++){
+        data[i] /= norm;
+    }
+    return *this;
 }
 
 Vector Vector::add(const Vector& other) const {
@@ -63,7 +92,6 @@ Vector Vector::add(const Vector& other) const {
     for (size_t i = 0; i < data.size(); i++) {
         res.set(i, data[i] + other.get(i));
     }
-
     return res;
 }
 
@@ -74,7 +102,6 @@ Vector& Vector::iadd(const Vector& other) {
     for (size_t i = 0; i < data.size(); i++) {
         data[i] += other.get(i);
     }
-
     return *this;
 }
 
@@ -86,7 +113,6 @@ Vector Vector::sub(const Vector& other) const {
     for (size_t i = 0; i < data.size(); i++) {
         res.set(i, data[i] - other.get(i));
     }
-
     return res;
 }
 
@@ -97,7 +123,6 @@ Vector& Vector::isub(const Vector& other) {
     for (size_t i = 0; i < data.size(); i++) {
         data[i] -= other.get(i);
     }
-
     return *this;
 }
 
@@ -107,7 +132,6 @@ Vector Vector::mulS(double scaler) const {
     for (size_t i = 0; i < data.size(); i++) {
         res.set(i, data[i] * scaler);
     }
-
     return res;
 }
 
@@ -116,7 +140,6 @@ Vector& Vector::imulS(double scaler) {
     for (size_t i = 0; i < data.size(); i++) {
         data[i] *= scaler;
     }
-
     return *this;
 }
 
@@ -153,7 +176,6 @@ void Matrix::resize(size_t m, size_t n){
 void Matrix::setRow(size_t row_idx, const Vector& vec) {
     size_t len = vec.size();
 
-    assert(0 <= row_idx);
     assert(row_idx < n_rows);
     assert(len == n_cols);
 
@@ -165,7 +187,6 @@ void Matrix::setRow(size_t row_idx, const Vector& vec) {
 void Matrix::setCol(size_t col_idx, const Vector& vec) {
     size_t len = vec.size();
 
-    assert(0 <= col_idx);
     assert(col_idx < n_cols);
     assert(len == n_rows);
 
@@ -180,7 +201,6 @@ Vector Matrix::getRow(size_t row_idx) const {
     for (int i = 0; i < n_cols; ++i) {
         row.set(i, data[row_idx][i]);
     }
-
     return row;
 }
 
@@ -190,7 +210,6 @@ Vector Matrix::getCol(size_t col_idx) const {
     for (int i = 0; i < n_rows; ++i) {
         col.set(i, data[i][col_idx]);
     }
-
     return col;
 }
 
@@ -204,7 +223,6 @@ Vector Matrix::mul(const Vector& vec) const {
         }
         ret.set(i, temp);
     }
-
     return ret;
 }
 
@@ -219,7 +237,6 @@ Vector Matrix::mulPartial(const Vector& vec, size_t n_cols_) const {
         }
         ret.set(i, temp);
     }
-
     return ret;
 }
 
@@ -234,8 +251,49 @@ Vector Matrix::mulPartialT(const Vector& vec, size_t n_rows_) const {
         }
         ret.set(j, temp);
     }
-
     return ret;
+}
+
+Matrix& Matrix::isub(const Matrix& other){
+    
+    size_t m = other.nRows();
+    size_t n = other.nCols();
+    
+    assert(m == n_rows);
+    assert(n == n_cols);
+
+    for(size_t i = 0; i < m; i++){
+        for(size_t j = 0; j < n; j++){
+            data[i][j] -= other.get(i, j);
+        }
+    }
+    return *this;
+}
+
+Matrix& Matrix::iadd(const Matrix& other){
+    
+    size_t m = other.nRows();
+    size_t n = other.nCols();
+    
+    assert(m == n_rows);
+    assert(n == n_cols);
+
+    for(size_t i = 0; i < m; i++){
+        for(size_t j = 0; j < n; j++){
+            data[i][j] += other.get(i, j);
+        }
+    }
+    return *this;
+}
+
+Matrix& Matrix::imulS(double scalar){
+    
+    for(size_t i = 0; i < n_rows; i++){
+        for(size_t j = 0; j < n_cols; j++){
+            data[i][j] *= scalar;
+        }
+    }
+    return *this;
 }
 
 void
@@ -272,11 +330,11 @@ SparseMatrix::SparseMatrix(
     size_t n_rows_, size_t n_cols_) {
 
     construct(raw_data, n_rows_, n_cols_);
-
 }
 
 SparseMatrix::SparseMatrix(Matrix dense) {
     vector<tuple<double, size_t, size_t>> raw_data;
+    
     for (size_t i = 0; i < dense.nRows(); ++i) {
         for (size_t j = 0; j < dense.nCols(); ++j) {
             if (dense.get(i, j) != 0) {
@@ -284,7 +342,6 @@ SparseMatrix::SparseMatrix(Matrix dense) {
             }
         }
     }
-
     construct(raw_data, dense.nRows(), dense.nCols());
 }
 
@@ -300,7 +357,6 @@ SparseMatrix::getCol(size_t col_idx) const {
         double mat_val = data[k];
         ret.set(i, mat_val);
     }
-
     return ret;
 }
 
@@ -322,12 +378,11 @@ SparseMatrix::mul(const Vector& vec) const {
             ret.set(i, ret.get(i) + mat_val * vec_val);
         }
     }
-
     return ret;
 };
 
 Vector
-SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {
+SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {   
     assert(n_cols_ == vec.size());
 
     Vector ret(vec.size());
@@ -344,7 +399,6 @@ SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {
             ret.set(i, ret.get(i) + mat_val * vec_val);
         }
     }
-
     return ret;
 };
 
