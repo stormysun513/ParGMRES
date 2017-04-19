@@ -15,6 +15,14 @@ SparseMatrix identitySparseMatrix(size_t size);
 Matrix identityMatrix(size_t size);
 
 /* algorithms */
+Vector leastSquare(const Matrix& H, size_t size, double beta);
+Vector leastSquareWithBeta(const Matrix& H, size_t size, double beta);
 void svd(Matrix& U, Matrix& V, Vector& sigma, const Matrix& A);
+
+/* mtx file IO */
+Vector loadMTXToVector(const std::string&);
+Matrix loadMTXToMatrix(const std::string&);
+void writeVecToMTXFile(const std::string&, const Vector&);
+void writeMatToMTXFile(const std::string&, const Matrix&);
 
 #endif  // UTILS_H

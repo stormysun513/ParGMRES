@@ -5,7 +5,7 @@
 #include <string>
 #include <cassert>
 
-#include "loadmtx.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -100,6 +100,9 @@ void writeVecToMTXFile(const std::string& filename, const Vector& vec){
     int colNum = 1;
 
     if(outfile.is_open()){
+        outfile << "%%MatrixMarket matrix coordinate real general\n";
+        outfile << "%-------------------------------------------------------------------------------\n";
+        outfile << "%-------------------------------------------------------------------------------\n";
         outfile << rowNum << " " << colNum << " " << rowNum*colNum << endl;
 
         for(int i = 1; i <= rowNum; i++){
@@ -120,9 +123,23 @@ void writeMatToMTXFile(const std::string& filename, const Matrix& mat){
 
     int rowNum = mat.nRows();
     int colNum = mat.nCols();
+    int count = 0;
 
     if(outfile.is_open()){
-        outfile << rowNum << " " << colNum << " " << rowNum*colNum << endl;
+        outfile << "%%MatrixMarket matrix coordinate real general\n";
+        outfile << "%-------------------------------------------------------------------------------\n";
+        outfile << "%-------------------------------------------------------------------------------\n";
+
+        
+        for(int i = 1; i <= rowNum; i++){
+            for(int j = 1; j <= colNum; j++){
+                double val = mat.get(i-1, j-1);
+                if(val != 0){
+                    count++;
+                }
+            }
+        }
+        outfile << rowNum << " " << colNum << " " << count << endl;
 
         for(int i = 1; i <= rowNum; i++){
             for(int j = 1; j <= colNum; j++){

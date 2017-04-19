@@ -6,39 +6,15 @@
 #include <string>
 #include <random>
 
-#include "Eigen/Dense"
 #include "CycleTimer.h"
 
 #include "utils.h"
-#include "loadmtx.h"
-#include "mtxvec.h"
 
 #define MAX_KRYLOV_DIM  500
 #define MAX_ITERS       100000
 
 using namespace std;
 
-Vector
-leastSquare(const Matrix& H, size_t size, double beta) {
-    Eigen::MatrixXf A(size+1, size);
-    Eigen::VectorXf b = Eigen::VectorXf::Zero(size+1);
-    Eigen::VectorXf y_(size);
-    Vector y(size);
-
-    b(0) = beta;
-    for (int i = 0; i < size+1; i++) {
-        for (int j = 0; j < size; j++) {
-            A(i, j) = H.get(i, j);
-        }
-    }
-
-    y_ = (A.transpose() * A).ldlt().solve(A.transpose() * b);
-    for (int i = 0; i < size; i++) {
-        y.set(i, y_(i));
-    }
-
-    return y;
-}
 
 Vector
 gmres(const Matrix& A,
@@ -91,6 +67,8 @@ gmres(const Matrix& A,
             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             Vector y = leastSquare(H, j+1, beta);
+            //Vector y = leastSquareWithBeta(H, j+1, beta);
+            //
             x = x0.add(Z.mulPartial(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
@@ -174,6 +152,8 @@ sparseGmres(const SparseMatrix& A,
             V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             Vector y = leastSquare(H, j+1, beta);
+            //Vector y = leastSquareWithBeta(H, j+1, beta);
+
             x = x0.add(Z.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
