@@ -50,7 +50,7 @@ gmres(const Matrix& A,
 
         innit = 0;
         // Generate krylov subspace
-        for(int j = 0; j < m; j++) {
+        for(size_t j = 0; j < m; j++) {
             // Z[:, j] = P * V[:, j]
             Z.setCol(j, Prcnd.mul(V.getCol(j)));
 
@@ -135,7 +135,7 @@ sparseGmres(const SparseMatrix& A,
 
         innit = 0;
         // Generate krylov subspace
-        for(int j = 0; j < m; j++) {
+        for(size_t j = 0; j < m; j++) {
             // Z[j, :] = P * V[j, :]
             Z.setRow(j, Prcnd.mul(V.getRow(j)));
 

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cassert>
 #include <tuple>
+#include <algorithm>
 
 #include <iostream>
 using namespace std;
@@ -29,7 +30,7 @@ void Vector::copy(const Vector& other){
 
     assert(size == this->size());
 
-    for(int i = 0; i < size; i++){
+    for(size_t i = 0; i < size; i++){
         this->set(i, other.get(i));
     }
 }
@@ -162,7 +163,7 @@ Matrix::Matrix(size_t m, size_t n) {
     data.resize(m);
     n_rows = m;
     n_cols = n;
-    for (int i = 0; i < m; i++){
+    for (size_t i = 0; i < m; i++){
         data[i] = std::vector<double>(n);
     }
 }
@@ -172,11 +173,11 @@ void Matrix::resize(size_t m, size_t n){
     data.resize(m);
 
     if(m > n_rows){
-        for(int i = n_rows; i < m; i++){
+        for(size_t i = n_rows; i < m; i++){
             data[i] = std::vector<double>(n);
         }
     }
-    for(int i = 0; i < n_rows; i++){
+    for(size_t i = 0; i < n_rows; i++){
         data[i].resize(n);
     }
     n_rows = m;
@@ -208,7 +209,7 @@ void Matrix::setCol(size_t col_idx, const Vector& vec) {
 Vector Matrix::getRow(size_t row_idx) const {
     Vector row(n_cols);
 
-    for (int i = 0; i < n_cols; ++i) {
+    for (size_t i = 0; i < n_cols; ++i) {
         row.set(i, data[row_idx][i]);
     }
     return row;
@@ -217,7 +218,7 @@ Vector Matrix::getRow(size_t row_idx) const {
 Vector Matrix::getCol(size_t col_idx) const {
     Vector col(n_rows);
 
-    for (int i = 0; i < n_rows; ++i) {
+    for (size_t i = 0; i < n_rows; ++i) {
         col.set(i, data[i][col_idx]);
     }
     return col;

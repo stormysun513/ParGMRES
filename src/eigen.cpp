@@ -106,14 +106,14 @@ Vector leastSquare(const Matrix& H, size_t size, double beta) {
     Vector y(size);
 
     b(0) = beta;
-    for (int i = 0; i < size+1; i++) {
-        for (int j = 0; j < size; j++) {
+    for (size_t i = 0; i < size+1; i++) {
+        for (size_t j = 0; j < size; j++) {
             A(i, j) = H.get(i, j);
         }
     }
 
     y_ = (A.transpose() * A).ldlt().solve(A.transpose() * b);
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         y.set(i, y_(i));
     }
     return y;
