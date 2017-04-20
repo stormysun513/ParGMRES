@@ -223,10 +223,11 @@ void runExp(const string& mat_name) {
 
 int main(int argc, char *argv[])
 {
-    runExp("../data/cage4.mtx");
-    runExp("../data/bcspwr01.mtx");
-    runExp("../data/bcspwr03.mtx");
-    runExp("../data/bcspwr06.mtx");
+    if (argc != 2) {
+        cout << "Usage: " << argv[0] << " matrix_filename" << endl;
+        return 0;
+    }
+    runExp(argv[1]);
 
     return 0;
 }
