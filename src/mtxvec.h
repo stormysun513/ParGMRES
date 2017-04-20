@@ -59,7 +59,7 @@ public:
     Vector mul(const Vector& vec) const;
     Vector mulPartial(const Vector& vec, size_t n_cols_) const;
     Vector mulPartialT(const Vector& vec, size_t n_rows_) const;
-    
+
     Matrix& isub(const Matrix& other);
     Matrix& iadd(const Matrix& other);
     Matrix& imulS(double scaler); // same as mulS, but inplace

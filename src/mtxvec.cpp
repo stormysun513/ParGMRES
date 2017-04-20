@@ -24,18 +24,18 @@ void Vector::resize(size_t size){
 }
 
 void Vector::copy(const Vector& other){
-    
+
     size_t size = other.size();
 
     assert(size == this->size());
 
     for(int i = 0; i < size; i++){
-        this->set(i, other.get(i)); 
+        this->set(i, other.get(i));
     }
 }
 
 double Vector::norm2() const {
-    
+
     double res = .0f;
 
     for (double num: data) {
@@ -58,7 +58,7 @@ double Vector::dotV(const Vector& other) const {
 }
 
 Matrix Vector::crossV(const Vector& other) const {
-    
+
     size_t m = this->size();
     size_t n = other.size();
     Matrix mat(m, n);
@@ -72,7 +72,7 @@ Matrix Vector::crossV(const Vector& other) const {
 }
 
 Vector& Vector::normalize(){
-    
+
     double norm = this->norm2();
     size_t size = data.size();
 
@@ -85,7 +85,7 @@ Vector& Vector::normalize(){
 }
 
 Vector& Vector::inverse(){
-    
+
     size_t size = data.size();
 
     for(size_t i = 0; i < size; i++){
@@ -168,13 +168,13 @@ Matrix::Matrix(size_t m, size_t n) {
 }
 
 void Matrix::resize(size_t m, size_t n){
-    
+
     data.resize(m);
 
     if(m > n_rows){
         for(int i = n_rows; i < m; i++){
             data[i] = std::vector<double>(n);
-        } 
+        }
     }
     for(int i = 0; i < n_rows; i++){
         data[i].resize(n);
@@ -265,10 +265,10 @@ Vector Matrix::mulPartialT(const Vector& vec, size_t n_rows_) const {
 }
 
 Matrix& Matrix::isub(const Matrix& other){
-    
+
     size_t m = other.nRows();
     size_t n = other.nCols();
-    
+
     assert(m == n_rows);
     assert(n == n_cols);
 
@@ -281,10 +281,10 @@ Matrix& Matrix::isub(const Matrix& other){
 }
 
 Matrix& Matrix::iadd(const Matrix& other){
-    
+
     size_t m = other.nRows();
     size_t n = other.nCols();
-    
+
     assert(m == n_rows);
     assert(n == n_cols);
 
@@ -297,7 +297,7 @@ Matrix& Matrix::iadd(const Matrix& other){
 }
 
 Matrix& Matrix::imulS(double scalar){
-    
+
     for(size_t i = 0; i < n_rows; i++){
         for(size_t j = 0; j < n_cols; j++){
             data[i][j] *= scalar;
@@ -307,7 +307,7 @@ Matrix& Matrix::imulS(double scalar){
 }
 
 Matrix& Matrix::iRowMulS(const Vector& other){
-   
+
     assert(n_rows == other.size());
 
     for(size_t i = 0; i < n_rows; i++){
@@ -320,7 +320,7 @@ Matrix& Matrix::iRowMulS(const Vector& other){
 }
 
 Matrix Matrix::covariance() const {
-    
+
     Matrix mat(n_cols, n_cols);
 
     for(size_t i = 0; i < n_cols; i++){
@@ -336,7 +336,7 @@ Matrix Matrix::covariance() const {
 }
 
 Matrix Matrix::transpose() const {
-    
+
     Matrix transpose(n_cols, n_rows);
 
     for(size_t i = 0; i < n_rows; i++){
@@ -385,7 +385,7 @@ SparseMatrix::SparseMatrix(
 
 SparseMatrix::SparseMatrix(Matrix dense) {
     vector<tuple<double, size_t, size_t>> raw_data;
-    
+
     for (size_t i = 0; i < dense.nRows(); ++i) {
         for (size_t j = 0; j < dense.nCols(); ++j) {
             if (dense.get(i, j) != 0) {
@@ -433,7 +433,7 @@ SparseMatrix::mul(const Vector& vec) const {
 };
 
 Vector
-SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {   
+SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {
     assert(n_cols_ == vec.size());
 
     Vector ret(vec.size());

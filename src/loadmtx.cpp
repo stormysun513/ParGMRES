@@ -26,7 +26,7 @@ Vector loadMTXToVector(const string& filename){
             if(!check){
                 int rowNum, colNum, total;
                 iss >> rowNum >> colNum >> total;
-        
+
                 assert(colNum == 1);
 
                 vec.resize(rowNum);
@@ -81,7 +81,7 @@ Matrix loadMTXToMatrix(const string& filename){
                 }
                 else{
                     iss >> entry;
-                } 
+                }
                 mat.set(r-1, c-1, entry);
             }
         }
@@ -118,7 +118,7 @@ void writeVecToMTXFile(const std::string& filename, const Vector& vec){
 }
 
 void writeMatToMTXFile(const std::string& filename, const Matrix& mat){
-    
+
     ofstream outfile(filename);
 
     int rowNum = mat.nRows();
@@ -130,7 +130,7 @@ void writeMatToMTXFile(const std::string& filename, const Matrix& mat){
         outfile << "%-------------------------------------------------------------------------------\n";
         outfile << "%-------------------------------------------------------------------------------\n";
 
-        
+
         for(int i = 1; i <= rowNum; i++){
             for(int j = 1; j <= colNum; j++){
                 double val = mat.get(i-1, j-1);
@@ -154,4 +154,3 @@ void writeMatToMTXFile(const std::string& filename, const Matrix& mat){
         cerr << "Failed to open file: " << filename << endl;
     }
 }
-

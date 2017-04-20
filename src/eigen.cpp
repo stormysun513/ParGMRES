@@ -10,7 +10,7 @@
 #define SVD_EPSILON         1e-3
 
 static Vector svdOneDim(const Matrix& A){
-    
+
     size_t n = A.nCols();
 
     Matrix B = A.covariance();
@@ -32,7 +32,7 @@ static Vector svdOneDim(const Matrix& A){
 }
 
 void svd(Matrix& U, Matrix& V, Vector& sigma, const Matrix& A){
-    
+
     size_t m = A.nRows();
     size_t n = A.nCols();
     size_t k = std::min(m, n);
@@ -44,19 +44,19 @@ void svd(Matrix& U, Matrix& V, Vector& sigma, const Matrix& A){
     V.resize(n, n);
     sigma.resize(k);
     for(size_t i = 0; i < k; i++){
-        
+
         size_t j = count - 1;
- 
+
         if(j < count){
             Vector v = V.getRow(j);
-            Vector u = U.getRow(j); 
+            Vector u = U.getRow(j);
             tmp.isub(u.crossV(v).imulS(sigma.get(j)));
         }
 
         Vector v = svdOneDim(tmp);
         Vector u_unnormalized = A.mul(v);
         double lambda = u_unnormalized.norm2();
-        
+
         sigma.set(count, lambda);
         V.setRow(count, v);
         U.setRow(count, u_unnormalized.normalize());
@@ -66,7 +66,7 @@ void svd(Matrix& U, Matrix& V, Vector& sigma, const Matrix& A){
 }
 
 Vector leastSquareWithBeta(const Matrix& H, size_t size, double beta){
-   
+
     Matrix U, V;
     Matrix A(size+1, size);
     Vector sigma;

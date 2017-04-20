@@ -100,4 +100,3 @@ identityMatrix(size_t size) {
     }
     return mat;
 }
-
