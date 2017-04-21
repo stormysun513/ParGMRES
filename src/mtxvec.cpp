@@ -6,10 +6,13 @@
 #include <tuple>
 #include <algorithm>
 
+#include <omp.h>
+
 #include <iostream>
 using namespace std;
 
-static void sortRawData(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
+static void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
+static void sortRawDataByCol(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
 
 /*
  * Vector member funciton
@@ -376,7 +379,7 @@ SparseMatrix::construct(std::vector<std::tuple<double, size_t, size_t>> raw_data
     n_rows = n_rows_;
     n_cols = n_cols_;
 
-    sortRawData(raw_data);
+    sortRawDataByCol(raw_data);
 
     indptr.push_back(0);
 
@@ -493,9 +496,139 @@ SparseMatrix::posInData(size_t i, size_t j, size_t& ret) const {
     return false;
 }
 
+// --- CSR ---
+
+void
+CSRMatrix::construct(std::vector<std::tuple<double, size_t, size_t>> raw_data,
+                     size_t n_rows_, size_t n_cols_) {
+    n_rows = n_rows_;
+    n_cols = n_cols_;
+
+    sortRawDataByRow(raw_data);
+
+    indptr.push_back(0);
+
+    for (size_t i = 0; i < raw_data.size(); ++i) {
+        double val = std::get<0>(raw_data[i]);
+        size_t row_idx = std::get<1>(raw_data[i]);
+        size_t col_idx = std::get<2>(raw_data[i]);
+
+        data.push_back(val);
+        indices.push_back(col_idx);
+
+        while (indptr.size() <= row_idx) {
+            indptr.push_back(i);
+        }
+
+    }
+
+    while (indptr.size() <= n_rows) {
+        indptr.push_back(data.size());
+    }
+}
+
+CSRMatrix::CSRMatrix(
+    std::vector<std::tuple<double, size_t, size_t>> raw_data,
+    size_t n_rows_, size_t n_cols_) {
+
+    construct(raw_data, n_rows_, n_cols_);
+}
+
+CSRMatrix::CSRMatrix(Matrix dense) {
+    vector<tuple<double, size_t, size_t>> raw_data;
+
+    for (size_t i = 0; i < dense.nRows(); ++i) {
+        for (size_t j = 0; j < dense.nCols(); ++j) {
+            if (dense.get(i, j) != 0) {
+                raw_data.push_back(make_tuple(dense.get(i, j), i, j));
+            }
+        }
+    }
+    construct(raw_data, dense.nRows(), dense.nCols());
+}
+
+Vector
+CSRMatrix::getRow(size_t row_idx) const {
+    Vector ret(n_cols);
+
+    size_t start_idx = indptr[row_idx];
+    size_t end_idx = indptr[row_idx+1];
+
+    for (size_t k = start_idx; k < end_idx; ++k) {
+        size_t i = indices[k];
+        double mat_val = data[k];
+        ret.set(i, mat_val);
+    }
+    return ret;
+}
+
+Vector
+CSRMatrix::mul(const Vector& vec) const {
+    assert(n_cols == vec.size());
+
+    Vector ret(vec.size());
+
+    for (size_t i = 0; i < n_rows; ++i) {
+        size_t start_idx = indptr[i];
+        size_t end_idx = indptr[i+1];
+
+        double temp = 0.0;
+
+#pragma omp parallel for reduction(+:temp)
+        for (size_t k = start_idx; k < end_idx; ++k) {
+            size_t j = indices[k];
+
+            temp += data[k] * vec.get(j);
+        }
+        ret.set(i, temp);
+    }
+
+    return ret;
+};
+
+Vector
+CSRMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {
+    assert(n_cols_ == vec.size());
+
+    Vector ret(vec.size());
+
+    for (size_t i = 0; i < n_rows; ++i) {
+        size_t start_idx = indptr[i];
+        size_t end_idx = indptr[i+1];
+
+        for (size_t k = start_idx; k < end_idx; ++k) {
+            size_t j = indices[k];
+
+            if (j >= n_cols_)
+                break;
+
+            ret.set(i, ret.get(i) + data[k] * vec.get(j));
+        }
+    }
+
+    return ret;
+};
+
+bool
+CSRMatrix::posInData(size_t i, size_t j, size_t& ret) const {
+    assert(0 <= i); assert(i < n_rows);
+    assert(0 <= j); assert(j < n_cols);
+
+    size_t start = indptr[j];
+    size_t end = indptr[j+1];
+
+    for (size_t k = start; k < end; ++k) {
+        if (indices[k] == i) {
+            ret = k;
+            return true;
+        }
+    }
+    return false;
+}
+
 // --- Helpers ---
 
-void sortRawData(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
+void sortRawDataByCol(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
     std::sort(
         raw_data.begin(), raw_data.end(),
         [](const std::tuple<double, size_t, size_t> &left,
@@ -506,6 +639,21 @@ void sortRawData(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
                 return false;
             } else {
                 return std::get<1>(left) < std::get<1>(right);
+            }
+        });
+}
+
+void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
+    std::sort(
+        raw_data.begin(), raw_data.end(),
+        [](const std::tuple<double, size_t, size_t> &left,
+           const std::tuple<double, size_t, size_t> &right) {
+            if (std::get<1>(left) < std::get<1>(right)) {
+                return true;
+            } else if (std::get<1>(left) > std::get<1>(right)) {
+                return false;
+            } else {
+                return std::get<2>(left) < std::get<2>(right);
             }
         });
 }

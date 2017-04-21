@@ -1,5 +1,5 @@
 CXX=g++ -m64
-CXXFLAGS=-std=c++11 -Iobjs/ -IEigen/ -O3 -Wall
+CXXFLAGS=-std=c++11 -Iobjs/ -IEigen/ -O3 -Wall -fopenmp
 
 APP=pgmres
 TEST=svdtest
