@@ -66,8 +66,8 @@ gmres(const Matrix& A,
             H.set(j+1, j, w.norm2());
             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
-            Vector y = leastSquare(H, j+1, beta);
-            //Vector y = leastSquareWithBeta(H, j+1, beta);
+            Vector y = leastSquareWithEigen(H, j+1, beta);
+            //Vector y = leastSquareWithPowerMethod(H, j+1, beta);
             //
             x = x0.add(Z.mulPartial(y, j+1));
 
@@ -151,8 +151,9 @@ sparseGmres(const SparseMatrix& A,
             H.set(j+1, j, w.norm2());
             V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
-            Vector y = leastSquare(H, j+1, beta);
-            //Vector y = leastSquareWithBeta(H, j+1, beta);
+            Vector y = leastSquareWithEigen(H, j+1, beta);
+            //Vector y = leastSquareWithJacobi(H, j+1, beta);
+            //Vector y = leastSquareWithPowerMethod(H, j+1, beta);
 
             x = x0.add(Z.mulPartialT(y, j+1));
 
