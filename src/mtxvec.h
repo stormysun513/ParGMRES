@@ -64,6 +64,7 @@ public:
     Matrix& iadd(const Matrix& other);
     Matrix& imulS(double scaler); // same as mulS, but inplace
     Matrix& iRowMulS(const Vector& other);
+    Matrix& iRowDivS(const Vector& other);
 
     Matrix covariance() const;
     Matrix transpose() const;

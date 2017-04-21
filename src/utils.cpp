@@ -27,7 +27,7 @@ printVector(const Vector& vec){
 }
 
 void
-printMatrix(Matrix& mat,
+printMatrix(const Matrix& mat,
             size_t row_start, size_t row_end,
             size_t col_start, size_t col_end) {
     size_t m = mat.nRows();

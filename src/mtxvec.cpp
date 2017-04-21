@@ -320,6 +320,19 @@ Matrix& Matrix::iRowMulS(const Vector& other){
     return *this;
 }
 
+Matrix& Matrix::iRowDivS(const Vector& other){
+   
+    assert(n_rows == other.size());
+
+    for(size_t i = 0; i < n_rows; i++){
+        double scalar = other.get(i);
+        for(size_t j = 0; j < n_cols; j++){
+            data[i][j] /= scalar;
+        }
+    }
+    return *this;
+}
+
 Matrix Matrix::covariance() const {
 
     Matrix mat(n_cols, n_cols);
