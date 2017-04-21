@@ -16,6 +16,7 @@ public:
     Vector();
     Vector(size_t size);
 
+    void clear();
     void resize(size_t size);
     void set(size_t idx, double val);
     double get(size_t idx) const;
@@ -46,6 +47,7 @@ public:
     Matrix();
     Matrix(size_t m, size_t n);
 
+    void clear();
     void resize(size_t m, size_t n);
     size_t nRows() const;
     size_t nCols() const;

@@ -20,6 +20,10 @@ Vector::Vector(size_t size) {
     data.resize(size);
 }
 
+void Vector::clear(){
+    std::fill(data.begin(), data.end(), 0);
+}
+
 void Vector::resize(size_t size){
     data.resize(size);
 }
@@ -166,6 +170,11 @@ Matrix::Matrix(size_t m, size_t n) {
     for (size_t i = 0; i < m; i++){
         data[i] = std::vector<double>(n);
     }
+}
+
+void Matrix::clear(){
+    for(auto vec: data)
+    std::fill(vec.begin(), vec.end(), 0);
 }
 
 void Matrix::resize(size_t m, size_t n){

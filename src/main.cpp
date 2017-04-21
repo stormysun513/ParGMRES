@@ -25,6 +25,12 @@ gmres(const Matrix& A,
     size_t nit = 0;
     size_t innit = 0;
     size_t outnit = 0;
+    
+    Matrix H = Matrix(m+1, m);
+    Matrix Z = Matrix(dim, m);
+    Matrix V = Matrix(dim, m+1);
+    
+    Vector x(dim);
     Vector x0(dim);
 
     assert(dim == b.size());
@@ -39,10 +45,11 @@ gmres(const Matrix& A,
     assert(maxit > 0);
 
     while (nit < maxit) {
-        Matrix H = Matrix(m+1, m);
-        Matrix Z = Matrix(dim, m);
-        Matrix V = Matrix(dim, m+1);
-        Vector x(dim);
+        
+        //Matrix H = Matrix(m+1, m);
+        //Matrix Z = Matrix(dim, m);
+        //Matrix V = Matrix(dim, m+1);
+        //Vector x(dim);
 
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
