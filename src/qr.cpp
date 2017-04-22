@@ -34,8 +34,8 @@ static Matrix getQwwT(const Matrix& Q, double* w, size_t j, double tau);
 //     A.set(4, 3, distribution(generator));
 
 //     printMatrix(A, 0, 5, 0, 4);
-//     Matrix Q(5, 5);
-//     Matrix R(5, 4);
+//     Matrix Q;
+//     Matrix R;
 //     householderQR(A, 4, Q, R);
 //     printMatrix(Q, 0, 5, 0, 5);
 //     printMatrix(R, 0, 5, 0, 4);

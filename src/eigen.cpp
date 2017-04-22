@@ -214,3 +214,16 @@ Vector leastSquareWithEigen(const Matrix& H, size_t size, double beta) {
     }
     return y;
 }
+
+Vector leastSquareWithQR(const Matrix& H, size_t size, double beta) {
+    Matrix Q;
+    Matrix R;
+    Vector sol(size);
+    Vector b(size+1);
+    b.set(0, beta);
+
+    householderQR(H, size, Q, R);
+    qrSolve(Q, R, b, sol);
+
+    return sol;
+}

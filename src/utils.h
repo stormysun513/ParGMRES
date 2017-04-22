@@ -19,6 +19,7 @@ void svdJacobiMethod(Matrix& U, Matrix& V, Vector& sigma, const Matrix& A);
 Vector leastSquareWithEigen(const Matrix& H, size_t size, double beta);
 Vector leastSquareWithPowerMethod(const Matrix& H, size_t size, double beta);
 Vector leastSquareWithJacobi(const Matrix& H, size_t size, double beta);
+Vector leastSquareWithQR(const Matrix& H, size_t size, double beta);
 
 /* QR */
 void householderQR(const Matrix& H, size_t size, Matrix& Q, Matrix& R);
