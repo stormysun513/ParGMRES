@@ -46,7 +46,7 @@ printMatrix(const Matrix& mat,
             if (j == col_start)
                 sprintf(buf, "%s[", buf);
 
-            sprintf(buf, "%s%.4f", buf, mat.get(i, j));
+            sprintf(buf, "%s%.8f", buf, mat.get(i, j));
             if (j == col_end-1)
                 sprintf(buf, "%s]", buf);
             else

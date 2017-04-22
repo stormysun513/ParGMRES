@@ -22,6 +22,7 @@ Vector leastSquareWithJacobi(const Matrix& H, size_t size, double beta);
 
 /* QR */
 void householderQR(const Matrix& H, size_t size, Matrix& Q, Matrix& R);
+void qrSolve(const Matrix& Q, const Matrix& R, const Vector& b, Vector& sol);
 
 /* mtx file IO */
 Vector loadMTXToVector(const std::string&);

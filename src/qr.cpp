@@ -84,6 +84,49 @@ void householderQR(const Matrix& H, size_t size, Matrix& Q, Matrix& R) {
     }
 }
 
+// Usage:
+//     Vector b(5);
+//     b.set(0, 10.0);
+//     b.set(1, 0.0);
+//     b.set(2, -3.0);
+//     b.set(3, 4.0);
+//     b.set(4, -1.0);
+//     Vector sol(4);
+//     qrSolve(Q, R, b, sol);
+void qrSolve(const Matrix& Q, const Matrix& R, const Vector& b, Vector& sol) {
+    // Solve Ax = b ==> Solve Rx = Q^T b
+
+    assert(Q.nCols() == Q.nRows());
+    assert(Q.nRows() == b.size());
+    assert(sol.size() == R.nCols());
+
+    // Q^T b, shape == b.shape
+    Vector QTb(b.size());
+
+    for (size_t i = 0; i < Q.nCols(); ++i) {
+        double temp = 0.0;
+
+        for (size_t j = 0; j < Q.nRows(); ++j) {
+            temp += Q.get(j, i) * b.get(j);
+        }
+
+        QTb.set(i, temp);
+    }
+
+    // Back-substitute
+
+    for (size_t i = 0; i < R.nCols(); ++i) {
+        size_t row_idx = R.nCols() - 1 - i;
+        double res = QTb.get(row_idx);
+
+        for (size_t j = row_idx+1; j < R.nCols(); ++j) {
+            res -= sol.get(j) * R.get(row_idx, j);
+        }
+
+        sol.set(row_idx,  res / R.get(row_idx, row_idx));
+    }
+}
+
 static double partialNorm(const Matrix& R, size_t j) {
     double ret = 0.0;
     for (size_t i = j; i < R.nRows(); ++i) {
