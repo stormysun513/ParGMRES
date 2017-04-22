@@ -36,7 +36,7 @@ gmres(const Matrix& A,
     assert(dim == b.size());
 
     // Use trivial preconditioner for now
-    auto Prcnd = identityMatrix(dim);
+    // auto Prcnd = identityMatrix(dim);
 
     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
@@ -58,8 +58,10 @@ gmres(const Matrix& A,
         innit = 0;
         // Generate krylov subspace
         for(size_t j = 0; j < m; j++) {
+
             // Z[:, j] = P * V[:, j]
-            Z.setCol(j, Prcnd.mul(V.getCol(j)));
+            // Z.setCol(j, Prcnd.mul(V.getCol(j)));
+            Z.setCol(j, V.getCol(j));
 
             // w = A * Z[:, j]
             Vector w = A.mul(Z.getCol(j));
@@ -111,11 +113,19 @@ sparseGmres(const SparseMatrix& A,
             const Vector& b,
             size_t m, double tol, size_t maxit) {
 
+    char buf[1024];
+
     size_t dim = A.nCols();
     size_t nit = 0;
     size_t innit = 0;
     size_t outnit = 0;
+
     Vector x0(dim);
+   
+    double tKrylov = .0f;
+    double tLLS = .0f;
+    double tTotalStart = .0f;
+    double tStart;
 
     assert(dim == b.size());
 
@@ -128,9 +138,11 @@ sparseGmres(const SparseMatrix& A,
     assert(m > 0);
     assert(maxit > 0);
 
-    while (nit < maxit) {
-        Matrix H = Matrix(m+1, m);
+    tTotalStart = CycleTimer::currentSeconds();
 
+    while (nit < maxit) {
+        
+        Matrix H = Matrix(m+1, m);
         Matrix Z = Matrix(m, dim);
         Matrix V = Matrix(m+1, dim);
         Vector x(dim);
@@ -142,6 +154,9 @@ sparseGmres(const SparseMatrix& A,
         innit = 0;
         // Generate krylov subspace
         for(size_t j = 0; j < m; j++) {
+
+            tStart = CycleTimer::currentSeconds();
+
             // Z[j, :] = P * V[j, :]
             Z.setRow(j, Prcnd.mul(V.getRow(j)));
 
@@ -157,6 +172,11 @@ sparseGmres(const SparseMatrix& A,
             H.set(j+1, j, w.norm2());
             V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
+            
+            tKrylov += CycleTimer::currentSeconds() - tStart;
+
+            tStart = CycleTimer::currentSeconds();
+
             Vector y = leastSquareWithEigen(H, j+1, beta);
 
             x = x0.add(Z.mulPartialT(y, j+1));
@@ -165,6 +185,9 @@ sparseGmres(const SparseMatrix& A,
 
             nit++;
             innit++;
+
+            tLLS += CycleTimer::currentSeconds() - tStart;
+
             if (res_norm < tol * b.norm2()) {
                 cout << "FGMRES converged to relative tolerance: "
                      << res_norm / b.norm2()
@@ -176,6 +199,16 @@ sparseGmres(const SparseMatrix& A,
                      << innit
                      << ")"
                      << endl;
+
+                
+                sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in Total \n\n", (CycleTimer::currentSeconds() - tTotalStart) * 1000);
+                cout << buf;
+                
+
                 return x;
             }
         }
