@@ -10,7 +10,6 @@ printVector(const Vector& vec){
     size_t length = vec.size();
 
     char buf[1024];
-    sprintf(buf, "");
 
     for (size_t j = 0; j < length; j++) {
         if (j == 0)
@@ -39,7 +38,6 @@ printMatrix(const Matrix& mat,
     assert(col_end <= n);
 
     char buf[1024];
-    sprintf(buf, "");
 
     for (size_t i = row_start; i < row_end; i++) {
         for (size_t j = col_start; j < col_end; j++) {

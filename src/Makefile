@@ -1,4 +1,13 @@
-CXX=g++ -m64
+OS := $(shell uname)
+
+ifeq ($(OS), Darwin)
+# Run MacOS commands
+CXX = g++-6 -m64
+else
+# check for Linux and run other commands
+CXX = g++ -m64
+endif
+
 CXXFLAGS=-std=c++11 -Iobjs/ -IEigen/ -O3 -Wall -fopenmp
 
 APP=pgmres
