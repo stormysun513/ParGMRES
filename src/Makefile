@@ -16,7 +16,7 @@ OBJDIR=objs
 
 APP_MAIN=main.cpp
 TEST_MAIN=svdtest.cpp
-SRCS=utils.cpp loadmtx.cpp mtxvec.cpp eigen.cpp
+SRCS=utils.cpp loadmtx.cpp mtxvec.cpp eigen.cpp qr.cpp
 OBJS=$(patsubst %.cpp,$(OBJDIR)/%.o,$(SRCS))
 
 .PHONY: dirs clean
