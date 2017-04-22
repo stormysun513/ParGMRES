@@ -20,6 +20,9 @@ Vector leastSquareWithEigen(const Matrix& H, size_t size, double beta);
 Vector leastSquareWithPowerMethod(const Matrix& H, size_t size, double beta);
 Vector leastSquareWithJacobi(const Matrix& H, size_t size, double beta);
 
+/* QR */
+void householderQR(const Matrix& H, size_t size, Matrix& Q, Matrix& R);
+
 /* mtx file IO */
 Vector loadMTXToVector(const std::string&);
 Matrix loadMTXToMatrix(const std::string&);

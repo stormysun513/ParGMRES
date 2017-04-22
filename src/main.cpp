@@ -25,11 +25,11 @@ gmres(const Matrix& A,
     size_t nit = 0;
     size_t innit = 0;
     size_t outnit = 0;
-    
+
     Matrix H = Matrix(m+1, m);
     Matrix Z = Matrix(dim, m);
     Matrix V = Matrix(dim, m+1);
-    
+
     Vector x(dim);
     Vector x0(dim);
 
@@ -45,7 +45,7 @@ gmres(const Matrix& A,
     assert(maxit > 0);
 
     while (nit < maxit) {
-        
+
         //Matrix H = Matrix(m+1, m);
         //Matrix Z = Matrix(dim, m);
         //Matrix V = Matrix(dim, m+1);
@@ -330,6 +330,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     runExp(argv[1]);
+
 
     return 0;
 }
