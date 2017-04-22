@@ -74,8 +74,7 @@ gmres(const Matrix& A,
             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             Vector y = leastSquareWithEigen(H, j+1, beta);
-            //Vector y = leastSquareWithPowerMethod(H, j+1, beta);
-            //
+
             x = x0.add(Z.mulPartial(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
@@ -159,8 +158,6 @@ sparseGmres(const SparseMatrix& A,
             V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             Vector y = leastSquareWithEigen(H, j+1, beta);
-            //Vector y = leastSquareWithJacobi(H, j+1, beta);
-            //Vector y = leastSquareWithPowerMethod(H, j+1, beta);
 
             x = x0.add(Z.mulPartialT(y, j+1));
 
@@ -245,7 +242,6 @@ csrGmres(const CSRMatrix& A,
             V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             Vector y = leastSquareWithEigen(H, j+1, beta);
-            //Vector y = leastSquareWithPowerMethod(H, j+1, beta);
 
             x = x0.add(Z.mulPartialT(y, j+1));
 
@@ -304,11 +300,11 @@ void runExp(const string& mat_name) {
          << A.nRows() << "x" << A.nCols() << endl;
 
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
-    // start_time = CycleTimer::currentSeconds();
-    // gmres(A, b, m, tol, maxit);
-    // end_time = CycleTimer::currentSeconds();
-    // sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
-    // cout << buf;
+    start_time = CycleTimer::currentSeconds();
+    gmres(A, b, m, tol, maxit);
+    end_time = CycleTimer::currentSeconds();
+    sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
+    cout << buf;
 
     start_time = CycleTimer::currentSeconds();
     sparseGmres(A_csc, b, m, tol, maxit);
