@@ -88,64 +88,6 @@ inline double Matrix::get(size_t row_idx, size_t col_idx) const {
 }
 
 // CSC format
-class SparseMatrix
-{
-private:
-    std::vector<double> data;
-
-    // row indices
-    std::vector<size_t> indices;
-
-    // col start
-    std::vector<size_t> indptr;
-
-    size_t n_rows;
-    size_t n_cols;
-
-    bool posInData(size_t i, size_t j, size_t& ret) const;
-    void construct(std::vector<std::tuple<double, size_t, size_t>> raw_data,
-                   size_t n_rows, size_t n_cols);
-public:
-    SparseMatrix(std::vector<std::tuple<double, size_t, size_t>> raw_data,
-                 size_t n_rows, size_t n_cols);
-
-    SparseMatrix(Matrix dense);
-
-    size_t nnz() const;
-    size_t nRows() const;
-    size_t nCols() const;
-    double get(size_t row_idx, size_t col_idx) const;
-    bool set(size_t row_idx, size_t col_idx, double val);
-
-    Vector getCol(size_t col_idx) const;
-    Vector mul(const Vector& vec) const;
-    Vector mulPartial(const Vector& vec, size_t n_cols_) const;
-};
-
-inline double SparseMatrix::get(size_t i, size_t j) const {
-    size_t idx;
-    if (posInData(i, j, idx))
-        return data[idx];
-    else
-        return 0.0;
-}
-
-inline bool SparseMatrix::set(size_t i, size_t j, double val) {
-    size_t idx;
-    if (posInData(i, j, idx)) {
-        data[idx] = val;
-        return true;
-    } else {
-        return false;
-    }
-}
-
-inline size_t SparseMatrix::nnz() const { return data.size(); }
-inline size_t SparseMatrix::nRows() const { return n_rows; }
-inline size_t SparseMatrix::nCols() const { return n_cols; }
-
-
-// CSC format
 class CSRMatrix
 {
 private:

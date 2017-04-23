@@ -333,7 +333,7 @@ Matrix& Matrix::iRowMulS(const Vector& other){
 }
 
 Matrix& Matrix::iRowDivS(const Vector& other){
-   
+
     assert(n_rows == other.size());
 
     for(size_t i = 0; i < n_rows; i++){
@@ -371,129 +371,6 @@ Matrix Matrix::transpose() const {
         }
     }
     return transpose;
-}
-
-void
-SparseMatrix::construct(std::vector<std::tuple<double, size_t, size_t>> raw_data,
-                        size_t n_rows_, size_t n_cols_) {
-    n_rows = n_rows_;
-    n_cols = n_cols_;
-
-    sortRawDataByCol(raw_data);
-
-    indptr.push_back(0);
-
-    for (size_t i = 0; i < raw_data.size(); ++i) {
-        double val = std::get<0>(raw_data[i]);
-        size_t row_idx = std::get<1>(raw_data[i]);
-        size_t col_idx = std::get<2>(raw_data[i]);
-
-        data.push_back(val);
-        indices.push_back(row_idx);
-
-        while (indptr.size() <= col_idx) {
-            indptr.push_back(i);
-        }
-
-    }
-
-    while (indptr.size() <= n_cols) {
-        indptr.push_back(data.size());
-    }
-}
-
-SparseMatrix::SparseMatrix(
-    std::vector<std::tuple<double, size_t, size_t>> raw_data,
-    size_t n_rows_, size_t n_cols_) {
-
-    construct(raw_data, n_rows_, n_cols_);
-}
-
-SparseMatrix::SparseMatrix(Matrix dense) {
-    vector<tuple<double, size_t, size_t>> raw_data;
-
-    for (size_t i = 0; i < dense.nRows(); ++i) {
-        for (size_t j = 0; j < dense.nCols(); ++j) {
-            if (dense.get(i, j) != 0) {
-                raw_data.push_back(make_tuple(dense.get(i, j), i, j));
-            }
-        }
-    }
-    construct(raw_data, dense.nRows(), dense.nCols());
-}
-
-Vector
-SparseMatrix::getCol(size_t col_idx) const {
-    Vector ret(n_rows);
-
-    size_t start_idx = indptr[col_idx];
-    size_t end_idx = indptr[col_idx+1];
-
-    for (size_t k = start_idx; k < end_idx; ++k) {
-        size_t i = indices[k];
-        double mat_val = data[k];
-        ret.set(i, mat_val);
-    }
-    return ret;
-}
-
-Vector
-SparseMatrix::mul(const Vector& vec) const {
-    assert(n_cols == vec.size());
-
-    Vector ret(vec.size());
-
-    for (size_t j = 0; j < n_cols; ++j) {
-        size_t start_idx = indptr[j];
-        size_t end_idx = indptr[j+1];
-        double vec_val = vec.get(j);
-
-        for (size_t k = start_idx; k < end_idx; ++k) {
-            size_t i = indices[k];
-            double mat_val = data[k];
-
-            ret.set(i, ret.get(i) + mat_val * vec_val);
-        }
-    }
-    return ret;
-};
-
-Vector
-SparseMatrix::mulPartial(const Vector& vec, size_t n_cols_) const {
-    assert(n_cols_ == vec.size());
-
-    Vector ret(vec.size());
-
-    for (size_t j = 0; j < n_cols_; ++j) {
-        size_t start_idx = indptr[j];
-        size_t end_idx = indptr[j+1];
-        double vec_val = vec.get(j);
-
-        for (size_t k = start_idx; k < end_idx; ++k) {
-            size_t i = indices[k];
-            double mat_val = data[k];
-
-            ret.set(i, ret.get(i) + mat_val * vec_val);
-        }
-    }
-    return ret;
-};
-
-bool
-SparseMatrix::posInData(size_t i, size_t j, size_t& ret) const {
-    assert(0 <= i); assert(i < n_rows);
-    assert(0 <= j); assert(j < n_cols);
-
-    size_t start = indptr[j];
-    size_t end = indptr[j+1];
-
-    for (size_t k = start; k < end; ++k) {
-        if (indices[k] == i) {
-            ret = k;
-            return true;
-        }
-    }
-    return false;
 }
 
 // --- CSR ---
@@ -574,7 +451,6 @@ CSRMatrix::mul(const Vector& vec) const {
 
         double temp = 0.0;
 
-#pragma omp parallel for reduction(+:temp)
         for (size_t k = start_idx; k < end_idx; ++k) {
             size_t j = indices[k];
 

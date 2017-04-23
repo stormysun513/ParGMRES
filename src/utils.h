@@ -11,7 +11,7 @@ void printMatrix(const Matrix& mat, size_t row_start, size_t row_end,
 /* vector and matrix generation function */
 Vector randUniformVector(size_t n);
 Vector randUnitUniformVector(size_t n);
-SparseMatrix identitySparseMatrix(size_t size);
+CSRMatrix identitySparseMatrix(size_t size);
 Matrix identityMatrix(size_t size);
 
 /* algorithms */

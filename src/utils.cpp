@@ -79,7 +79,7 @@ Vector randUnitUniformVector(size_t n){
     return vec.normalize();
 }
 
-SparseMatrix
+CSRMatrix
 identitySparseMatrix(size_t size) {
 
     std::vector<std::tuple<double, size_t, size_t>> raw_data;
@@ -87,8 +87,8 @@ identitySparseMatrix(size_t size) {
         raw_data.push_back(std::make_tuple(1, i, i));
     }
 
-    SparseMatrix mat_csc = SparseMatrix(raw_data, size, size);
-    return mat_csc;
+    CSRMatrix mat_csr(raw_data, size, size);
+    return mat_csr;
 }
 
 Matrix
