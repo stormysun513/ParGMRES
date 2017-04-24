@@ -124,7 +124,7 @@ public:
     CSRMatrix(std::vector<std::tuple<double, size_t, size_t>> raw_data,
               size_t n_rows, size_t n_cols);
 
-    CSRMatrix(Matrix dense);
+    CSRMatrix(const Matrix& dense);
 
     size_t nnz() const;
     size_t nRows() const;

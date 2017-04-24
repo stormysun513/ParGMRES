@@ -411,7 +411,7 @@ CSRMatrix::CSRMatrix(
     construct(raw_data, n_rows_, n_cols_);
 }
 
-CSRMatrix::CSRMatrix(Matrix dense) {
+CSRMatrix::CSRMatrix(const Matrix& dense) {
     vector<tuple<double, size_t, size_t>> raw_data;
 
     for (size_t i = 0; i < dense.nRows(); ++i) {
