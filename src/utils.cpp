@@ -38,23 +38,21 @@ printMatrix(const Matrix& mat,
     assert(row_end <= m);
     assert(col_end <= n);
 
-    char buf[1024];
-    buf[0] = '\0';
-
+    std::cout << "[";
     for (size_t i = row_start; i < row_end; i++) {
         for (size_t j = col_start; j < col_end; j++) {
             if (j == col_start)
-                sprintf(buf, "%s[", buf);
+                std::cout << "[";
 
-            sprintf(buf, "%s%.8f", buf, mat.get(i, j));
+            std::cout << mat.get(i, j);
             if (j == col_end-1)
-                sprintf(buf, "%s]", buf);
+                std::cout << "],";
             else
-                sprintf(buf, "%s, ", buf);
+                std::cout << ", ";
         }
-        sprintf(buf, "%s\n", buf);
+        std::cout << "\n";
     }
-    std::cout << buf;
+    std::cout << "]\n";
 }
 
 Vector randUniformVector(size_t n){

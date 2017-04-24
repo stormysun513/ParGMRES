@@ -2,8 +2,8 @@
 
 
 for line in $(ls ../data/*.mtx); do
+    echo "===Matrix: $line==="
     ./pgmres $line
-    echo "------"
     printf "\n\n"
 done
 
