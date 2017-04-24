@@ -28,8 +28,8 @@ gmres(const Matrix& A,
     size_t outnit = 0;
 
     Matrix H = Matrix(m+1, m);
-    Matrix Z = Matrix(dim, m);
-    Matrix V = Matrix(dim, m+1);
+    Matrix Z = Matrix(m, dim);
+    Matrix V = Matrix(m+1, dim);
     Vector x(dim);
     Vector x0(dim);
 
@@ -49,7 +49,7 @@ gmres(const Matrix& A,
 
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
-        V.setCol(0, r0.mulS(1.0 / beta));
+        V.setRow(0, r0.mulS(1.0 / beta));
 
         innit = 0;
         
@@ -59,18 +59,18 @@ gmres(const Matrix& A,
             tStart = CycleTimer::currentSeconds();
 
             // Z.setCol(j, Prcnd.mul(V.getCol(j)));
-            Z.setCol(j, V.getCol(j));
+            Z.setRow(j, V.getRow(j));
 
-            Vector w = A.mul(Z.getCol(j));
+            Vector w = A.mul(Z.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
-                Vector v = V.getCol(i);
+                Vector v = V.getRow(i);
                 H.set(i, j, w.dotV(v));
                 w.isub(v.mulS(H.get(i, j)));
             }
 
             H.set(j+1, j, w.norm2());
-            V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
+            V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
 
             tKrylov += CycleTimer::currentSeconds() - tStart;
@@ -78,7 +78,8 @@ gmres(const Matrix& A,
 
             Vector y = leastSquareWithQR(H, j+1, beta);
 
-            x = x0.add(Z.mulPartial(y, j+1));
+            //x = x0.add(Z.mulPartial(y, j+1));
+            x = x0.add(Z.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
 
@@ -189,6 +190,113 @@ sparseGmres(const CSRMatrix& A,
             nit++;
             innit++;
 
+            tLLS += CycleTimer::currentSeconds() - tStart;
+
+            if (res_norm < tol * b.norm2()) {
+                cout << "FGMRES converged to relative tolerance: "
+                     << res_norm / b.norm2()
+                     << " at iteration "
+                     << nit
+                     << " (out: "
+                     << outnit
+                     << ", in: "
+                     << innit
+                     << ")"
+                     << endl;
+
+                sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                cout << buf;
+
+                return x;
+            }
+        }
+        x0 = x;
+        outnit++;
+    }
+
+    double res_norm = A.mul(x0).sub(b).norm2();
+    cout << "FGMRES is not converged: "
+         << res_norm / b.norm2()
+         << endl;
+    return x0;
+}
+
+Vector
+ompGmres(const Matrix& A,
+         const Vector& b,
+         size_t m, double tol, size_t maxit) {
+
+    char buf[1024];
+
+    size_t dim = A.nCols();
+    size_t nit = 0;
+    size_t innit = 0;
+    size_t outnit = 0;
+
+    Matrix H = Matrix(m+1, m);
+    Matrix Z = Matrix(dim, m);
+    Matrix V = Matrix(dim, m+1);
+    Vector x(dim);
+    Vector x0(dim);
+    Vector r0;
+    Vector temp;
+
+    double tKrylov = .0f;
+    double tLLS = .0f;
+    double tStart;
+
+    assert(dim == b.size());
+
+    // Use trivial preconditioner for now
+    // auto Prcnd = identityMatrix(dim);
+
+    m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
+    maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
+
+    while (nit < maxit) {
+
+        matVecMul(temp, A, x0);
+        vecSub(r0, b, temp);
+        double beta = r0.norm2();
+        vecScalarMul(temp, r0, 1.0/beta);
+        V.setRow(0, temp);
+
+        innit = 0;
+        
+        // Generate krylov subspace
+        for(size_t j = 0; j < m; j++) {
+
+            tStart = CycleTimer::currentSeconds();
+
+            // Z.setCol(j, Prcnd.mul(V.getCol(j)));
+            Z.setCol(j, V.getCol(j));
+
+            Vector w = A.mul(Z.getCol(j));
+
+            for (size_t i = 0; i < j; i++) {
+                Vector v = V.getCol(i);
+                H.set(i, j, w.dotV(v));
+                w.isub(v.mulS(H.get(i, j)));
+            }
+
+            H.set(j+1, j, w.norm2());
+            V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
+
+
+            tKrylov += CycleTimer::currentSeconds() - tStart;
+            tStart = CycleTimer::currentSeconds();
+
+            Vector y = leastSquareWithQR(H, j+1, beta);
+
+            x = x0.add(Z.mulPartial(y, j+1));
+
+            double res_norm = A.mul(x).sub(b).norm2();
+
+            nit++;
+            innit++;
+            
             tLLS += CycleTimer::currentSeconds() - tStart;
 
             if (res_norm < tol * b.norm2()) {
