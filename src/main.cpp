@@ -4,7 +4,6 @@
 #include <cassert>
 #include <cmath>
 #include <string>
-#include <random>
 
 #include "CycleTimer.h"
 
@@ -21,6 +20,8 @@ gmres(const Matrix& A,
       const Vector& b,
       size_t m, double tol, size_t maxit) {
 
+    char buf[1024];
+
     size_t dim = A.nCols();
     size_t nit = 0;
     size_t innit = 0;
@@ -29,9 +30,12 @@ gmres(const Matrix& A,
     Matrix H = Matrix(m+1, m);
     Matrix Z = Matrix(dim, m);
     Matrix V = Matrix(dim, m+1);
-
     Vector x(dim);
     Vector x0(dim);
+
+    double tKrylov = .0f;
+    double tLLS = .0f;
+    double tStart;
 
     assert(dim == b.size());
 
@@ -41,29 +45,22 @@ gmres(const Matrix& A,
     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
 
-    assert(m > 0);
-    assert(maxit > 0);
-
     while (nit < maxit) {
-
-        //Matrix H = Matrix(m+1, m);
-        //Matrix Z = Matrix(dim, m);
-        //Matrix V = Matrix(dim, m+1);
-        //Vector x(dim);
 
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
         V.setCol(0, r0.mulS(1.0 / beta));
 
         innit = 0;
+        
         // Generate krylov subspace
         for(size_t j = 0; j < m; j++) {
 
-            // Z[:, j] = P * V[:, j]
+            tStart = CycleTimer::currentSeconds();
+
             // Z.setCol(j, Prcnd.mul(V.getCol(j)));
             Z.setCol(j, V.getCol(j));
 
-            // w = A * Z[:, j]
             Vector w = A.mul(Z.getCol(j));
 
             for (size_t i = 0; i < j; i++) {
@@ -75,6 +72,10 @@ gmres(const Matrix& A,
             H.set(j+1, j, w.norm2());
             V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
+
+            tKrylov += CycleTimer::currentSeconds() - tStart;
+            tStart = CycleTimer::currentSeconds();
+
             Vector y = leastSquareWithQR(H, j+1, beta);
 
             x = x0.add(Z.mulPartial(y, j+1));
@@ -83,17 +84,26 @@ gmres(const Matrix& A,
 
             nit++;
             innit++;
+            
+            tLLS += CycleTimer::currentSeconds() - tStart;
+
             if (res_norm < tol * b.norm2()) {
                 cout << "FGMRES converged to relative tolerance: "
                      << res_norm / b.norm2()
                      << " at iteration "
                      << nit
-                     << "(out: "
+                     << " (out: "
                      << outnit
                      << ", in: "
                      << innit
                      << ")"
                      << endl;
+
+                sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                cout << buf;
+
                 return x;
             }
         }
@@ -121,32 +131,27 @@ sparseGmres(const CSRMatrix& A,
     size_t innit = 0;
     size_t outnit = 0;
 
+    Matrix H = Matrix(m+1, m);
+    Matrix Z = Matrix(m, dim);
+    Matrix V = Matrix(m+1, dim);
     Vector x0(dim);
+    Vector x(dim);
 
     double tKrylov = .0f;
     double tLLS = .0f;
-    double tTotalStart = .0f;
     double tStart;
 
     assert(dim == b.size());
 
     // Use trivial preconditioner for now
-    auto Prcnd = identitySparseMatrix(dim);
+    //auto Prcnd = identitySparseMatrix(dim);
 
     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
 
-    assert(m > 0);
-    assert(maxit > 0);
-
-    tTotalStart = CycleTimer::currentSeconds();
 
     while (nit < maxit) {
 
-        Matrix H = Matrix(m+1, m);
-        Matrix Z = Matrix(m, dim);
-        Matrix V = Matrix(m+1, dim);
-        Vector x(dim);
 
         Vector r0 = b.sub(A.mul(x0));
         double beta = r0.norm2();
@@ -158,10 +163,9 @@ sparseGmres(const CSRMatrix& A,
 
             tStart = CycleTimer::currentSeconds();
 
-            // Z[j, :] = P * V[j, :]
-            Z.setRow(j, Prcnd.mul(V.getRow(j)));
+            //Z.setRow(j, Prcnd.mul(V.getRow(j)));
+            Z.setRow(j, V.getRow(j));
 
-            // w = A * Z[j, :]
             Vector w = A.mul(Z.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
@@ -174,7 +178,6 @@ sparseGmres(const CSRMatrix& A,
             V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
             tKrylov += CycleTimer::currentSeconds() - tStart;
-
             tStart = CycleTimer::currentSeconds();
 
             Vector y = leastSquareWithQR(H, j+1, beta);
@@ -193,7 +196,7 @@ sparseGmres(const CSRMatrix& A,
                      << res_norm / b.norm2()
                      << " at iteration "
                      << nit
-                     << "(out: "
+                     << " (out: "
                      << outnit
                      << ", in: "
                      << innit
@@ -203,8 +206,6 @@ sparseGmres(const CSRMatrix& A,
                 sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
                 cout << buf;
                 sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
-                cout << buf;
-                sprintf(buf, "[%.3f] ms in Total \n\n", (CycleTimer::currentSeconds() - tTotalStart) * 1000);
                 cout << buf;
 
                 return x;
@@ -222,40 +223,41 @@ sparseGmres(const CSRMatrix& A,
 }
 
 void runExp(const string& mat_name) {
-    int m = 100;
-    int maxit = 1000000;
+    
+    int m = 100;                    // m may be adaptive to input size
+    int maxit = 100000;
     double tol = 1e-6;
     double start_time;
     double end_time;
     char buf[1024];
 
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
-
     Matrix A = loadMTXToMatrix(mat_name);
     assert(A.nCols() == A.nRows());
 
     CSRMatrix A_csr(A);
-    Vector b = Vector(A.nCols());
-
-    for (size_t i = 0; i < A.nCols(); ++i) {
-        b.set(i, distribution(generator));
-    }
+    Vector b = randUnitUniformVector(A.nCols());
 
     cout << "A: " << mat_name << " "
          << A.nRows() << "x" << A.nCols() << endl;
-
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
+    cout << endl;
+
+    // experiment on dense matrix representation
     start_time = CycleTimer::currentSeconds();
     gmres(A, b, m, tol, maxit);
     end_time = CycleTimer::currentSeconds();
-    sprintf(buf, "[%.3f] ms\n\n", (end_time - start_time) * 1000);
+    
+    sprintf(buf, "[%.3f] ms in total (Dense)\n\n", 
+            (end_time - start_time) * 1000);
     cout << buf;
 
+    // experiment on scr sparse matrix representation
     start_time = CycleTimer::currentSeconds();
     sparseGmres(A_csr, b, m, tol, maxit);
     end_time = CycleTimer::currentSeconds();
-    sprintf(buf, "[%.3f] ms (CSR Sparse GMRES) \n\n", (end_time - start_time) * 1000);
+    
+    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n", 
+            (end_time - start_time) * 1000);
     cout << buf;
 }
 
@@ -263,7 +265,7 @@ int main(int argc, char *argv[])
 {
     if (argc != 2) {
         cout << "Usage: " << argv[0] << " matrix_filename" << endl;
-        return 0;
+        return 1;
     }
     runExp(argv[1]);
 
