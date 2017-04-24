@@ -30,11 +30,18 @@ public:
     Vector& inverse();
 
     Vector add(const Vector& other) const;
-    Vector& iadd(const Vector& other); // same as add, but inplace
+    Vector& iadd(const Vector& other);          // same as add, but inplace
     Vector sub(const Vector& other) const;
-    Vector& isub(const Vector& other); // same as sub, but inplace
+    Vector& isub(const Vector& other);          // same as sub, but inplace
     Vector mulS(double scaler) const;
-    Vector& imulS(double scaler); // same as mulS, but inplace
+    Vector& imulS(double scaler);               // same as mulS, but inplace
+
+    // friend functions
+    friend void vecDot(Vector& dst, const Vector& src1, const Vector& src2);
+    friend void vecScalarMul(Vector& dst, const Vector& src, double scalar);
+    friend void vecSub(Vector& dst, const Vector& src1, const Vector& src2);
+    friend void vecAdd(Vector& dst, const Vector& src1, const Vector& src2);
+    friend void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec);
 };
 
 class Matrix
@@ -70,6 +77,8 @@ public:
 
     Matrix covariance() const;
     Matrix transpose() const;
+
+    friend void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec);
 };
 
 

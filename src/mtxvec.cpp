@@ -533,3 +533,72 @@ void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data)
             }
         });
 }
+
+
+/*
+ * Definition of friend functions of Vector class
+ */
+void vecDot(Vector& dst, const Vector& src1, const Vector& src2){
+    
+    size_t size = src1.size();
+
+    assert(size == src2.size());
+
+    dst.resize(size);
+    for(size_t i = 0; i < size; i++){
+        dst.data[i] = src1.data[i]*src2.data[i];
+    }
+}
+
+void vecScalarMul(Vector& dst, const Vector& src, double scalar){
+
+    size_t size = src.size();
+
+    dst.resize(size);
+    for(size_t i = 0; i < size; i++){
+        dst.data[i] = src.data[i]*scalar;
+    }
+}
+
+void vecSub(Vector& dst, const Vector& src1, const Vector& src2){
+
+    size_t size = src1.size();
+
+    assert(size == src2.size());
+
+    dst.resize(size);
+    for(size_t i = 0; i < size; i++){
+        dst.data[i] = src1.data[i]-src2.data[i];
+    }
+}
+
+void vecAdd(Vector& dst, const Vector& src1, const Vector& src2){
+
+    size_t size = src1.size();
+
+    assert(size == src2.size());
+
+    dst.resize(size);
+    for(size_t i = 0; i < size; i++){
+        dst.data[i] = src1.data[i]+src2.data[i];
+    }
+}
+
+void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec){
+    
+    size_t col = mat.nCols();
+    size_t row = mat.nRows();
+
+    assert(col == vec.size());
+
+    dst.resize(mat.nRows());
+    for(size_t i = 0; i < row; i++){
+        
+        double sum = .0f;
+
+        for(size_t j = 0; j < col; j++){
+            sum += mat.data[i][j] * vec.data[j];
+        }
+        dst.data[i] = sum;
+    }
+}
