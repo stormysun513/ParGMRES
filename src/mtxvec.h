@@ -42,6 +42,8 @@ public:
     friend void vecSub(Vector& dst, const Vector& src1, const Vector& src2);
     friend void vecAdd(Vector& dst, const Vector& src1, const Vector& src2);
     friend void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec);
+    friend double l2norm(const Vector& vec);
+    friend void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t row);
 };
 
 class Matrix
@@ -78,7 +80,11 @@ public:
     Matrix covariance() const;
     Matrix transpose() const;
 
+    // friend function
     friend void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec);
+    friend void copyCol(Matrix& dst, const Matrix& src, size_t to, size_t from);
+    friend void copyRow(Matrix& dst, const Matrix& src, size_t to, size_t from);
+    friend void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t row);
 };
 
 

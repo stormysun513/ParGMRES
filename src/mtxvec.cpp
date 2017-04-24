@@ -592,6 +592,8 @@ void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec){
     assert(col == vec.size());
 
     dst.resize(mat.nRows());
+
+#pragma omp parallel for schedule(static, 64)
     for(size_t i = 0; i < row; i++){
         
         double sum = .0f;
@@ -601,4 +603,69 @@ void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec){
         }
         dst.data[i] = sum;
     }
+}
+
+double l2norm(const Vector& vec){
+
+    size_t size = vec.size();
+    double res = .0f;
+
+#pragma omp parallel for reduction(+: res)
+    for (size_t i = 0; i < size; i++) {
+        double num = vec.data[i];
+        num *= num;
+        res += num;
+    }
+
+    return sqrt(res);
+}
+
+void copyCol(Matrix& dst, const Matrix& src, size_t to, size_t from){
+    
+    size_t dst_col = dst.nCols();
+    size_t src_col = src.nCols();
+    size_t row = dst.nRows();
+
+    assert(to < dst_col);
+    assert(from < src_col);
+    assert(row == src.nRows());
+
+    for(size_t i = 0; i < row; i++){
+        dst.data[i][to] = src.data[i][from];
+    }
+}
+
+void copyRow(Matrix& dst, const Matrix& src, size_t to, size_t from){
+
+    size_t dst_row = dst.nRows();
+    size_t src_row = src.nRows();
+    size_t col = dst.nCols();
+
+    assert(to < dst_row);
+    assert(from < src_row);
+    assert(col == src.nCols());
+
+    for(size_t j = 0; j < col; j++){
+        dst.data[to][j] = src.data[from][j];
+    }
+}
+
+void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t row){
+    
+    size_t src1_col = src1.nCols();
+    size_t src1_row = src1.nRows();
+    size_t src2_col = src2.nCols();
+    size_t src2_row = src2.nRows();
+ 
+    assert(row < src2_row);
+    assert(src1_col == src2_col);
+
+    dst.resize(src1_row);
+    for(size_t i = 0; i < src1_row; i++){
+        double sum = .0f;
+        for(size_t j = 0; j < src1_col; j++){
+            sum += src1.data[i][j] * src2.data[row][j];
+        }
+        dst.data[i] = sum;
+    } 
 }

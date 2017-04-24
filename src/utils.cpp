@@ -77,6 +77,20 @@ Vector randUnitUniformVector(size_t n){
     return vec.normalize();
 }
 
+Matrix randUniformMatrix(size_t size){
+
+    Matrix mat(size, size);
+    std::random_device rd;
+    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+
+    for(size_t i = 0; i < size; i++){
+        for(size_t j = 0; j < size; j++){
+            mat.set(i, j, distribution(rd));
+        }
+    }
+    return mat;
+}
+
 CSRMatrix
 identitySparseMatrix(size_t size) {
 
