@@ -38,3 +38,29 @@ differ, not all items in the list below are relevant to all projects.
   to put this information on a public web site you are welcome to email the
   staff directly.
 - [Optionally] schedule a meeting with the course staff to discuss progress
+
+
+
+We list four deliverables in our project proposal: sequential version, OpenMP 
+version, GPU version, and CPU-GPU mixed version using OpenMPI. We planned to 
+complete GPU version before the project checkpoint but we are not able to meet 
+the milestones. We finished the sequential version. Currently, we are working 
+on the OpenMP version, which we may finish in two to three days after checkpoint; 
+that is, we have a delay about a week. We may not complete all planned deliverable. 
+Because the GPU version requires a re-design of data structure, we may not have 
+enough time for CPU-GPU mixed version across multiple nodes. We decide to move 
+this part into nice to have features. By the deadline of final project, we should 
+be able to complete GPU version. Our new milestones will be shifted by a week. 
+We anticipa e to complete a workable GPU version before May 3. 
+
+
+We encounter a problem related to solver precision while implementing the sequential 
+version. Some large matrices do not converge so that we can not use them to compare 
+with the OpenMPI version. We spent a lot of time to survey this convergence issue. 
+We finally realized that GMRES algorithm requires proper precondition to reduce 
+condition numbers. This reduction is highly matrix dependent. We found that different 
+domain may have different precondition matrices. Therefore, we try to find some matrix 
+patterns that does not rely on precondition and is likely to converge as long as the 
+number of iterations is enough. We found this kind of matrices on [Link]. Now, we can 
+focus on how to parallelize algorithm instead of being bothered by algorithm itself. 
+As for environment configuration, we think we don’t have problem so far.
