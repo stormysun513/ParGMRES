@@ -1,3 +1,9 @@
+---
+title: Project Proposal
+permalink: index.html
+---
+
+
 Project Proposal
 ======================
 
