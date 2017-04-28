@@ -11,6 +11,9 @@
 #include <iostream>
 using namespace std;
 
+#define OMP_N_BOUND     1000000
+#define OMP_NN_BOUND    500
+
 static void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
 static void sortRawDataByCol(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
 
@@ -593,15 +596,29 @@ void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec){
 
     dst.resize(mat.nRows());
 
-#pragma omp parallel for schedule(static, 64)
-    for(size_t i = 0; i < row; i++){
-        
-        double sum = .0f;
+    if(col < OMP_NN_BOUND){
+        for(size_t i = 0; i < row; i++){
 
-        for(size_t j = 0; j < col; j++){
-            sum += mat.data[i][j] * vec.data[j];
+            double sum = .0f;
+
+            for(size_t j = 0; j < col; j++){
+                sum += mat.data[i][j] * vec.data[j];
+            }
+            dst.data[i] = sum;
         }
-        dst.data[i] = sum;
+    }
+    else{
+
+#pragma omp parallel for schedule(static, 64)
+        for(size_t i = 0; i < row; i++){
+
+            double sum = .0f;
+
+            for(size_t j = 0; j < col; j++){
+                sum += mat.data[i][j] * vec.data[j];
+            }
+            dst.data[i] = sum;
+        }
     }
 }
 
@@ -610,11 +627,20 @@ double l2norm(const Vector& vec){
     size_t size = vec.size();
     double res = .0f;
 
+    if(size < OMP_NN_BOUND){
+        for (size_t i = 0; i < size; i++) {
+            double num = vec.data[i];
+            num *= num;
+            res += num;
+        }
+    }
+    else{
 #pragma omp parallel for reduction(+: res)
-    for (size_t i = 0; i < size; i++) {
-        double num = vec.data[i];
-        num *= num;
-        res += num;
+        for (size_t i = 0; i < size; i++) {
+            double num = vec.data[i];
+            num *= num;
+            res += num;
+        }
     }
 
     return sqrt(res);
@@ -669,3 +695,5 @@ void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t r
         dst.data[i] = sum;
     } 
 }
+
+

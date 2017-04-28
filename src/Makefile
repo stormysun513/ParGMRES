@@ -29,7 +29,7 @@ dirs:
 clean:
 	/bin/rm -rf $(OBJDIR) *~ $(APP) $(TEST)
 
-test: $(TEST)
+test: dirs $(TEST)
 
 $(TEST): $(TEST_MAIN) $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $(TEST_MAIN) $(OBJS)
