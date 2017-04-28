@@ -1,5 +1,5 @@
-EXECUTABLE := hello
-CU_FILES   := hello.cu
+EXECUTABLE := test
+CU_FILES   := test.cu
 CU_DEPS    :=
 CC_FILES   := main.cpp
 LOGS       := logs
@@ -17,6 +17,7 @@ FRAMEWORKS :=
 
 NVCCFLAGS=-O3 -m64 --gpu-architecture compute_35
 LIBS += GL glut cudart
+INC=-Icusplibrary
 
 ifneq ($(wildcard /opt/cuda-8.0/.*),)
 # Latedays
@@ -30,22 +31,20 @@ LDLIBS  := $(addprefix -l, $(LIBS))
 LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
-
-OBJS=hello.o
+OBJS=test.o
 
 .PHONY: clean
-
 
 default: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
-    $(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS) $(LDFRAMEWORKS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS) $(LDFRAMEWORKS)
 
 %.o: %.cpp
-    $(CXX) $< $(CXXFLAGS) -c -o $@
+	$(CXX) $< $(CXXFLAGS) -c -o $@
 
 %.o: %.cu
-    $(NVCC) $< $(NVCCFLAGS) -c -o $@
+	$(NVCC) $(INC) $< $(NVCCFLAGS) -c -o $@
 
 clean:
-    rm -rf *~ $(EXECUTABLE) $(LOGS)
+	rm -rf *~ $(EXECUTABLE) $(OBJS) $(LOGS) 
