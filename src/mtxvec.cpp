@@ -15,7 +15,6 @@ using namespace std;
 #define OMP_NN_BOUND    500
 
 static void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
-static void sortRawDataByCol(std::vector<std::tuple<double, size_t, size_t>>& raw_data);
 
 /*
  * Vector member funciton
@@ -505,44 +504,11 @@ CSRMatrix::posInData(size_t i, size_t j, size_t& ret) const {
     return false;
 }
 
-// --- Helpers ---
-
-void sortRawDataByCol(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
-    std::sort(
-        raw_data.begin(), raw_data.end(),
-        [](const std::tuple<double, size_t, size_t> &left,
-           const std::tuple<double, size_t, size_t> &right) {
-            if (std::get<2>(left) < std::get<2>(right)) {
-                return true;
-            } else if (std::get<2>(left) > std::get<2>(right)) {
-                return false;
-            } else {
-                return std::get<1>(left) < std::get<1>(right);
-            }
-        });
-}
-
-void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
-    std::sort(
-        raw_data.begin(), raw_data.end(),
-        [](const std::tuple<double, size_t, size_t> &left,
-           const std::tuple<double, size_t, size_t> &right) {
-            if (std::get<1>(left) < std::get<1>(right)) {
-                return true;
-            } else if (std::get<1>(left) > std::get<1>(right)) {
-                return false;
-            } else {
-                return std::get<2>(left) < std::get<2>(right);
-            }
-        });
-}
-
-
 /*
  * Definition of friend functions of Vector class
  */
 void vecDot(Vector& dst, const Vector& src1, const Vector& src2){
-    
+
     size_t size = src1.size();
 
     assert(size == src2.size());
@@ -588,7 +554,7 @@ void vecAdd(Vector& dst, const Vector& src1, const Vector& src2){
 }
 
 void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec){
-    
+
     size_t col = mat.nCols();
     size_t row = mat.nRows();
 
@@ -647,7 +613,7 @@ double l2norm(const Vector& vec){
 }
 
 void copyCol(Matrix& dst, const Matrix& src, size_t to, size_t from){
-    
+
     size_t dst_col = dst.nCols();
     size_t src_col = src.nCols();
     size_t row = dst.nRows();
@@ -677,12 +643,12 @@ void copyRow(Matrix& dst, const Matrix& src, size_t to, size_t from){
 }
 
 void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t row){
-    
+
     size_t src1_col = src1.nCols();
     size_t src1_row = src1.nRows();
     size_t src2_col = src2.nCols();
     size_t src2_row = src2.nRows();
- 
+
     assert(row < src2_row);
     assert(src1_col == src2_col);
 
@@ -693,7 +659,47 @@ void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t r
             sum += src1.data[i][j] * src2.data[row][j];
         }
         dst.data[i] = sum;
-    } 
+    }
+}
+
+/*
+ * Definition of friend functions of CSRMatrix class
+ */
+void spMatVecMul(Vector& dst, const CSRMatrix& mat, const Vector& vec) {
+    assert(dst.size() == vec.size());
+    assert(mat.n_cols == vec.size());
+
+#pragma omp parallel for schedule(static, 64)
+    for (size_t i = 0; i < mat.n_rows; ++i) {
+        size_t start_idx = mat.indptr[i];
+        size_t end_idx = mat.indptr[i+1];
+
+        double temp = 0.0;
+
+        for (size_t k = start_idx; k < end_idx; ++k) {
+            size_t j = mat.indices[k];
+
+            temp += mat.data[k] * vec.get(j);
+        }
+        dst.set(i, temp);
+    }
 }
 
 
+/*
+ * Definition of helper functions used by CSRMatrix
+ */
+void sortRawDataByRow(std::vector<std::tuple<double, size_t, size_t>>& raw_data) {
+    std::sort(
+        raw_data.begin(), raw_data.end(),
+        [](const std::tuple<double, size_t, size_t> &left,
+           const std::tuple<double, size_t, size_t> &right) {
+            if (std::get<1>(left) < std::get<1>(right)) {
+                return true;
+            } else if (std::get<1>(left) > std::get<1>(right)) {
+                return false;
+            } else {
+                return std::get<2>(left) < std::get<2>(right);
+            }
+        });
+}

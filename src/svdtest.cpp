@@ -5,7 +5,7 @@
 #include "utils.h"
 
 int main(){
-    
+
     // Test 1
     // Matrix A = loadMTXToMatrix("../data/cage4.mtx");
     // Matrix U, V;
@@ -18,8 +18,8 @@ int main(){
     // std::cout << std::endl;
 
     // std::cout << "\n\nV matrix: " << std::endl;
-   
-    // Test 2 
+
+    // Test 2
     //Matrix H = loadMTXToMatrix("../data/H.mtx");
     //size_t j = 10;
     //double beta = 1.82896;
@@ -39,7 +39,7 @@ int main(){
 
     //for(size_t i = 10000; i <= 10000000; i *= 10){
 
-    //    Vector a = randUnitUniformVector(i); 
+    //    Vector a = randUnitUniformVector(i);
 
     //    std::cout << "L2 Norm test: " << i << std::endl;
 
@@ -47,7 +47,7 @@ int main(){
     //    a.norm2();
     //    end_time = CycleTimer::currentSeconds();
 
-    //    sprintf(buf, "[%.3f] ms (Sequential) \n", 
+    //    sprintf(buf, "[%.3f] ms (Sequential) \n",
     //            (end_time - start_time) * 1000);
     //    std::cout << buf;
 
@@ -55,17 +55,17 @@ int main(){
     //    l2norm(a);
     //    end_time = CycleTimer::currentSeconds();
 
-    //    sprintf(buf, "[%.3f] ms (Omp) \n\n", 
+    //    sprintf(buf, "[%.3f] ms (Omp) \n\n",
     //            (end_time - start_time) * 1000);
     //    std::cout << buf;
     //}
 
 
-    for(size_t i = 100; i <= 1000; i += 100){
+    for(size_t i = 100; i <= 1000; i += 100) {
 
-        Vector y = randUnitUniformVector(i); 
-        Vector x = randUnitUniformVector(i); 
-        Matrix A = randUniformMatrix(i); 
+        Vector y = randUnitUniformVector(i);
+        Vector x = randUnitUniformVector(i);
+        Matrix A = randUniformMatrix(i);
 
         std::cout << "mvmul test: " << i << std::endl;
 
@@ -73,7 +73,7 @@ int main(){
         A.mul(x);
         end_time = CycleTimer::currentSeconds();
 
-        sprintf(buf, "[%.3f] ms (Sequential) \n", 
+        sprintf(buf, "[%.3f] ms (Sequential) \n",
                 (end_time - start_time) * 1000);
         std::cout << buf;
 
@@ -81,7 +81,30 @@ int main(){
         matVecMul(y, A, x);
         end_time = CycleTimer::currentSeconds();
 
-        sprintf(buf, "[%.3f] ms (Omp) \n\n", 
+        sprintf(buf, "[%.3f] ms (Omp) \n\n",
+                (end_time - start_time) * 1000);
+        std::cout << buf;
+    }
+
+    for (size_t i = 100; i < 1000; i += 100) {
+        Vector y = randUnitUniformVector(i);
+        Vector x = randUnitUniformVector(i);
+        CSRMatrix S = randUniformCSRMatrix(i);
+        std::cout << "CSR mvmul test: " << i << std::endl;
+
+        start_time = CycleTimer::currentSeconds();
+        S.mul(x);
+        end_time = CycleTimer::currentSeconds();
+
+        sprintf(buf, "[%.3f] ms (Sequential) \n",
+                (end_time - start_time) * 1000);
+        std::cout << buf;
+
+        start_time = CycleTimer::currentSeconds();
+        spMatVecMul(y, S, x);
+        end_time = CycleTimer::currentSeconds();
+
+        sprintf(buf, "[%.3f] ms (Omp) \n\n",
                 (end_time - start_time) * 1000);
         std::cout << buf;
     }

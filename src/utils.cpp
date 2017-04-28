@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <tuple>
+#include <vector>
 #include <cassert>
 
 #include "utils.h"
@@ -89,6 +90,28 @@ Matrix randUniformMatrix(size_t size){
         }
     }
     return mat;
+}
+
+CSRMatrix
+randUniformCSRMatrix(size_t size) {
+
+    std::random_device rd;
+    std::uniform_real_distribution<double> val_dist(-1.0, 1.0);
+    std::uniform_real_distribution<double> sparsity_dist(0.0, 1.0);
+
+    double sparsity = 0.3;
+
+    std::vector<std::tuple<double, size_t, size_t>> raw_data;
+
+    for (size_t i = 0; i < size; ++i) {
+        for (size_t j = 0; j < size; ++j) {
+            if (sparsity_dist(rd) <= sparsity) {
+                raw_data.push_back(std::make_tuple(val_dist(rd), i, j));
+            }
+        }
+    }
+
+    return CSRMatrix(raw_data, size, size);
 }
 
 CSRMatrix

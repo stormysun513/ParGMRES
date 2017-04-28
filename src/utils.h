@@ -12,6 +12,7 @@ void printMatrix(const Matrix& mat, size_t row_start, size_t row_end,
 Vector randUniformVector(size_t n);
 Vector randUnitUniformVector(size_t n);
 Matrix randUniformMatrix(size_t size);
+CSRMatrix randUniformCSRMatrix(size_t size);
 CSRMatrix identitySparseMatrix(size_t size);
 Matrix identityMatrix(size_t size);
 

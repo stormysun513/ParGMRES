@@ -135,6 +135,9 @@ public:
     Vector getRow(size_t row_idx) const;
     Vector mul(const Vector& vec) const;
     Vector mulPartial(const Vector& vec, size_t n_cols_) const;
+
+    // friend function
+    friend void spMatVecMul(Vector& dst, const CSRMatrix& mat, const Vector& vec);
 };
 
 inline double CSRMatrix::get(size_t i, size_t j) const {
