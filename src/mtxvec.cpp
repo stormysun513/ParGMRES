@@ -669,19 +669,35 @@ void spMatVecMul(Vector& dst, const CSRMatrix& mat, const Vector& vec) {
     assert(dst.size() == vec.size());
     assert(mat.n_cols == vec.size());
 
-#pragma omp parallel for schedule(static, 64)
-    for (size_t i = 0; i < mat.n_rows; ++i) {
-        size_t start_idx = mat.indptr[i];
-        size_t end_idx = mat.indptr[i+1];
+    if (mat.n_cols < OMP_NN_BOUND) {
+        for (size_t i = 0; i < mat.n_rows; ++i) {
+            size_t start_idx = mat.indptr[i];
+            size_t end_idx = mat.indptr[i+1];
 
-        double temp = 0.0;
+            double temp = 0.0;
 
-        for (size_t k = start_idx; k < end_idx; ++k) {
-            size_t j = mat.indices[k];
+            for (size_t k = start_idx; k < end_idx; ++k) {
+                size_t j = mat.indices[k];
 
-            temp += mat.data[k] * vec.get(j);
+                temp += mat.data[k] * vec.get(j);
+            }
+            dst.set(i, temp);
         }
-        dst.set(i, temp);
+    } else {
+#pragma omp parallel for schedule(static, 64)
+        for (size_t i = 0; i < mat.n_rows; ++i) {
+            size_t start_idx = mat.indptr[i];
+            size_t end_idx = mat.indptr[i+1];
+
+            double temp = 0.0;
+
+            for (size_t k = start_idx; k < end_idx; ++k) {
+                size_t j = mat.indices[k];
+
+                temp += mat.data[k] * vec.get(j);
+            }
+            dst.set(i, temp);
+        }
     }
 }
 

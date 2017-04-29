@@ -52,7 +52,7 @@ gmres(const Matrix& A,
         V.setRow(0, r0.mulS(1.0 / beta));
 
         innit = 0;
-        
+
         // Generate krylov subspace
         for(size_t j = 0; j < m; j++) {
 
@@ -85,7 +85,7 @@ gmres(const Matrix& A,
 
             nit++;
             innit++;
-            
+
             tLLS += CycleTimer::currentSeconds() - tStart;
 
             if (res_norm < tol * b.norm2()) {
@@ -224,7 +224,7 @@ sparseGmres(const CSRMatrix& A,
 }
 
 Vector
-ompGmres(const Matrix& A,
+ompGmres(const CSRMatrix& A,
          const Vector& b,
          size_t m, double tol, size_t maxit) {
 
@@ -236,12 +236,13 @@ ompGmres(const Matrix& A,
     size_t outnit = 0;
 
     Matrix H = Matrix(m+1, m);
-    Matrix Z = Matrix(dim, m);
-    Matrix V = Matrix(dim, m+1);
+    Matrix Z = Matrix(m, dim);
+    Matrix V = Matrix(m+1, dim);
     Vector x(dim);
     Vector x0(dim);
     Vector r0;
-    Vector temp;
+    Vector temp(dim);
+    Vector w(dim);
 
     double tKrylov = .0f;
     double tLLS = .0f;
@@ -257,32 +258,32 @@ ompGmres(const Matrix& A,
 
     while (nit < maxit) {
 
-        matVecMul(temp, A, x0);
+        spMatVecMul(temp, A, x0);
         vecSub(r0, b, temp);
         double beta = r0.norm2();
         vecScalarMul(temp, r0, 1.0/beta);
         V.setRow(0, temp);
 
         innit = 0;
-        
+
         // Generate krylov subspace
         for(size_t j = 0; j < m; j++) {
 
             tStart = CycleTimer::currentSeconds();
 
             // Z.setCol(j, Prcnd.mul(V.getCol(j)));
-            Z.setCol(j, V.getCol(j));
+            Z.setRow(j, V.getRow(j));
 
-            Vector w = A.mul(Z.getCol(j));
+            spMatVecMul(w, A, Z.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
-                Vector v = V.getCol(i);
+                Vector v = V.getRow(i);
                 H.set(i, j, w.dotV(v));
                 w.isub(v.mulS(H.get(i, j)));
             }
 
             H.set(j+1, j, w.norm2());
-            V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
+            V.setRow(j+1, w.mulS(1.0 / H.get(j+1, j)));
 
 
             tKrylov += CycleTimer::currentSeconds() - tStart;
@@ -290,13 +291,14 @@ ompGmres(const Matrix& A,
 
             Vector y = leastSquareWithQR(H, j+1, beta);
 
-            x = x0.add(Z.mulPartial(y, j+1));
+            x = x0.add(Z.mulPartialT(y, j+1));
 
-            double res_norm = A.mul(x).sub(b).norm2();
+            spMatVecMul(temp, A, x);
+            double res_norm = temp.sub(b).norm2();
 
             nit++;
             innit++;
-            
+
             tLLS += CycleTimer::currentSeconds() - tStart;
 
             if (res_norm < tol * b.norm2()) {
@@ -323,7 +325,8 @@ ompGmres(const Matrix& A,
         outnit++;
     }
 
-    double res_norm = A.mul(x0).sub(b).norm2();
+    spMatVecMul(temp, A, x0);
+    double res_norm = temp.sub(b).norm2();
     cout << "FGMRES is not converged: "
          << res_norm / b.norm2()
          << endl;
@@ -331,7 +334,7 @@ ompGmres(const Matrix& A,
 }
 
 void runExp(const string& mat_name) {
-    
+
     int m = 100;                    // m may be adaptive to input size
     int maxit = 100000;
     double tol = 1e-6;
@@ -351,20 +354,29 @@ void runExp(const string& mat_name) {
     cout << endl;
 
     // experiment on dense matrix representation
-    start_time = CycleTimer::currentSeconds();
-    gmres(A, b, m, tol, maxit);
-    end_time = CycleTimer::currentSeconds();
-    
-    sprintf(buf, "[%.3f] ms in total (Dense)\n\n", 
-            (end_time - start_time) * 1000);
-    cout << buf;
+    // start_time = CycleTimer::currentSeconds();
+    // gmres(A, b, m, tol, maxit);
+    // end_time = CycleTimer::currentSeconds();
 
-    // experiment on scr sparse matrix representation
+    // sprintf(buf, "[%.3f] ms in total (Dense)\n\n",
+    //         (end_time - start_time) * 1000);
+    // cout << buf;
+
+    // experiment on CSR sparse matrix representation
     start_time = CycleTimer::currentSeconds();
     sparseGmres(A_csr, b, m, tol, maxit);
     end_time = CycleTimer::currentSeconds();
-    
-    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n", 
+
+    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n",
+            (end_time - start_time) * 1000);
+    cout << buf;
+
+    // experiment on CSR + OMP
+    start_time = CycleTimer::currentSeconds();
+    ompGmres(A_csr, b, m, tol, maxit);
+    end_time = CycleTimer::currentSeconds();
+
+    sprintf(buf, "[%.3f] ms in total (CSR + OMP GMRES) \n\n",
             (end_time - start_time) * 1000);
     cout << buf;
 }

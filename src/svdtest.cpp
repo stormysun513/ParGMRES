@@ -86,7 +86,7 @@ int main(){
         std::cout << buf;
     }
 
-    for (size_t i = 100; i < 1000; i += 100) {
+    for (size_t i = 100; i < 2000; i += 100) {
         Vector y = randUnitUniformVector(i);
         Vector x = randUnitUniformVector(i);
         CSRMatrix S = randUniformCSRMatrix(i);
