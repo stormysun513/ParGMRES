@@ -78,6 +78,8 @@ gmres(const Matrix& A,
 
             Vector y = leastSquareWithQR(H, j+1, beta);
 
+            tLLS += CycleTimer::currentSeconds() - tStart;
+
             //x = x0.add(Z.mulPartial(y, j+1));
             x = x0.add(Z.mulPartialT(y, j+1));
 
@@ -85,8 +87,6 @@ gmres(const Matrix& A,
 
             nit++;
             innit++;
-
-            tLLS += CycleTimer::currentSeconds() - tStart;
 
             if (res_norm < tol * b.norm2()) {
                 cout << "FGMRES converged to relative tolerance: "
@@ -183,14 +183,14 @@ sparseGmres(const CSRMatrix& A,
 
             Vector y = leastSquareWithQR(H, j+1, beta);
 
+            tLLS += CycleTimer::currentSeconds() - tStart;
+
             x = x0.add(Z.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
 
             nit++;
             innit++;
-
-            tLLS += CycleTimer::currentSeconds() - tStart;
 
             if (res_norm < tol * b.norm2()) {
                 cout << "FGMRES converged to relative tolerance: "
@@ -291,6 +291,8 @@ ompGmres(const CSRMatrix& A,
 
             Vector y = leastSquareWithQR(H, j+1, beta);
 
+            tLLS += CycleTimer::currentSeconds() - tStart;
+
             x = x0.add(Z.mulPartialT(y, j+1));
 
             spMatVecMul(temp, A, x);
@@ -298,8 +300,6 @@ ompGmres(const CSRMatrix& A,
 
             nit++;
             innit++;
-
-            tLLS += CycleTimer::currentSeconds() - tStart;
 
             if (res_norm < tol * b.norm2()) {
                 cout << "FGMRES converged to relative tolerance: "
