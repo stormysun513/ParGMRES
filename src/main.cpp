@@ -28,7 +28,7 @@ gmres(const Matrix& A,
     size_t outnit = 0;
 
     Matrix H = Matrix(m+1, m);
-    Matrix Z = Matrix(m, dim);
+    // Matrix Z = Matrix(m, dim);
     Matrix V = Matrix(m+1, dim);
     Vector x(dim);
     Vector x0(dim);
@@ -60,9 +60,9 @@ gmres(const Matrix& A,
             tStart = CycleTimer::currentSeconds();
 
             // Z.setCol(j, Prcnd.mul(V.getCol(j)));
-            Z.setRow(j, V.getRow(j));
+            //Z.setRow(j, V.getRow(j));
 
-            Vector w = A.mul(Z.getRow(j));
+            Vector w = A.mul(V.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
                 Vector v = V.getRow(i);
@@ -83,7 +83,7 @@ gmres(const Matrix& A,
             tStart = CycleTimer::currentSeconds();
 
             //x = x0.add(Z.mulPartial(y, j+1));
-            x = x0.add(Z.mulPartialT(y, j+1));
+            x = x0.add(V.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
 
@@ -139,7 +139,7 @@ sparseGmres(const CSRMatrix& A,
     size_t outnit = 0;
 
     Matrix H = Matrix(m+1, m);
-    Matrix Z = Matrix(m, dim);
+    // Matrix Z = Matrix(m, dim);
     Matrix V = Matrix(m+1, dim);
     Vector x0(dim);
     Vector x(dim);
@@ -172,9 +172,9 @@ sparseGmres(const CSRMatrix& A,
             tStart = CycleTimer::currentSeconds();
 
             //Z.setRow(j, Prcnd.mul(V.getRow(j)));
-            Z.setRow(j, V.getRow(j));
+            // Z.setRow(j, V.getRow(j));
 
-            Vector w = A.mul(Z.getRow(j));
+            Vector w = A.mul(V.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
                 Vector v = V.getRow(i);
@@ -193,7 +193,7 @@ sparseGmres(const CSRMatrix& A,
             tLLS += CycleTimer::currentSeconds() - tStart;
             tStart = CycleTimer::currentSeconds();
 
-            x = x0.add(Z.mulPartialT(y, j+1));
+            x = x0.add(V.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
 
@@ -248,7 +248,7 @@ ompGmres(const CSRMatrix& A,
     size_t outnit = 0;
 
     Matrix H = Matrix(m+1, m);
-    Matrix Z = Matrix(m, dim);
+    //Matrix Z = Matrix(m, dim);
     Matrix V = Matrix(m+1, dim);
     Vector x(dim);
     Vector x0(dim);
@@ -285,9 +285,9 @@ ompGmres(const CSRMatrix& A,
             tStart = CycleTimer::currentSeconds();
 
             // Z.setCol(j, Prcnd.mul(V.getCol(j)));
-            Z.setRow(j, V.getRow(j));
+            //Z.setRow(j, V.getRow(j));
 
-            spMatVecMul(w, A, Z.getRow(j));
+            spMatVecMul(w, A, V.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
                 Vector v = V.getRow(i);
@@ -307,7 +307,7 @@ ompGmres(const CSRMatrix& A,
             tLLS += CycleTimer::currentSeconds() - tStart;
             tStart = CycleTimer::currentSeconds();
 
-            x = x0.add(Z.mulPartialT(y, j+1));
+            x = x0.add(V.mulPartialT(y, j+1));
 
             spMatVecMul(temp, A, x);
             double res_norm = temp.sub(b).norm2();
@@ -372,13 +372,13 @@ void runExp(const string& mat_name) {
     cout << endl;
 
     // experiment on dense matrix representation
-    // start_time = CycleTimer::currentSeconds();
-    // gmres(A, b, m, tol, maxit);
-    // end_time = CycleTimer::currentSeconds();
+    start_time = CycleTimer::currentSeconds();
+    gmres(A, b, m, tol, maxit);
+    end_time = CycleTimer::currentSeconds();
 
-    // sprintf(buf, "[%.3f] ms in total (Dense)\n\n",
-    //         (end_time - start_time) * 1000);
-    // cout << buf;
+    sprintf(buf, "[%.3f] ms in total (Dense)\n\n",
+            (end_time - start_time) * 1000);
+    cout << buf;
 
     // experiment on CSR sparse matrix representation
     start_time = CycleTimer::currentSeconds();
