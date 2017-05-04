@@ -35,6 +35,7 @@ gmres(const Matrix& A,
 
     double tKrylov = .0f;
     double tLLS = .0f;
+    double tGetRes = .0f;
     double tStart;
 
     assert(dim == b.size());
@@ -79,11 +80,14 @@ gmres(const Matrix& A,
             Vector y = leastSquareWithQR(H, j+1, beta);
 
             tLLS += CycleTimer::currentSeconds() - tStart;
+            tStart = CycleTimer::currentSeconds();
 
             //x = x0.add(Z.mulPartial(y, j+1));
             x = x0.add(Z.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
+
+            tGetRes += CycleTimer::currentSeconds() - tStart;
 
             nit++;
             innit++;
@@ -103,6 +107,8 @@ gmres(const Matrix& A,
                 sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
                 cout << buf;
                 sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in Get Residual \n", tGetRes * 1000);
                 cout << buf;
 
                 return x;
@@ -140,6 +146,7 @@ sparseGmres(const CSRMatrix& A,
 
     double tKrylov = .0f;
     double tLLS = .0f;
+    double tGetRes = .0f;
     double tStart;
 
     assert(dim == b.size());
@@ -184,10 +191,13 @@ sparseGmres(const CSRMatrix& A,
             Vector y = leastSquareWithQR(H, j+1, beta);
 
             tLLS += CycleTimer::currentSeconds() - tStart;
+            tStart = CycleTimer::currentSeconds();
 
             x = x0.add(Z.mulPartialT(y, j+1));
 
             double res_norm = A.mul(x).sub(b).norm2();
+
+            tGetRes += CycleTimer::currentSeconds() - tStart;
 
             nit++;
             innit++;
@@ -207,6 +217,8 @@ sparseGmres(const CSRMatrix& A,
                 sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
                 cout << buf;
                 sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in Get Residual \n", tGetRes * 1000);
                 cout << buf;
 
                 return x;
@@ -246,6 +258,7 @@ ompGmres(const CSRMatrix& A,
 
     double tKrylov = .0f;
     double tLLS = .0f;
+    double tGetRes = .0f;
     double tStart;
 
     assert(dim == b.size());
@@ -292,11 +305,14 @@ ompGmres(const CSRMatrix& A,
             Vector y = leastSquareWithQR(H, j+1, beta);
 
             tLLS += CycleTimer::currentSeconds() - tStart;
+            tStart = CycleTimer::currentSeconds();
 
             x = x0.add(Z.mulPartialT(y, j+1));
 
             spMatVecMul(temp, A, x);
             double res_norm = temp.sub(b).norm2();
+
+            tGetRes += CycleTimer::currentSeconds() - tStart;
 
             nit++;
             innit++;
@@ -316,6 +332,8 @@ ompGmres(const CSRMatrix& A,
                 sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
                 cout << buf;
                 sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                cout << buf;
+                sprintf(buf, "[%.3f] ms in Get Residual \n", tGetRes * 1000);
                 cout << buf;
 
                 return x;
