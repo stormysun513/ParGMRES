@@ -3,8 +3,7 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
-
-#include "Eigen/Dense"
+#include <cassert>
 
 #include "utils.h"
 

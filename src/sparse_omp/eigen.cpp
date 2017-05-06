@@ -4,7 +4,7 @@
 #include <random>
 #include <algorithm>
 
-#include "Eigen/Dense"
+#include "../Eigen/Dense"
 
 #include "utils.h"
 
