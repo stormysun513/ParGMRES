@@ -414,6 +414,36 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     HANDLE_ERROR(cudaFree(beta));
 }
 
+template <typename Matrix, typename Vector>
+static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
+    
+    float start_time;
+    float end_time;
+    char buf[1024];
+    
+    // reference answer
+    std::cout << "\nReference answer from CUSP library:\n\n";
+
+    // set stopping criteria:
+    cusp::monitor<float> monitor(b, KRYLOV_M, 1e-6, 0, false);
+    int restart = 50;
+
+    // run gmres to solve 
+    start_time = CycleTimer::currentSeconds();
+    cusp::krylov::gmres(A, x, b, restart, monitor);
+    end_time = CycleTimer::currentSeconds();
+
+    // print the performance
+    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n", 
+            (end_time - start_time) * 1000);
+    std::cout << buf;
+
+    // print out result for debug
+    // cusp::print(A);
+    // cusp::print(b);
+    cusp::print(x);
+}
+
 int main(void)
 {
     float start_time;
@@ -444,18 +474,20 @@ int main(void)
     vec_t vec;
     vec.value = thrust::raw_pointer_cast(b.data());
     vec.size = b.size();
+
+    gmres_ref(A, x, b);
   
     /* DEBUG */
 
     //debug(csr_mat);
 
-    cusp::array1d<float, cusp::device_memory> y(A.num_rows);
+    //cusp::array1d<float, cusp::device_memory> y(A.num_rows);
 
     // compute y = A * x
-    cusp::multiply(A, x, y);
+    //cusp::multiply(A, x, y);
  
     // print y
-    cusp::print(y);
+    //cusp::print(y);
 
     /* end of DEBUG */
 
