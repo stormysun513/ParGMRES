@@ -562,29 +562,29 @@ void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec){
 
     dst.resize(mat.nRows());
 
-    if(col < OMP_NN_BOUND){
-        for(size_t i = 0; i < row; i++){
+    for (size_t i = 0; i < row; i++) {
 
-            double sum = .0f;
+        double sum = .0f;
 
-            for(size_t j = 0; j < col; j++){
-                sum += mat.data[i][j] * vec.data[j];
-            }
-            dst.data[i] = sum;
+        for (size_t j = 0; j < col; j++) {
+            sum += mat.data[i][j] * vec.data[j];
         }
+        dst.data[i] = sum;
     }
-    else{
+}
 
-#pragma omp parallel for schedule(static, 64)
-        for(size_t i = 0; i < row; i++){
+void matVecMulPartialT(
+    Vector& dst, const Matrix& mat,
+    const Vector& vec, size_t n_rows_) {
 
-            double sum = .0f;
+    assert(n_rows_ == vec.size());
 
-            for(size_t j = 0; j < col; j++){
-                sum += mat.data[i][j] * vec.data[j];
-            }
-            dst.data[i] = sum;
+    for (size_t j = 0; j < mat.n_cols; ++j) {
+        double temp = .0f;
+        for (size_t i = 0; i < n_rows_; ++i) {
+            temp += mat.data[i][j] * vec.get(i);
         }
+        dst.set(j, temp);
     }
 }
 
@@ -593,20 +593,10 @@ double l2norm(const Vector& vec){
     size_t size = vec.size();
     double res = .0f;
 
-    if(size < OMP_NN_BOUND){
-        for (size_t i = 0; i < size; i++) {
-            double num = vec.data[i];
-            num *= num;
-            res += num;
-        }
-    }
-    else{
-#pragma omp parallel for reduction(+: res)
-        for (size_t i = 0; i < size; i++) {
-            double num = vec.data[i];
-            num *= num;
-            res += num;
-        }
+    for (size_t i = 0; i < size; i++) {
+        double num = vec.data[i];
+        num *= num;
+        res += num;
     }
 
     return sqrt(res);

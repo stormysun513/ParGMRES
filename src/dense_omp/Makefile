@@ -10,7 +10,7 @@ endif
 
 CXXFLAGS=-std=c++11 -Iobjs/ -I../Eigen/ -O3 -Wall -fopenmp
 
-APP=sparse_omp
+APP=dense_omp
 OBJDIR=objs
 
 APP_MAIN=main.cpp

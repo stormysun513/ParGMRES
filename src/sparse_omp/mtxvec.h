@@ -82,6 +82,7 @@ public:
 
     // friend function
     friend void matVecMul(Vector& dst, const Matrix& mat, const Vector& vec);
+    friend void matVecMulPartialT(Vector& dst, const Matrix& mat, const Vector& vec, size_t n_rows_);
     friend void copyCol(Matrix& dst, const Matrix& src, size_t to, size_t from);
     friend void copyRow(Matrix& dst, const Matrix& src, size_t to, size_t from);
     friend void matMulRowCoef(Vector& dst, const Matrix& src1, const Matrix& src2, size_t row);

@@ -15,11 +15,10 @@
 using namespace std;
 
 
-
 Vector
-sparseOmpGmres(
-    const CSRMatrix& A, const Vector& b,
-    size_t m, double tol, size_t maxit) {
+gmres(const Matrix& A,
+      const Vector& b,
+      size_t m, double tol, size_t maxit) {
 
     char buf[1024];
 
@@ -43,15 +42,12 @@ sparseOmpGmres(
 
     assert(dim == b.size());
 
-    // Use trivial preconditioner for now
-    // auto Prcnd = identityMatrix(dim);
-
     m = (m > MAX_KRYLOV_DIM) ? MAX_KRYLOV_DIM : m;
     maxit = (maxit > MAX_ITERS) ? MAX_ITERS : maxit;
 
     while (nit < maxit) {
 
-        spMatVecMul(temp, A, x0);
+        matVecMul(temp, A, x0);
         vecSub(r0, b, temp);
         double beta = r0.norm2();
         vecScalarMul(temp, r0, 1.0/beta);
@@ -64,7 +60,7 @@ sparseOmpGmres(
 
             tStart = CycleTimer::currentSeconds();
 
-            spMatVecMul(w, A, V.getRow(j));
+            matVecMul(w, A, V.getRow(j));
 
             for (size_t i = 0; i < j; i++) {
                 Vector v = V.getRow(i);
@@ -87,7 +83,7 @@ sparseOmpGmres(
             matVecMulPartialT(temp, V, y, j+1);
             x = x0.add(temp);
 
-            spMatVecMul(temp, A, x);
+            matVecMul(temp, A, x);
             double res_norm = temp.sub(b).norm2();
 
             tGetRes += CycleTimer::currentSeconds() - tStart;
@@ -121,7 +117,7 @@ sparseOmpGmres(
         outnit++;
     }
 
-    spMatVecMul(temp, A, x0);
+    matVecMul(temp, A, x0);
     double res_norm = temp.sub(b).norm2();
     cout << "FGMRES is not converged: "
          << res_norm / b.norm2()
@@ -141,7 +137,6 @@ void runExp(const string& mat_name) {
     Matrix A = loadMTXToMatrix(mat_name);
     assert(A.nCols() == A.nRows());
 
-    CSRMatrix A_csr(A);
     Vector b = randUnitUniformVector(A.nCols());
 
     cout << "A: " << mat_name << " "
@@ -149,12 +144,12 @@ void runExp(const string& mat_name) {
     cout << "m=" << m << ", tol=" << tol << ", maxit=" << maxit << endl;
     cout << endl;
 
-    // experiment on CSR + OMP
+    // experiment on dense matrix representation
     start_time = CycleTimer::currentSeconds();
-    sparseOmpGmres(A_csr, b, m, tol, maxit);
+    gmres(A, b, m, tol, maxit);
     end_time = CycleTimer::currentSeconds();
 
-    sprintf(buf, "[%.3f] ms in total (Sparse w/ OMP) \n\n",
+    sprintf(buf, "[%.3f] ms in total (Dense w OMP)\n\n",
             (end_time - start_time) * 1000);
     cout << buf;
 }
