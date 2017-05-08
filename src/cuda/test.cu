@@ -317,6 +317,8 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     float *tmp1;
     float *tmp2;
 
+    std::cout << "\nOur GMRES solution:\n\n";
+
     HANDLE_ERROR(cudaMalloc((void**)&H, (m+1) * m * sizeof(float))); 
     HANDLE_ERROR(cudaMalloc((void**)&V, (m+1) * dim * sizeof(float))); 
     HANDLE_ERROR(cudaMalloc((void**)&x, dim * sizeof(float))); 
@@ -332,8 +334,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
 
     mem_init<<<blocks, threads>>>(x, .0, dim);
 
-    /*
-    while(nit < 1){
+    while(nit < maxit){
       
         // kernel 1: compute r0 and beta
         compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
@@ -355,7 +356,6 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             //     H.set(i, j, w.dotV(v));
             //     w.isub(v.mulS(H.get(i, j)));
             // }
-
             for(size_t i = 0; i < j; i++){
                 vector_dot<<<blocks, threads>>>(w, (V+i*dim), H+i*(KRYLOV_M+1)+j, dim);
                 vector_sub_svector<<<blocks, threads>>>(w, (V+i*dim), H+i*(KRYLOV_M+1)+j, dim);
@@ -365,21 +365,22 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
             float *out = H+(j+1)*(KRYLOV_M+1)+j;
             vector_dot<<<blocks, threads>>>(w, w, out, dim);
-
             vector_sqrt<<<1,1>>>(tmp1, out, 1);  
             vector_divide_scalar<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
             
+
             // tKrylov += CycleTimer::currentSeconds() - tStart;
             // tStart = CycleTimer::currentSeconds();
 
-            // later 
+	    // TODO: make cuda version LLS
             // Vector y = leastSquareWithQR(H, j+1, beta);
-            // x = x0.add(V.mulPartialT(y, j+1));
-            vector_update_gmres<<<blocks, threads>>>(x, V, y, j+1, dim);
 
+
+            // x = x0.add(V.mulPartialT(y, j+1));
+            // float res_norm = A.mul(x).sub(b).norm2();
+            vector_update_gmres<<<blocks, threads>>>(x, V, y, j+1, dim);
             compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
             vector_sqrt<<<1,1>>>(tmp2, tmp1, 1);
-            // float res_norm = A.mul(x).sub(b).norm2();
 
             nit++;
             innit++;
@@ -401,8 +402,6 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
         }
         outnit++;
     }
-
-    */
 
     HANDLE_ERROR(cudaFree(H));
     HANDLE_ERROR(cudaFree(V));
@@ -439,8 +438,6 @@ static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
     std::cout << buf;
 
     // print out result for debug
-    // cusp::print(A);
-    // cusp::print(b);
     cusp::print(x);
 }
 
@@ -456,11 +453,11 @@ int main(void)
     cusp::csr_matrix<int, float, cusp::device_memory> A;
 
     // load a matrix stored in MatrixMarket format
-    cusp::io::read_matrix_market_file(A, "../data/cage4.mtx");
+    cusp::io::read_matrix_market_file(A, "../../data/cage4.mtx");
 
     // allocate storage for solution (x) and right hand side (b)
-    cusp::array1d<float, cusp::device_memory> x(A.num_cols, 1);     // 0
-    cusp::array1d<float, cusp::device_memory> b(A.num_rows, 0);     // 1
+    cusp::array1d<float, cusp::device_memory> x(A.num_cols);     // 0
+    cusp::array1d<float, cusp::device_memory> b(A.num_rows, 1);     // 1
 
     // get raw pointer
     csr_mat_t csr_mat;
@@ -477,6 +474,8 @@ int main(void)
 
     gmres_ref(A, x, b);
   
+    gmres(csr_mat, vec, 100, 1e-6, 1000);
+
     /* DEBUG */
 
     //debug(csr_mat);
@@ -490,40 +489,6 @@ int main(void)
     //cusp::print(y);
 
     /* end of DEBUG */
-
-    /*
-
-    // reference answer
-    std::cout << "\nOur GMRES solution:\n\n";
-    gmres(csr_mat, vec, 100, 1e-6, 1000);
-
-
-    // reference answer
-    std::cout << "\nReference answer from CUSP library:\n\n";
-
-    // initialize b vector
-    mem_init<<<ROUND(vec.size, MAX_THREAD_NUM), MAX_THREAD_NUM>>>(vec.value, .0, vec.size){
-
-    // set stopping criteria:
-    cusp::monitor<float> monitor(b, KRYLOV_M, 1e-6, 0, false);
-    int restart = 50;
-
-    // run gmres to solve 
-    start_time = CycleTimer::currentSeconds();
-    cusp::krylov::gmres(A, x, b, restart, monitor);
-    end_time = CycleTimer::currentSeconds();
-
-    // print the performance
-    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n", 
-            (end_time - start_time) * 1000);
-    std::cout << buf;
-
-    // print out result for debug
-    // cusp::print(A);
-    cusp::print(b);
-    cusp::print(x);
-
-    */
 
     return 0;
 }

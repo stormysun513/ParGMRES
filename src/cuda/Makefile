@@ -15,15 +15,17 @@ HOSTNAME=$(shell hostname)
 LIBS       :=
 FRAMEWORKS :=
 
-NVCCFLAGS=-O3 -m64 --gpu-architecture compute_35
-LIBS += GL glut cudart
+#NVCCFLAGS=-O3 -m64 --gpu-architecture compute_35
+#LIBS += GL glut cudart
 INC=-Icusplibrary
 
 ifneq ($(wildcard /opt/cuda-8.0/.*),)
 # Latedays
+NVCCFLAGS=-O3 -m64 --gpu-architecture compute_35
 LDFLAGS=-L/opt/cuda-8.0/lib64/ -lcudart
 else
-# GHC
+# GHC or AWS
+NVCCFLAGS=-O3 -m64 --gpu-architecture compute_30
 LDFLAGS=-L/usr/local/cuda/lib64/ -lcudart
 endif
 
