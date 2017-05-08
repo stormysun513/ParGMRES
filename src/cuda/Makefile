@@ -1,5 +1,5 @@
-EXECUTABLE := test
-CU_FILES   := test.cu
+EXECUTABLE := gmres
+CU_FILES   := gmres.cu
 CU_DEPS    :=
 CC_FILES   := main.cpp
 LOGS       := logs
@@ -33,7 +33,7 @@ LDLIBS  := $(addprefix -l, $(LIBS))
 LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
-OBJS=test.o
+OBJS=gmres.o
 
 .PHONY: clean
 

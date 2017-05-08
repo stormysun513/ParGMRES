@@ -228,76 +228,6 @@ static void display_gpu_info() {
     }
 }
 
-
-void debug(csr_mat_t mat){
-        
-    int dim = mat.ncol;
- 
-    float *H;
-    float *V;
-
-    float *r0;
-    float *x;
-    float *w;
-    float *b;
-    float *tmp;
-    float *beta;
-    vec_t vec;
-
-    HANDLE_ERROR(cudaMalloc((void**)&H, (KRYLOV_M+1) * KRYLOV_M * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&V, (KRYLOV_M+1) * dim * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&r0, dim * sizeof(float)));
-    HANDLE_ERROR(cudaMalloc((void**)&x, dim * sizeof(float)));
-    HANDLE_ERROR(cudaMalloc((void**)&w, dim * sizeof(float)));
-    HANDLE_ERROR(cudaMalloc((void**)&b, dim * sizeof(float)));
-    HANDLE_ERROR(cudaMalloc((void**)&tmp, dim * sizeof(float)));
-    HANDLE_ERROR(cudaMalloc((void**)&beta, sizeof(float)));
-
-    int blocks = ROUND(dim, MAX_THREAD_NUM);
-    int threads = MAX_THREAD_NUM;
-
-    mem_init<<<blocks, threads>>>(x, 1.0, dim);
-
-    blocks = ROUND(dim, MAX_THREAD_NUM);
-    mem_init<<<blocks, threads>>>(b, .0, dim);
- 
-    vec.value = b;
-    vec.size = dim;
-
-    HANDLE_ERROR(cudaDeviceSynchronize());
-
-    compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp);
-    mem_log(r0, dim);
-
-    vector_sqrt<<<1,1>>>(beta, tmp, 1);
-    HANDLE_ERROR(cudaDeviceSynchronize());
-
-    vector_divide_scalar<<<blocks, threads>>>(V, r0, beta, dim);
-    mem_log(V, dim);
-            
-
-    int j = 0;
-    matrix_vector_multiply<<<blocks, threads>>>(w, mat, (V + j*dim));
-    mem_log(w, dim);
-
-    float *out = H+(j+1)*(KRYLOV_M+1)+j;
-    vector_dot<<<blocks, threads>>>(w, w, out, dim);
-
-    vector_sqrt<<<1,1>>>(tmp, out, 1);  
-    vector_divide_scalar<<<blocks, threads>>>(V+(j+1)*dim, w, tmp, dim);
-    mem_log(V+(j+1)*dim, dim);
-
-
-    HANDLE_ERROR(cudaFree(H));
-    HANDLE_ERROR(cudaFree(V));
-    HANDLE_ERROR(cudaFree(r0));
-    HANDLE_ERROR(cudaFree(x));
-    HANDLE_ERROR(cudaFree(w));
-    HANDLE_ERROR(cudaFree(b));
-    HANDLE_ERROR(cudaFree(tmp));
-    HANDLE_ERROR(cudaFree(beta));
-}
-
 void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
    
     int dim = mat.ncol;
@@ -441,11 +371,7 @@ static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
     cusp::print(x);
 }
 
-int main(void)
-{
-    float start_time;
-    float end_time;
-    char buf[1024];
+int main(void) {
 
     display_gpu_info();
 
@@ -472,23 +398,8 @@ int main(void)
     vec.value = thrust::raw_pointer_cast(b.data());
     vec.size = b.size();
 
-    gmres_ref(A, x, b);
-  
+    gmres_ref(A, x, b); 
     gmres(csr_mat, vec, 100, 1e-6, 1000);
-
-    /* DEBUG */
-
-    //debug(csr_mat);
-
-    //cusp::array1d<float, cusp::device_memory> y(A.num_rows);
-
-    // compute y = A * x
-    //cusp::multiply(A, x, y);
- 
-    // print y
-    //cusp::print(y);
-
-    /* end of DEBUG */
 
     return 0;
 }
