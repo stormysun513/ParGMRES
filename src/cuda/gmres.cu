@@ -9,6 +9,7 @@
 #include <cusp/krylov/gmres.h>
 #include <cusp/print.h>
 
+#include "gmres.cuh"
 #include "CycleTimer.h"
 
 #define WARP_SIZE               32
@@ -17,20 +18,6 @@
 #define INDEX( i, j, dim )      (i * dim + j)
 #define ROUND( num, base )      ((num + base - 1)/base)
 #define HANDLE_ERROR( err )     (cuda_handle_error(err, __FILE__, __LINE__))
-
-typedef struct csr_mat_t {
-    int *rowstart;
-    int *cindex;
-    float *value;
-    int nrow;
-    int ncol;
-    int nnz;
-} csr_mat_t;
-
-typedef struct vec_t {
-    float *value;
-    int size;
-} vec_t;
 
 /*
 __inline__ __device__
@@ -59,7 +46,7 @@ void device_reduce_warp_atomic_kernel(float *in, float* out, int N) {
 /* kernel functions */
 
 __global__ 
-void mem_init(float *addr, float value, int N){
+void s_mem_init(float *addr, float value, int N){
     
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -68,39 +55,35 @@ void mem_init(float *addr, float value, int N){
 }
 
 __global__ 
-void vector_sqrt(float *dst, float *src, int N){
+void s_x_sqrt(float *res, float *x, int N){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if(i >= N) return;
-    dst[i] = sqrt(src[i]);
+    res[i] = sqrt(x[i]);
 }
 
 __global__ 
-void vector_divide_scalar(float *dst, float *src, float *val, int N){
+void s_x_div_a(float *res, float *x, float *a, int N){
     
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if(i >= N) return;
-    dst[i] = src[i] / (*val);
+    res[i] = x[i] / (*a);
 }
 
 __global__ 
-void vector_dot(float *v1, float *v2, float *out, int N){
+void s_x_dot_y(float *res, float *x, float *y, int N){
     
     int i = blockIdx.x * blockDim.x + threadIdx.x; 
-
     if(i >= N) return;
-
-    float value = v1[i] * v2[i];
-    atomicAdd(out, value);
+    float value = x[i] * y[i];
+    atomicAdd(res, value);
 }
 
 __global__
-void vector_sub_svector(float *w, float *v, float *val, int N){    
+void s_x_sub_ay(float *x, float *y, float *a, int N){    
     int i = blockIdx.x * blockDim.x + threadIdx.x; 
-
     if(i >= N) return;
-
-    w[i] = w[i] - v[i] * (*val);
+    x[i] = x[i] - y[i] * (*a);
 }
 
 __global__
@@ -118,7 +101,7 @@ void vector_update_gmres(float *x, float *V, float *y, int m, int N){
 }
 
 __global__ 
-void matrix_vector_multiply(float *w, csr_mat_t mat, float *x){
+void s_mat_mul_x(float *res, csr_mat_t mat, float *x){
     
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -137,7 +120,7 @@ void matrix_vector_multiply(float *w, csr_mat_t mat, float *x){
         int j = cindex[k];
         temp += value[k] * x[j];
     }
-    w[i] = temp;
+    res[i] = temp;
 }
 
 __global__ 
@@ -169,7 +152,7 @@ void compute_remainder(float *r0, csr_mat_t mat, float *x, vec_t vec, float *bet
 
 /* host functions */
 
-static void cuda_handle_error(cudaError_t err, const char *file, int line) {
+void cuda_handle_error(cudaError_t err, const char *file, int line) {
     if (err != cudaSuccess) {
         printf( "%s in %s at line %d\n", cudaGetErrorString( err ),
                 file, line );
@@ -177,7 +160,7 @@ static void cuda_handle_error(cudaError_t err, const char *file, int line) {
     }
 }
 
-static void mem_log(float* device, int N){
+void mem_log(float* device, int N){
     
     float host[1024];
     char buf[4096];
@@ -262,14 +245,14 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     int blocks = ROUND(dim, MAX_THREAD_NUM);
     int threads = MAX_THREAD_NUM;
 
-    mem_init<<<blocks, threads>>>(x, .0, dim);
+    s_mem_init<<<blocks, threads>>>(x, .0, dim);
 
     while(nit < maxit){
       
         // kernel 1: compute r0 and beta
         compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
-        vector_sqrt<<<1,1>>>(beta, tmp1, 1);
-        vector_divide_scalar<<<blocks, threads>>>(V, r0, beta, dim);
+        s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
+        s_x_div_a<<<blocks, threads>>>(V, r0, beta, dim);
         
         innit = 0;
         
@@ -279,7 +262,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             // tStart = CycleTimer::currentSeconds();
             
             // compute mat and vec mulplication (mat, V, j),  w can be placed at V(:, j+1) in the future
-            matrix_vector_multiply<<<blocks, threads>>>(w, mat, (V + j*dim));
+            s_mat_mul_x<<<blocks, threads>>>(w, mat, (V + j*dim));
 
             // for (size_t i = 0; i < j; i++) {
             //     Vector v = V.getCol(i);
@@ -287,22 +270,22 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             //     w.isub(v.mulS(H.get(i, j)));
             // }
             for(size_t i = 0; i < j; i++){
-                vector_dot<<<blocks, threads>>>(w, (V+i*dim), H+i*(KRYLOV_M+1)+j, dim);
-                vector_sub_svector<<<blocks, threads>>>(w, (V+i*dim), H+i*(KRYLOV_M+1)+j, dim);
+                s_x_dot_y<<<blocks, threads>>>(H+i*(KRYLOV_M+1)+j, w, (V+i*dim), dim);
+                s_x_sub_ay<<<blocks, threads>>>(w, (V+i*dim), H+i*(KRYLOV_M+1)+j, dim);
             }
 
             //H.set(j+1, j, w.norm2());
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
             float *out = H+(j+1)*(KRYLOV_M+1)+j;
-            vector_dot<<<blocks, threads>>>(w, w, out, dim);
-            vector_sqrt<<<1,1>>>(tmp1, out, 1);  
-            vector_divide_scalar<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
+            s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
+            s_x_sqrt<<<1,1>>>(tmp1, out, 1);  
+            s_x_div_a<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
             
 
             // tKrylov += CycleTimer::currentSeconds() - tStart;
             // tStart = CycleTimer::currentSeconds();
 
-	    // TODO: make cuda version LLS
+	        // TODO: make cuda version LLS
             // Vector y = leastSquareWithQR(H, j+1, beta);
 
 
@@ -310,7 +293,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             // float res_norm = A.mul(x).sub(b).norm2();
             vector_update_gmres<<<blocks, threads>>>(x, V, y, j+1, dim);
             compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
-            vector_sqrt<<<1,1>>>(tmp2, tmp1, 1);
+            s_x_sqrt<<<1,1>>>(tmp2, tmp1, 1);
 
             nit++;
             innit++;
@@ -371,7 +354,7 @@ static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
     cusp::print(x);
 }
 
-int main(void) {
+void run(void) {
 
     display_gpu_info();
 

@@ -1,5 +1,6 @@
 EXECUTABLE := gmres
-CU_FILES   := gmres.cu
+TEST 	   := test
+CU_FILES   := gmres.cu test.cu
 CU_DEPS    :=
 CC_FILES   := main.cpp
 LOGS       := logs
@@ -34,13 +35,17 @@ LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
 OBJS=gmres.o
+TESTOBJS=test.o gmres.o
 
 .PHONY: clean
 
 default: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS) $(LDFRAMEWORKS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) $(CC_FILES) $(LDFLAGS) $(LDLIBS) $(LDFRAMEWORKS)
+
+test: $(TESTOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(TESTOBJS) $(LDFLAGS) $(LDLIBS) $(LDFRAMEWORKS)
 
 %.o: %.cpp
 	$(CXX) $< $(CXXFLAGS) -c -o $@
@@ -49,4 +54,4 @@ $(EXECUTABLE): $(OBJS)
 	$(NVCC) $(INC) $< $(NVCCFLAGS) -c -o $@
 
 clean:
-	rm -rf *~ $(EXECUTABLE) $(OBJS) $(LOGS) 
+	rm -rf *~ $(EXECUTABLE) $(TEST) $(OBJS) $(TESTOBJS) $(LOGS)
