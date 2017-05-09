@@ -5,6 +5,8 @@ src/sparse_seq/sparse_seq
 src/dense_omp/dense_omp
 src/sparse_omp/sparse_omp
 
+objs/
+
 # Created by https://www.gitignore.io/api/c++
 
 ### C++ ###
