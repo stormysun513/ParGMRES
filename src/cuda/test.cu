@@ -47,6 +47,12 @@ void saxpy_fast(float a, Iteratable& X, Iteratable& Y) {
     thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor<float>(a));
 }
 
+template <class Iterator>
+void saxpy_fast(float a, Iterator xbegin, Iterator xend, Iterator ybegin){
+    // Y <- A * X + Y
+    thrust::transform(xbegin, xend, ybegin, ybegin, saxpy_functor<float>(a));
+}
+
 template <class Matrix>
 static csr_mat_t get_csr_mat_t(Matrix& A){
 
@@ -207,7 +213,12 @@ static void test_thrust_reduction(){
         x[i] = num*num;
     }
 
-    float res = thrust::reduce(x.begin(), x.end());
+    //float *p_x = thrust::raw_pointer_cast(x.data());
+    thrust::device_ptr<float> dp_x = x.data();
+
+    //float res = thrust::reduce(x.begin(), x.end());
+    float res = thrust::reduce(dp_x, dp_x+10);
+
     std::cout << "Thrust reduce result: " << res << std::endl;
 }
 
@@ -228,7 +239,12 @@ static void test_saxpy(){
     cusp::array1d<float, cusp::device_memory> x(10, 2);
     cusp::array1d<float, cusp::device_memory> y(10, 1);
 
-    saxpy_fast(3, x, y);
+    thrust::device_ptr<float> dp_x = x.data();
+    thrust::device_ptr<float> dp_y = y.data();
+
+    //saxpy_fast(3, x, y);
+    //saxpy_fast(3, x.begin(), x.end(), y.begin());
+    saxpy_fast(3, dp_x, dp_x+10, dp_y);
 
     cusp::print(y);
 }
@@ -243,8 +259,8 @@ int main(){
     //test_s_x_sub_ay();
     
     test_thrust_reduction();
-    test_l2norm();
-    test_saxpy();
+    //test_l2norm();
+    //test_saxpy();
 
     return 0;
 }

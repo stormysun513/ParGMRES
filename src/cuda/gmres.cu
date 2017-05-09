@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include <cassert>
 
 #include <cuda.h>
@@ -152,6 +153,46 @@ void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta
     atomicAdd(beta, square);
 }
 
+/* thrust related subroutine */
+
+template <class T>
+struct square
+{
+    __host__ __device__
+    T operator()(const T& x) const { 
+        return x * x;
+    }
+};
+
+template <class T>
+struct saxpy_functor : public thrust::binary_function<T, T, T>
+{
+    const T a;
+
+    saxpy_functor(T _a) : a(_a) {}
+
+    __host__ __device__
+    T operator()(const T& x, const T& y) const { 
+        return a * x + y;
+    }
+};
+
+template <class Iteratable>
+void saxpy_fast(float a, Iteratable& X, Iteratable& Y) {
+    // Y <- A * X + Y
+    thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor<float>(a));
+}
+
+template <class Iterator>
+static float l2norm(Iterator begin, Iterator end){
+    
+    square<float>        unary_op;
+    thrust::plus<float> binary_op;
+    float init = 0;
+
+    return std::sqrt(thrust::transform_reduce(begin, end, unary_op, init, binary_op));
+}
+
 /* host functions */
 
 void cuda_handle_error(cudaError_t err, const char *file, int line) {
@@ -213,7 +254,7 @@ static void display_gpu_info() {
     }
 }
 
-void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
+void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
     int dim = mat.ncol;
     int nit = 0;
@@ -253,7 +294,14 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     int blocks = ROUND(dim, MAX_THREAD_NUM);
     int threads = MAX_THREAD_NUM;
 
-    s_mem_init<<<blocks, threads>>>(x, .0, dim);
+    thrust::device_ptr<float> dp_b = thrust::device_pointer_cast(vec.value);
+    thrust::device_ptr<float> dp_x = thrust::device_pointer_cast(x);
+    thrust::device_ptr<float> dp_tmp1 = thrust::device_pointer_cast(tmp1);
+
+    float b_norm2 = l2norm(dp_b, dp_b + dim);
+
+    // s_mem_init<<<blocks, threads>>>(x, .0, dim);
+    thrust::fill(dp_x, dp_x+dim, .0);
 
     while(nit < maxit){
 
@@ -261,6 +309,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
         gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
         s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
         s_x_div_a<<<blocks, threads>>>(V, r0, beta, dim);
+        //float res = std::sqrt(thrust::reduce(dp_tmp1, dp_tmp1+dim));
 
         innit = 0;
 
@@ -305,25 +354,28 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             // float res_norm = A.mul(x).sub(b).norm2();
             gmres_update_x<<<blocks, threads>>>(x, V, y, j+1, dim);
             gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
-            s_x_sqrt<<<1,1>>>(tmp2, tmp1, 1);
+            //s_x_sqrt<<<1,1>>>(tmp2, tmp1, 1);
+            float res_norm = std::sqrt(thrust::reduce(dp_tmp1, dp_tmp1+dim));
 
             nit++;
             innit++;
 
             // tLLS += CycleTimer::currentSeconds() - tStart;
 
-            // if (res_norm < tol * b.norm2()) {
-            //     cout << "FGMRES converged to relative tolerance: "
-            //          << res_norm / b.norm2() << " at iteration " << nit
-            //          << " (out: " << outnit << ", in: " << innit << ")" << endl;
+            if (res_norm < tol * b_norm2) {
+                std::cout << "FGMRES converged to relative tolerance: "
+                     << res_norm / b_norm2 << " at iteration " << nit
+                     << " (out: " << outnit << ", in: " << innit << ")" << std::endl;
+            
+                cudaMemcpy(res.value, x, dim, cudaMemcpyDeviceToHost);
 
-            //     sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
-            //     cout << buf;
-            //     sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
-            //     cout << buf;
+                // sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
+                // std::cout << buf;
+                // sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
+                // std::cout << buf;    
 
-            //     return x;
-            // }
+                break;
+            }
         }
         outnit++;
     }
@@ -377,7 +429,7 @@ void run(void) {
     cusp::io::read_matrix_market_file(A, "../../data/cage4.mtx");
 
     // allocate storage for solution (x) and right hand side (b)
-    cusp::array1d<float, cusp::device_memory> x(A.num_cols);     // 0
+    cusp::array1d<float, cusp::device_memory> x(A.num_cols, 0);     // 0
     cusp::array1d<float, cusp::device_memory> b(A.num_rows, 1);     // 1
 
     // get raw pointer
@@ -389,10 +441,14 @@ void run(void) {
     csr_mat.cindex = thrust::raw_pointer_cast(A.column_indices.data());
     csr_mat.rowstart = thrust::raw_pointer_cast(A.row_offsets.data());
 
-    vec_t vec;
-    vec.value = thrust::raw_pointer_cast(b.data());
-    vec.size = b.size();
+    vec_t vec_x, vec_b;
+    vec_b.value = thrust::raw_pointer_cast(b.data());
+    vec_b.size = b.size();
+    vec_x.value = thrust::raw_pointer_cast(x.data());
+    vec_x.size = x.size();
 
+    gmres(csr_mat, vec_x, vec_b, 100, 1e-6, 1000);
+    cusp::print(x); 
+    
     gmres_ref(A, x, b);
-    gmres(csr_mat, vec, 100, 1e-6, 1000);
 }
