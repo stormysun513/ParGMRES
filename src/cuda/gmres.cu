@@ -62,6 +62,7 @@ void s_x_sqrt(float *res, float *x, int N){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if(i >= N) return;
+    printf("i = %d, x[i] = %f \n", i, x[i]);
     res[i] = sqrt(x[i]);
 }
 
@@ -146,7 +147,7 @@ void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta
         int j = cindex[k];
         temp += value[k] * x[j];
     }
-    r0[i] = temp - vec.value[i];
+    r0[i] = vec.value[i] - temp;
 
     float square = r0[i];
     square *= square;
@@ -159,7 +160,7 @@ template <class T>
 struct square
 {
     __host__ __device__
-    T operator()(const T& x) const { 
+    T operator()(const T& x) const {
         return x * x;
     }
 };
@@ -172,7 +173,7 @@ struct saxpy_functor : public thrust::binary_function<T, T, T>
     saxpy_functor(T _a) : a(_a) {}
 
     __host__ __device__
-    T operator()(const T& x, const T& y) const { 
+    T operator()(const T& x, const T& y) const {
         return a * x + y;
     }
 };
@@ -185,7 +186,7 @@ void saxpy_fast(float a, Iteratable& X, Iteratable& Y) {
 
 template <class Iterator>
 static float l2norm(Iterator begin, Iterator end){
-    
+
     square<float>        unary_op;
     thrust::plus<float> binary_op;
     float init = 0;
@@ -279,6 +280,8 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
     float *y_host_data = (float *)calloc(m, sizeof(float));
     float *beta_host = (float *)malloc(sizeof(float));
 
+    float *temp_host_float = (float *)malloc(sizeof(float));
+
     std::cout << "\nOur GMRES solution:\n\n";
 
     HANDLE_ERROR(cudaMalloc((void**)&H, (m+1) * m * sizeof(float)));
@@ -307,8 +310,16 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
         // kernel 1: compute r0 and beta
         gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
-        s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
+
+        // s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
+
+        thrust::device_ptr<float> dp_r0 = thrust::device_pointer_cast(r0);
+        *temp_host_float = l2norm(dp_r0, dp_r0 + dim);
+
+        cudaMemcpy(beta, temp_host_float, sizeof(float), cudaMemcpyHostToDevice);
+
         s_x_div_a<<<blocks, threads>>>(V, r0, beta, dim);
+
         //float res = std::sqrt(thrust::reduce(dp_tmp1, dp_tmp1+dim));
 
         innit = 0;
@@ -334,8 +345,13 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
             //H.set(j+1, j, w.norm2());
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
             float *out = H+(j+1)*(KRYLOV_M+1)+j;
-            s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
-            s_x_sqrt<<<1,1>>>(tmp1, out, 1);
+            thrust::device_ptr<float> dp_out = thrust::device_pointer_cast(out);
+
+            // s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
+            // s_x_sqrt<<<1,1>>>(tmp1, out, 1);
+            *temp_host_float = l2norm(w, w + dim);
+            cudaMemcpy(tmp1, temp_host_float, sizeof(float), cudaMemcpyHostToDevice);
+
             s_x_div_a<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
 
 
@@ -366,18 +382,20 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
                 std::cout << "FGMRES converged to relative tolerance: "
                      << res_norm / b_norm2 << " at iteration " << nit
                      << " (out: " << outnit << ", in: " << innit << ")" << std::endl;
-            
+
                 cudaMemcpy(res.value, x, dim, cudaMemcpyDeviceToHost);
 
                 // sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
                 // std::cout << buf;
                 // sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
-                // std::cout << buf;    
+                // std::cout << buf;
 
                 break;
             }
         }
         outnit++;
+
+        break;
     }
 
     HANDLE_ERROR(cudaFree(H));
@@ -430,7 +448,9 @@ void run(void) {
 
     // allocate storage for solution (x) and right hand side (b)
     cusp::array1d<float, cusp::device_memory> x(A.num_cols, 0);     // 0
-    cusp::array1d<float, cusp::device_memory> b(A.num_rows, 1);     // 1
+    cusp::array1d<float, cusp::device_memory> b(A.num_rows, 0);     // 1
+
+    b[0] = 1;
 
     // get raw pointer
     csr_mat_t csr_mat;
@@ -448,7 +468,7 @@ void run(void) {
     vec_x.size = x.size();
 
     gmres(csr_mat, vec_x, vec_b, 100, 1e-6, 1000);
-    cusp::print(x); 
-    
+    cusp::print(x);
+
     gmres_ref(A, x, b);
 }

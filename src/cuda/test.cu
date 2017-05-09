@@ -13,7 +13,7 @@ template <class T>
 struct square
 {
     __host__ __device__
-    T operator()(const T& x) const { 
+    T operator()(const T& x) const {
         return x * x;
     }
 };
@@ -26,14 +26,14 @@ struct saxpy_functor : public thrust::binary_function<T, T, T>
     saxpy_functor(T _a) : a(_a) {}
 
     __host__ __device__
-    T operator()(const T& x, const T& y) const { 
+    T operator()(const T& x, const T& y) const {
         return a * x + y;
     }
 };
 
 template <class Iterator>
 static float l2norm(Iterator begin, Iterator end){
-    
+
     square<float>        unary_op;
     thrust::plus<float> binary_op;
     float init = 0;
@@ -75,12 +75,12 @@ static vec_t get_vec_t(Vector& x){
 
     vec_x.value = thrust::raw_pointer_cast(x.data());
     vec_x.size = x.size();
-    
+
     return vec_x;
 }
 
 static void test_matrix_setup(){
-    
+
     // // create an empty sparse matrix structure (CSR format)
     // cusp::csr_matrix<int, float, cusp::device_memory> A;
 
@@ -98,29 +98,29 @@ static void test_matrix_setup(){
 }
 
 static void test_s_x_sqrt(){
-    
+
     cusp::array1d<float, cusp::device_memory> x(10, 9);
     cusp::array1d<float, cusp::device_memory> y(10);
-    
+
     float *p_x = thrust::raw_pointer_cast(x.data());
     float *p_y = thrust::raw_pointer_cast(y.data());
-    
+
     s_x_sqrt<<<1, 256>>>(p_y, p_x, 10);
-    
+
     // it should be all 3s
     cusp::print(y);
 }
 
 static void test_s_x_div_a(){
- 
+
     cusp::array1d<float, cusp::device_memory> x(10, 9);
     cusp::array1d<float, cusp::device_memory> y(10);
     cusp::array1d<float, cusp::device_memory> a(1, 2);
-    
+
     float *p_x = thrust::raw_pointer_cast(x.data());
     float *p_y = thrust::raw_pointer_cast(y.data());
     float *p_a = thrust::raw_pointer_cast(a.data());
-    
+
     s_x_div_a<<<1, 256>>>(p_y, p_x, p_a, 10);
 
     // it should be all 4.5s
@@ -129,20 +129,20 @@ static void test_s_x_div_a(){
 
 
 static void test_s_x_dot_y(){
- 
+
     cusp::array1d<float, cusp::device_memory> x(10);
     cusp::array1d<float, cusp::device_memory> y(10);
     cusp::array1d<float, cusp::device_memory> res(1);
-    
+
     for(int i = 0; i < 10; i++){
         x[i] = i+1;
         y[i] = i+1;
     }
-    
+
     float *p_x = thrust::raw_pointer_cast(x.data());
     float *p_y = thrust::raw_pointer_cast(y.data());
     float *p_res = thrust::raw_pointer_cast(res.data());
-    
+
     s_x_dot_y<<<1, 256>>>(p_res, p_y, p_x, 10);
 
     // it should be 91
@@ -151,12 +151,12 @@ static void test_s_x_dot_y(){
 
 static void test_s_x_sub_ay(){
 
-    // void s_x_sub_ay(float *x, float *y, float *a, int N){    
-    
+    // void s_x_sub_ay(float *x, float *y, float *a, int N){
+
     cusp::array1d<float, cusp::device_memory> x(10, 9);
     cusp::array1d<float, cusp::device_memory> y(10, 2);
     cusp::array1d<float, cusp::device_memory> a(1, 2);
-    
+
     float *p_x = thrust::raw_pointer_cast(x.data());
     float *p_y = thrust::raw_pointer_cast(y.data());
     float *p_a = thrust::raw_pointer_cast(a.data());
@@ -185,17 +185,17 @@ static void test_s_mat_mul_x(){
     float *p_y1 = thrust::raw_pointer_cast(y1.data());
 
     s_mat_mul_x<<<1, 256>>>(p_y1, mat, p_x);
-    
+
     // y1 should be the same as y2
     cusp::print(y1);
-    
+
     cusp::multiply(A, x, y2);
 
     cusp::print(y2);
 }
 
 static void test_gmres_update_x(){
-    //(float *x, float *V, float *y, int m, int N); 
+    //(float *x, float *V, float *y, int m, int N);
 
 }
 
@@ -205,9 +205,9 @@ static void test_gmres_compute_r0(){
 }
 
 static void test_thrust_reduction(){
-    
+
     cusp::array1d<float, cusp::device_memory> x(10);
-    
+
     for(int i = 0; i < 10; i++){
         int num = i+1;
         x[i] = num*num;
@@ -223,7 +223,7 @@ static void test_thrust_reduction(){
 }
 
 static void test_l2norm(){
-    
+
     cusp::array1d<float, cusp::device_memory> x(10);
     for(int i = 0; i < 10; i++){
         int num = i+1;
@@ -235,7 +235,7 @@ static void test_l2norm(){
 }
 
 static void test_saxpy(){
-    
+
     cusp::array1d<float, cusp::device_memory> x(10, 2);
     cusp::array1d<float, cusp::device_memory> y(10, 1);
 
@@ -257,12 +257,10 @@ int main(){
     //test_s_x_div_a();
     //test_s_x_dot_y();
     //test_s_x_sub_ay();
-    
+
     test_thrust_reduction();
     //test_l2norm();
     //test_saxpy();
 
     return 0;
 }
-
-
