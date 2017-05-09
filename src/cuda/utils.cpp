@@ -31,13 +31,11 @@ void
 printMatrix(const Matrix& mat,
             size_t row_start, size_t row_end,
             size_t col_start, size_t col_end) {
-    size_t m = mat.nRows();
-    size_t n = mat.nCols();
 
     assert(row_start >= 0);
     assert(col_start >= 0);
-    assert(row_end <= m);
-    assert(col_end <= n);
+    assert(row_end <= mat.nRows());
+    assert(col_end <= mat.nCols());
 
     std::cout << "[";
     for (size_t i = row_start; i < row_end; i++) {
@@ -54,76 +52,6 @@ printMatrix(const Matrix& mat,
         std::cout << "\n";
     }
     std::cout << "]\n";
-}
-
-Vector randUniformVector(size_t n){
-    Vector vec(n);
-    std::random_device rd;
-    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
-
-    for(size_t i = 0; i < n; i++){
-        vec.set(i, distribution(rd));
-    }
-    return vec;
-}
-
-Vector randUnitUniformVector(size_t n){
-    Vector vec(n);
-    std::random_device rd;
-    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
-
-    for(size_t i = 0; i < n; i++){
-        vec.set(i, distribution(rd));
-    }
-    return vec.normalize();
-}
-
-Matrix randUniformMatrix(size_t size){
-
-    Matrix mat(size, size);
-    std::random_device rd;
-    std::uniform_real_distribution<double> distribution(-1.0, 1.0);
-
-    for(size_t i = 0; i < size; i++){
-        for(size_t j = 0; j < size; j++){
-            mat.set(i, j, distribution(rd));
-        }
-    }
-    return mat;
-}
-
-CSRMatrix
-randUniformCSRMatrix(size_t size) {
-
-    std::random_device rd;
-    std::uniform_real_distribution<double> val_dist(-1.0, 1.0);
-    std::uniform_real_distribution<double> sparsity_dist(0.0, 1.0);
-
-    double sparsity = 0.3;
-
-    std::vector<std::tuple<double, size_t, size_t>> raw_data;
-
-    for (size_t i = 0; i < size; ++i) {
-        for (size_t j = 0; j < size; ++j) {
-            if (sparsity_dist(rd) <= sparsity) {
-                raw_data.push_back(std::make_tuple(val_dist(rd), i, j));
-            }
-        }
-    }
-
-    return CSRMatrix(raw_data, size, size);
-}
-
-CSRMatrix
-identitySparseMatrix(size_t size) {
-
-    std::vector<std::tuple<double, size_t, size_t>> raw_data;
-    for (size_t i = 0; i < size; ++i) {
-        raw_data.push_back(std::make_tuple(1, i, i));
-    }
-
-    CSRMatrix mat_csr(raw_data, size, size);
-    return mat_csr;
 }
 
 Matrix

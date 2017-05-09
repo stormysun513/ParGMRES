@@ -12,6 +12,8 @@
 #include "gmres.cuh"
 #include "CycleTimer.h"
 
+#include "utils.h"
+
 #define WARP_SIZE               32
 #define MAX_THREAD_NUM          1024
 #define KRYLOV_M                100
@@ -234,6 +236,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     size_t y_bytes = m * sizeof(float);
     float *H_host_data = (float *)calloc((m+1) * m, sizeof(float));
     float *y_host_data = (float *)calloc(m, sizeof(float));
+    float *beta_host = (float *)malloc(sizeof(float));
 
     std::cout << "\nOur GMRES solution:\n\n";
 
@@ -293,7 +296,10 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
 	        // TODO: make cuda version LLS
             // Vector y = leastSquareWithQR(H, j+1, beta);
             cudaMemcpy(H_host_data, H, H_bytes, cudaMemcpyDeviceToHost);
-
+            cudaMemcpy(beta_host, beta, sizeof(float), cudaMemcpyDeviceToHost);
+            Matrix H_host_mat(m+1, m, H_host_data);
+            Vector y_host_vec = leastSquareWithQR(H_host_mat, j+1, *beta_host);
+            cudaMemcpy(y, y_host_vec.getData(), y_bytes, cudaMemcpyHostToDevice);
 
             // x = x0.add(V.mulPartialT(y, j+1));
             // float res_norm = A.mul(x).sub(b).norm2();

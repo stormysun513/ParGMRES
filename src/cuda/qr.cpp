@@ -7,14 +7,27 @@
 
 #include "utils.h"
 
-static double partialNorm(const Matrix& R, size_t j);
-static Matrix getwwTR(const Matrix& R, double* w, size_t j, double tau);
-static Matrix getQwwT(const Matrix& Q, double* w, size_t j, double tau);
+static float partialNorm(const Matrix& R, size_t j);
+static Matrix getwwTR(const Matrix& R, float* w, size_t j, float tau);
+static Matrix getQwwT(const Matrix& Q, float* w, size_t j, float tau);
+
+Vector leastSquareWithQR(const Matrix& H, size_t size, float beta) {
+    Matrix Q;
+    Matrix R;
+    Vector sol(size);
+    Vector b(size+1);
+    b.set(0, beta);
+
+    householderQR(H, size, Q, R);
+    qrSolve(Q, R, b, sol);
+
+    return sol;
+}
 
 // Perform QR on H[:(size+1), :size]
 // usage:
 //     std::default_random_engine generator;
-//     std::uniform_real_distribution<double> distribution(-1.0, 1.0);
+//     std::uniform_real_distribution<float> distribution(-1.0, 1.0);
 
 //     Matrix A(5, 4);
 //     A.set(0, 0, distribution(generator));
@@ -53,17 +66,17 @@ void householderQR(const Matrix& H, size_t size, Matrix& Q, Matrix& R) {
 
     for (size_t j = 0; j < n; ++j) {
         // nomrx = norm(R[j:, j])
-        double normx = partialNorm(R, j);
-        double s = (R.get(j, j) > 0 ? -1.0 : 1.0);
-        double u1 = R.get(j, j) - s * normx;
+        float normx = partialNorm(R, j);
+        float s = (R.get(j, j) > 0 ? -1.0 : 1.0);
+        float u1 = R.get(j, j) - s * normx;
 
-        double w[m-j];
+        float w[m-j];
         w[0] = 1.0;
         for(size_t i = j+1; i < m; ++i) {
             w[i-j] = R.get(i, j) / u1;
         }
 
-        double tau = -1 * s * u1 / normx;
+        float tau = -1 * s * u1 / normx;
 
         // R(j:end,:) = R(j:end,:)-(tau*w)*(w’*R(j:end,:));
         Matrix sndTerm = getwwTR(R, w, j, tau);
@@ -103,7 +116,7 @@ void qrSolve(const Matrix& Q, const Matrix& R, const Vector& b, Vector& sol) {
     Vector QTb(b.size());
 
     for (size_t i = 0; i < Q.nCols(); ++i) {
-        double temp = 0.0;
+        float temp = 0.0;
 
         for (size_t j = 0; j < Q.nRows(); ++j) {
             temp += Q.get(j, i) * b.get(j);
@@ -116,7 +129,7 @@ void qrSolve(const Matrix& Q, const Matrix& R, const Vector& b, Vector& sol) {
 
     for (size_t i = 0; i < R.nCols(); ++i) {
         size_t row_idx = R.nCols() - 1 - i;
-        double res = QTb.get(row_idx);
+        float res = QTb.get(row_idx);
 
         for (size_t j = row_idx+1; j < R.nCols(); ++j) {
             res -= sol.get(j) * R.get(row_idx, j);
@@ -126,8 +139,8 @@ void qrSolve(const Matrix& Q, const Matrix& R, const Vector& b, Vector& sol) {
     }
 }
 
-static double partialNorm(const Matrix& R, size_t j) {
-    double ret = 0.0;
+static float partialNorm(const Matrix& R, size_t j) {
+    float ret = 0.0;
     for (size_t i = j; i < R.nRows(); ++i) {
         ret += R.get(i, j) * R.get(i, j);
     }
@@ -141,15 +154,15 @@ static double partialNorm(const Matrix& R, size_t j) {
 // R = len x (n_cols)
 // w^T dot R = 1 x n_cols
 
-static Matrix getwwTR(const Matrix& R, double* w, size_t j, double tau) {
+static Matrix getwwTR(const Matrix& R, float* w, size_t j, float tau) {
     size_t len = (R.nRows() - j);
     // (tau*w)*(w’*R(j:end,:))
-    double wTR[R.nCols()];
+    float wTR[R.nCols()];
     Matrix wwTR(len, R.nCols());
 
     // wTR = w^T dot R, shape: 1 x n_cols
     for (size_t k = 0; k < R.nCols(); ++k) {
-        double temp = 0.0;
+        float temp = 0.0;
 
         for (size_t i = 0; i < len; ++i) {
             temp += R.get(j+i, k) * w[i];
@@ -174,14 +187,14 @@ static Matrix getwwTR(const Matrix& R, double* w, size_t j, double tau) {
 // Q w = n_rows x 1
 // Q w w^T = n_rows x len
 
-static Matrix getQwwT(const Matrix& Q, double* w, size_t j, double tau) {
+static Matrix getQwwT(const Matrix& Q, float* w, size_t j, float tau) {
     size_t len = (Q.nRows() - j);
-    double Qw[Q.nRows()];
+    float Qw[Q.nRows()];
     Matrix QwwT(Q.nRows(), len);
 
     // Qw = Q x w, shape: n_rows x 1
     for (size_t k = 0; k < Q.nRows(); ++k) {
-        double temp = 0.0;
+        float temp = 0.0;
 
         for (size_t i = 0; i < len; ++i) {
             temp += Q.get(k, j+i) * w[i];

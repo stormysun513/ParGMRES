@@ -10,7 +10,7 @@ LOGS       := logs
 ARCH=$(shell uname | sed -e 's/-.*//g')
 OBJDIR=objs
 CXX=g++ -m64
-CXXFLAGS=-O3 -Wall -g
+CXXFLAGS=-O3 -Wall -g -std=c++11
 HOSTNAME=$(shell hostname)
 
 LIBS       :=
@@ -34,7 +34,7 @@ LDLIBS  := $(addprefix -l, $(LIBS))
 LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
-OBJS=gmres.o
+OBJS=gmres.o mtxvec.o qr.o utils.o
 TESTOBJS=test.o gmres.o
 
 .PHONY: clean
