@@ -338,14 +338,27 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
             //     w.isub(v.mulS(H.get(i, j)));
             // }
             for(size_t i = 0; i < j; i++){
-                s_x_dot_y<<<blocks, threads>>>(H+i*(KRYLOV_M+1)+j, w, (V+i*dim), dim);
-                s_x_sub_ay<<<blocks, threads>>>(w, (V+i*dim), H+i*(KRYLOV_M+1)+j, dim);
+                
+                // s_x_dot_y<<<blocks, threads>>>(H+i*(KRYLOV_M+1)+j, w, (V+i*dim), dim);
+                thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
+                thrust::device_ptr<float> dp_vi = thrust::device_pointer_cast(V+i*dim);
+                float dot = thrust::inner_product(dp_w, dp_w+dim, dp_vi, 0);
+                float *hij = H+i*(KRYLOV_M+1)+j;
+
+                cudaMemcpy(hij, &dot, sizeof(float), cudaMemcpyHostToDevice);
+                s_x_sub_ay<<<blocks, threads>>>(w, (V+i*dim), hij, dim);
             }
 
             //H.set(j+1, j, w.norm2());
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
             float *out = H+(j+1)*(KRYLOV_M+1)+j;
             thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
+            
+            // DEBUG
+            if(nit < 2){
+                std::cout << "w:\n";
+                mem_log(w, dim);
+            }
 
             // s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
             // s_x_sqrt<<<1,1>>>(tmp1, out, 1);
@@ -366,11 +379,23 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
             Vector y_host_vec = leastSquareWithQR(H_host_mat, j+1, *beta_host);
             cudaMemcpy(y, y_host_vec.getData(), y_bytes, cudaMemcpyHostToDevice);
 
+            if(nit < 2){
+                std::cout << "y:\n";
+                printVector(y_host_vec);
+            }
+
             // x = x0.add(V.mulPartialT(y, j+1));
             // float res_norm = A.mul(x).sub(b).norm2();
             gmres_update_x<<<blocks, threads>>>(x, V, y, j+1, dim);
+
+
+            if(nit < 2){
+                std::cout << "x:\n";
+                mem_log(x, dim);
+            }
+
+
             gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
-            //s_x_sqrt<<<1,1>>>(tmp2, tmp1, 1);
             float res_norm = std::sqrt(thrust::reduce(dp_tmp1, dp_tmp1+dim));
 
             nit++;
@@ -451,6 +476,8 @@ void run(void) {
     cusp::array1d<float, cusp::device_memory> b(A.num_rows, 0);     // 1
 
     b[0] = 1;
+
+    cusp::print(b);
 
     // get raw pointer
     csr_mat_t csr_mat;
