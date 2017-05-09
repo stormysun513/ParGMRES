@@ -87,7 +87,7 @@ void s_x_sub_ay(float *x, float *y, float *a, int N){
 }
 
 __global__
-void vector_update_gmres(float *x, float *V, float *y, int m, int N){
+void gmres_update_x(float *x, float *V, float *y, int m, int N){ 
     
     int i = blockIdx.x * blockDim.x + threadIdx.x; 
     float entry = .0;
@@ -124,7 +124,7 @@ void s_mat_mul_x(float *res, csr_mat_t mat, float *x){
 }
 
 __global__ 
-void compute_remainder(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta){
+void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta){
      
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -250,7 +250,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     while(nit < maxit){
       
         // kernel 1: compute r0 and beta
-        compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
+        gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
         s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
         s_x_div_a<<<blocks, threads>>>(V, r0, beta, dim);
         
@@ -291,8 +291,8 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
 
             // x = x0.add(V.mulPartialT(y, j+1));
             // float res_norm = A.mul(x).sub(b).norm2();
-            vector_update_gmres<<<blocks, threads>>>(x, V, y, j+1, dim);
-            compute_remainder<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
+            gmres_update_x<<<blocks, threads>>>(x, V, y, j+1, dim);
+            gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
             s_x_sqrt<<<1,1>>>(tmp2, tmp1, 1);
 
             nit++;
@@ -383,8 +383,6 @@ void run(void) {
 
     gmres_ref(A, x, b); 
     gmres(csr_mat, vec, 100, 1e-6, 1000);
-
-    return 0;
 }
 
 
