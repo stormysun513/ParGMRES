@@ -9,6 +9,7 @@ void printMatrix(const Matrix& mat, size_t row_start, size_t row_end,
                  size_t col_start, size_t col_end);
 
 /* vector and matrix generation function */
+Vector eOneVector(size_t n);
 Vector randUniformVector(size_t n);
 Vector randUnitUniformVector(size_t n);
 Matrix randUniformMatrix(size_t size);

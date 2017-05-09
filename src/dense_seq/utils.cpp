@@ -56,6 +56,18 @@ printMatrix(const Matrix& mat,
     std::cout << "]\n";
 }
 
+
+Vector eOneVector(size_t n){
+
+    Vector vec(n);
+
+    vec.set(0, 1);
+    for(size_t i = 1; i < n; i++){
+        vec.set(i, 0);
+    }
+    return vec;
+}
+
 Vector randUniformVector(size_t n){
     Vector vec(n);
     std::random_device rd;

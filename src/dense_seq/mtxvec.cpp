@@ -674,7 +674,7 @@ void spMatVecMul(Vector& dst, const CSRMatrix& mat, const Vector& vec) {
             dst.set(i, temp);
         }
     } else {
-#pragma omp parallel for schedule(static, 64)
+//#pragma omp parallel for schedule(static, 64)
         for (size_t i = 0; i < mat.n_rows; ++i) {
             size_t start_idx = mat.indptr[i];
             size_t end_idx = mat.indptr[i+1];
