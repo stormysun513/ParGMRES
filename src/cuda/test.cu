@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include <thrust/device_ptr.h>
 #include <cusp/csr_matrix.h>
@@ -7,6 +8,44 @@
 #include <cusp/multiply.h>
 
 #include "gmres.cuh"
+
+template <class T>
+struct square
+{
+    __host__ __device__
+    T operator()(const T& x) const { 
+        return x * x;
+    }
+};
+
+template <class T>
+struct saxpy_functor : public thrust::binary_function<T, T, T>
+{
+    const T a;
+
+    saxpy_functor(T _a) : a(_a) {}
+
+    __host__ __device__
+    T operator()(const T& x, const T& y) const { 
+        return a * x + y;
+    }
+};
+
+template <class Iterator>
+static float l2norm(Iterator begin, Iterator end){
+    
+    square<float>        unary_op;
+    thrust::plus<float> binary_op;
+    float init = 0;
+
+    return std::sqrt(thrust::transform_reduce(begin, end, unary_op, init, binary_op));
+}
+
+template <class Iteratable>
+void saxpy_fast(float a, Iteratable& X, Iteratable& Y) {
+    // Y <- A * X + Y
+    thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor<float>(a));
+}
 
 template <class Matrix>
 static csr_mat_t get_csr_mat_t(Matrix& A){
@@ -36,20 +75,20 @@ static vec_t get_vec_t(Vector& x){
 
 static void test_matrix_setup(){
     
-    // create an empty sparse matrix structure (CSR format)
-    cusp::csr_matrix<int, float, cusp::device_memory> A;
+    // // create an empty sparse matrix structure (CSR format)
+    // cusp::csr_matrix<int, float, cusp::device_memory> A;
 
-    // load a matrix stored in MatrixMarket format
-    cusp::io::read_matrix_market_file(A, "../../data/cage4.mtx");
+    // // load a matrix stored in MatrixMarket format
+    // cusp::io::read_matrix_market_file(A, "../../data/cage4.mtx");
 
-    // allocate storage for solution (x) and right hand side (b)
-    cusp::array1d<float, cusp::device_memory> x(A.num_cols);
-    cusp::array1d<float, cusp::device_memory> b(A.num_rows, 1);
+    // // allocate storage for solution (x) and right hand side (b)
+    // cusp::array1d<float, cusp::device_memory> x(A.num_cols);
+    // cusp::array1d<float, cusp::device_memory> b(A.num_rows, 1);
 
-    // get raw pointer
-    csr_mat_t csr_mati = get_csr_mat_t(A);
-    vec_t vec_x = get_vec_t(x);
-    vec_t vec_b = get_vec_t(b);
+    // // get raw pointer
+    // csr_mat_t csr_mati = get_csr_mat_t(A);
+    // vec_t vec_x = get_vec_t(x);
+    // vec_t vec_b = get_vec_t(b);
 }
 
 static void test_s_x_sqrt(){
@@ -159,14 +198,53 @@ static void test_gmres_compute_r0(){
 
 }
 
+static void test_thrust_reduction(){
+    
+    cusp::array1d<float, cusp::device_memory> x(10);
+    
+    for(int i = 0; i < 10; i++){
+        int num = i+1;
+        x[i] = num*num;
+    }
+
+    float res = thrust::reduce(x.begin(), x.end());
+    std::cout << "Thrust reduce result: " << res << std::endl;
+}
+
+static void test_l2norm(){
+    
+    cusp::array1d<float, cusp::device_memory> x(10);
+    for(int i = 0; i < 10; i++){
+        int num = i+1;
+        x[i] = num;
+    }
+
+    float res = l2norm(x.begin(), x.end());
+    std::cout << "L2 norm result: " << res << std::endl;
+}
+
+static void test_saxpy(){
+    
+    cusp::array1d<float, cusp::device_memory> x(10, 2);
+    cusp::array1d<float, cusp::device_memory> y(10, 1);
+
+    saxpy_fast(3, x, y);
+
+    cusp::print(y);
+}
+
 int main(){
 
-    std::cout << "\nTest program:\n\n";
+    std::cout << "\nTest program: \n\n";
 
-    test_s_x_sqrt();
-    test_s_x_div_a();
-    test_s_x_dot_y();
-    test_s_x_sub_ay();
+    //test_s_x_sqrt();
+    //test_s_x_div_a();
+    //test_s_x_dot_y();
+    //test_s_x_sub_ay();
+    
+    test_thrust_reduction();
+    test_l2norm();
+    test_saxpy();
 
     return 0;
 }
