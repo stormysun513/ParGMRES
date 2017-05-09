@@ -13,7 +13,7 @@
 #include "CycleTimer.h"
 
 #define WARP_SIZE               32
-#define MAX_THREAD_NUM          1024 
+#define MAX_THREAD_NUM          1024
 #define KRYLOV_M                100
 #define INDEX( i, j, dim )      (i * dim + j)
 #define ROUND( num, base )      ((num + base - 1)/base)
@@ -23,17 +23,17 @@
 __inline__ __device__
 float warp_reduce_sum(float val) {
 
-    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2) 
+    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2)
         val += __shfl_down(val, offset);
     return val;
 }
 
-__global__ 
+__global__
 void device_reduce_warp_atomic_kernel(float *in, float* out, int N) {
 
     float sum = float(0);
-    for(int i = blockIdx.x * blockDim.x + threadIdx.x; 
-            i < N; 
+    for(int i = blockIdx.x * blockDim.x + threadIdx.x;
+            i < N;
             i += blockDim.x * gridDim.x) {
         sum += in[i];
     }
@@ -45,16 +45,16 @@ void device_reduce_warp_atomic_kernel(float *in, float* out, int N) {
 
 /* kernel functions */
 
-__global__ 
-void s_mem_init(float *addr, float value, int N){
-    
+__global__
+void s_mem_init(float *addr, float value, int N) {
+
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if(i >= N) return;
     addr[i] = value;
 }
 
-__global__ 
+__global__
 void s_x_sqrt(float *res, float *x, int N){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -62,34 +62,34 @@ void s_x_sqrt(float *res, float *x, int N){
     res[i] = sqrt(x[i]);
 }
 
-__global__ 
+__global__
 void s_x_div_a(float *res, float *x, float *a, int N){
-    
+
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if(i >= N) return;
     res[i] = x[i] / (*a);
 }
 
-__global__ 
+__global__
 void s_x_dot_y(float *res, float *x, float *y, int N){
-    
-    int i = blockIdx.x * blockDim.x + threadIdx.x; 
+
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
     if(i >= N) return;
     float value = x[i] * y[i];
     atomicAdd(res, value);
 }
 
 __global__
-void s_x_sub_ay(float *x, float *y, float *a, int N){    
-    int i = blockIdx.x * blockDim.x + threadIdx.x; 
+void s_x_sub_ay(float *x, float *y, float *a, int N){
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
     if(i >= N) return;
     x[i] = x[i] - y[i] * (*a);
 }
 
 __global__
-void gmres_update_x(float *x, float *V, float *y, int m, int N){ 
-    
-    int i = blockIdx.x * blockDim.x + threadIdx.x; 
+void gmres_update_x(float *x, float *V, float *y, int m, int N){
+
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
     float entry = .0;
 
     if(i >= N) return;
@@ -100,9 +100,9 @@ void gmres_update_x(float *x, float *V, float *y, int m, int N){
     x[i] += entry;
 }
 
-__global__ 
+__global__
 void s_mat_mul_x(float *res, csr_mat_t mat, float *x){
-    
+
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     int nrow = mat.nrow;
@@ -123,9 +123,9 @@ void s_mat_mul_x(float *res, csr_mat_t mat, float *x){
     res[i] = temp;
 }
 
-__global__ 
+__global__
 void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta){
-     
+
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     int nrow = mat.nrow;
@@ -160,8 +160,8 @@ void cuda_handle_error(cudaError_t err, const char *file, int line) {
     }
 }
 
-void mem_log(float* device, int N){
-    
+void mem_log(float* device, int N) {
+
     float host[1024];
     char buf[4096];
     int min = std::min(1024, N);
@@ -177,17 +177,17 @@ void mem_log(float* device, int N){
 }
 
 static void display_gpu_info() {
-    
+
     const int kb = 1024;
     const int mb = kb * kb;
-    
+
     std::cout << "\nCUDA version: v" << CUDART_VERSION << std::endl;
     std::cout << "Thrust version: v" << THRUST_MAJOR_VERSION << ".";
-    std::cout << THRUST_MINOR_VERSION << std::endl; 
+    std::cout << THRUST_MINOR_VERSION << std::endl;
 
     int devCount;
     HANDLE_ERROR(cudaGetDeviceCount(&devCount));
-    
+
     std::cout << "\nCUDA Devices: \n\n";
 
     for(int i = 0; i < devCount; ++i) {
@@ -201,18 +201,18 @@ static void display_gpu_info() {
 
         std::cout << "  Warp size:         " << props.warpSize << std::endl;
         std::cout << "  Threads per block: " << props.maxThreadsPerBlock << std::endl;
-        std::cout << "  Max block dimensions: [ " << props.maxThreadsDim[0] << ", " 
-                                             << props.maxThreadsDim[1] << ", " 
+        std::cout << "  Max block dimensions: [ " << props.maxThreadsDim[0] << ", "
+                                             << props.maxThreadsDim[1] << ", "
                                              << props.maxThreadsDim[2] << " ]" << std::endl;
-        std::cout << "  Max grid dimensions:  [ " << props.maxGridSize[0] << ", " 
-                                             << props.maxGridSize[1] << ", " 
+        std::cout << "  Max grid dimensions:  [ " << props.maxGridSize[0] << ", "
+                                             << props.maxGridSize[1] << ", "
                                              << props.maxGridSize[2] << " ]" << std::endl;
         std::cout << std::endl;
     }
 }
 
 void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
-   
+
     int dim = mat.ncol;
     int nit = 0;
     int innit = 0;
@@ -230,17 +230,22 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     float *tmp1;
     float *tmp2;
 
+    size_t H_bytes = (m+1) * m * sizeof(float);
+    size_t y_bytes = m * sizeof(float);
+    float *H_host_data = (float *)calloc((m+1) * m, sizeof(float));
+    float *y_host_data = (float *)calloc(m, sizeof(float));
+
     std::cout << "\nOur GMRES solution:\n\n";
 
-    HANDLE_ERROR(cudaMalloc((void**)&H, (m+1) * m * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&V, (m+1) * dim * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&x, dim * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&y, m * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&w, dim * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&r0, dim * sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&beta, sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&tmp1, sizeof(float))); 
-    HANDLE_ERROR(cudaMalloc((void**)&tmp2, sizeof(float))); 
+    HANDLE_ERROR(cudaMalloc((void**)&H, (m+1) * m * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&V, (m+1) * dim * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&x, dim * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&y, m * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&w, dim * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&r0, dim * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&beta, sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&tmp1, sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&tmp2, sizeof(float)));
 
     int blocks = ROUND(dim, MAX_THREAD_NUM);
     int threads = MAX_THREAD_NUM;
@@ -248,19 +253,19 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
     s_mem_init<<<blocks, threads>>>(x, .0, dim);
 
     while(nit < maxit){
-      
+
         // kernel 1: compute r0 and beta
         gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
         s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
         s_x_div_a<<<blocks, threads>>>(V, r0, beta, dim);
-        
+
         innit = 0;
-        
+
         // Generate krylov subspace
         for(size_t j = 0; j < m; j++) {
 
             // tStart = CycleTimer::currentSeconds();
-            
+
             // compute mat and vec mulplication (mat, V, j),  w can be placed at V(:, j+1) in the future
             s_mat_mul_x<<<blocks, threads>>>(w, mat, (V + j*dim));
 
@@ -278,15 +283,16 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
             float *out = H+(j+1)*(KRYLOV_M+1)+j;
             s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
-            s_x_sqrt<<<1,1>>>(tmp1, out, 1);  
+            s_x_sqrt<<<1,1>>>(tmp1, out, 1);
             s_x_div_a<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
-            
+
 
             // tKrylov += CycleTimer::currentSeconds() - tStart;
             // tStart = CycleTimer::currentSeconds();
 
 	        // TODO: make cuda version LLS
             // Vector y = leastSquareWithQR(H, j+1, beta);
+            cudaMemcpy(H_host_data, H, H_bytes, cudaMemcpyDeviceToHost);
 
 
             // x = x0.add(V.mulPartialT(y, j+1));
@@ -297,7 +303,7 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
 
             nit++;
             innit++;
-            
+
             // tLLS += CycleTimer::currentSeconds() - tStart;
 
             // if (res_norm < tol * b.norm2()) {
@@ -328,11 +334,11 @@ void gmres(csr_mat_t mat, vec_t vec, int m, float tol, int maxit){
 
 template <typename Matrix, typename Vector>
 static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
-    
+
     float start_time;
     float end_time;
     char buf[1024];
-    
+
     // reference answer
     std::cout << "\nReference answer from CUSP library:\n\n";
 
@@ -340,13 +346,13 @@ static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
     cusp::monitor<float> monitor(b, KRYLOV_M, 1e-6, 0, false);
     int restart = 50;
 
-    // run gmres to solve 
+    // run gmres to solve
     start_time = CycleTimer::currentSeconds();
     cusp::krylov::gmres(A, x, b, restart, monitor);
     end_time = CycleTimer::currentSeconds();
 
     // print the performance
-    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n", 
+    sprintf(buf, "[%.3f] ms in total (CSR Sparse GMRES) \n\n",
             (end_time - start_time) * 1000);
     std::cout << buf;
 
@@ -381,8 +387,6 @@ void run(void) {
     vec.value = thrust::raw_pointer_cast(b.data());
     vec.size = b.size();
 
-    gmres_ref(A, x, b); 
+    gmres_ref(A, x, b);
     gmres(csr_mat, vec, 100, 1e-6, 1000);
 }
-
-
