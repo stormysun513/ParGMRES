@@ -345,11 +345,11 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
             //H.set(j+1, j, w.norm2());
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
             float *out = H+(j+1)*(KRYLOV_M+1)+j;
-            thrust::device_ptr<float> dp_out = thrust::device_pointer_cast(out);
+            thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
 
             // s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
             // s_x_sqrt<<<1,1>>>(tmp1, out, 1);
-            *temp_host_float = l2norm(w, w + dim);
+            *temp_host_float = l2norm(dp_w, dp_w + dim);
             cudaMemcpy(tmp1, temp_host_float, sizeof(float), cudaMemcpyHostToDevice);
 
             s_x_div_a<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
