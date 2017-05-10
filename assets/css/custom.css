@@ -1,0 +1,7 @@
+h1, h2 {
+    font-family: open-sans-condensed, sans-serif;
+}
+
+.main-content h1 {
+    font-weight: bold;
+}
