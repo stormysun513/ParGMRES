@@ -222,6 +222,28 @@ static void test_thrust_reduction(){
     std::cout << "Thrust reduce result: " << res << std::endl;
 }
 
+static void test_thrust_dot(){
+
+    cusp::array1d<float, cusp::device_memory> x(10);
+    cusp::array1d<float, cusp::device_memory> y(10);
+
+    for(int i = 0; i < 10; i++){
+        int num = i+1;
+        x[i] = num*num;
+        y[i] = 0;
+    }
+    y[9] = 0.1;
+
+    //float *p_x = thrust::raw_pointer_cast(x.data());
+    thrust::device_ptr<float> dp_x = x.data();
+    thrust::device_ptr<float> dp_y = y.data();
+
+    //float res = thrust::reduce(x.begin(), x.end());
+    float res = thrust::inner_product(dp_x, dp_x+10, dp_y, 0.f);
+
+    std::cout << "Thrust dot result: " << res << std::endl;
+}
+
 static void test_l2norm(){
 
     cusp::array1d<float, cusp::device_memory> x(10);
@@ -258,7 +280,8 @@ int main(){
     //test_s_x_dot_y();
     //test_s_x_sub_ay();
 
-    test_thrust_reduction();
+    // test_thrust_reduction();
+    test_thrust_dot();
     //test_l2norm();
     //test_saxpy();
 

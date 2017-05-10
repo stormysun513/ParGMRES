@@ -81,6 +81,8 @@ void s_x_dot_y(float *res, float *x, float *y, int N){
     if(i >= N) return;
     float value = x[i] * y[i];
     atomicAdd(res, value);
+    printf("value = %f\n", value);
+    printf("res = %f\n", res);
 }
 
 __global__
@@ -91,7 +93,7 @@ void s_x_sub_ay(float *x, float *y, float *a, int N){
 }
 
 __global__
-void gmres_update_x(float *x, float *V, float *y, int m, int N){
+void gmres_update_x(float *x, float *x0, float *V, float *y, int m, int N){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     float entry = .0;
@@ -101,7 +103,7 @@ void gmres_update_x(float *x, float *V, float *y, int m, int N){
     for(int k = 0; k < m; k++){
         entry += V[k*N+i] * y[k];
     }
-    x[i] += entry;
+    x[i] = x0[i] + entry;
 }
 
 __global__
@@ -128,7 +130,7 @@ void s_mat_mul_x(float *res, csr_mat_t mat, float *x){
 }
 
 __global__
-void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta){
+void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec){
 
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -148,10 +150,6 @@ void gmres_compute_r0(float *r0, csr_mat_t mat, float *x, vec_t vec, float *beta
         temp += value[k] * x[j];
     }
     r0[i] = vec.value[i] - temp;
-
-    float square = r0[i];
-    square *= square;
-    atomicAdd(beta, square);
 }
 
 /* thrust related subroutine */
@@ -212,6 +210,8 @@ void mem_log(float* device, int N) {
 
     assert(min >= 0);
 
+    buf[0] = '\0';
+
     HANDLE_ERROR(cudaMemcpy(host, device, N*sizeof(float), cudaMemcpyDeviceToHost));
 
     for(int i = 0; i < min; i++){
@@ -222,17 +222,19 @@ void mem_log(float* device, int N) {
 
 void mem_log_2d(float* device, int M, int N, int dim) {
 
-    float host[1024];
+    float host[2048];
     char buf[4096];
     int min = std::min(1024, N);
 
     assert(min >= 0);
 
+    buf[0] = '\0';
+
     HANDLE_ERROR(cudaMemcpy(host, device, M*dim*sizeof(float), cudaMemcpyDeviceToHost));
 
     for(int i = 0; i < M; i++){
         for(int j = 0; j < N; j++){
-            sprintf(buf, "%s%lf, ", buf, host[i]);
+            sprintf(buf, "%s%lf, ", buf, host[i*dim + j]);
         }
         sprintf(buf, "%s\n", buf);
     }
@@ -288,6 +290,7 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
     float *y;
     float *w;
     float *r0;
+    float *x0;
 
     float *beta;
     float *tmp1;
@@ -306,6 +309,7 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
     HANDLE_ERROR(cudaMalloc((void**)&H, (m+1) * m * sizeof(float)));
     HANDLE_ERROR(cudaMalloc((void**)&V, (m+1) * dim * sizeof(float)));
     HANDLE_ERROR(cudaMalloc((void**)&x, dim * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc((void**)&x0, dim * sizeof(float)));
     HANDLE_ERROR(cudaMalloc((void**)&y, m * sizeof(float)));
     HANDLE_ERROR(cudaMalloc((void**)&w, dim * sizeof(float)));
     HANDLE_ERROR(cudaMalloc((void**)&r0, dim * sizeof(float)));
@@ -318,16 +322,20 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
     thrust::device_ptr<float> dp_b = thrust::device_pointer_cast(vec.value);
     thrust::device_ptr<float> dp_x = thrust::device_pointer_cast(x);
+    thrust::device_ptr<float> dp_x0 = thrust::device_pointer_cast(x0);
     thrust::device_ptr<float> dp_tmp1 = thrust::device_pointer_cast(tmp1);
+    thrust::device_ptr<float> dp_H = thrust::device_pointer_cast(H);
 
     float b_norm2 = l2norm(dp_b, dp_b + dim);
 
-    thrust::fill(dp_x, dp_x+dim, .0);
+    thrust::fill(dp_x0, dp_x0+dim, .0);
 
-    while(nit < maxit){
+    thrust::fill(dp_H, dp_H + (m+1)*m, .0);
+
+    while(nit < maxit) {
 
         // kernel 1: compute r0 and beta
-        gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
+        gmres_compute_r0<<<blocks, threads>>>(r0, mat, x0, vec);
 
         // s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
         thrust::device_ptr<float> dp_r0 = thrust::device_pointer_cast(r0);
@@ -348,6 +356,16 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
             // compute mat and vec mulplication (mat, V, j),  w can be placed at V(:, j+1) in the future
             s_mat_mul_x<<<blocks, threads>>>(w, mat, (V + j*dim));
+            cudaDeviceSynchronize();
+
+            // DEBUG
+            if(nit < 3) {
+                std::cout << "w:\n";
+                mem_log(w, dim);
+
+                std::cout << "V:\n";
+                mem_log_2d(V, j+1, dim, dim);
+            }
 
             // for (size_t i = 0; i < j; i++) {
             //     Vector v = V.getCol(i);
@@ -355,44 +373,45 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
             //     w.isub(v.mulS(H.get(i, j)));
             // }
             for(size_t i = 0; i < j; i++){
-                
+
                 // s_x_dot_y<<<blocks, threads>>>(H+i*(KRYLOV_M+1)+j, w, (V+i*dim), dim);
                 thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
                 thrust::device_ptr<float> dp_vi = thrust::device_pointer_cast(V+i*dim);
-                float dot = thrust::inner_product(dp_w, dp_w+dim, dp_vi, 0);
+                float *dot = (float *)malloc(sizeof(float));
+                *dot = thrust::inner_product(dp_w, dp_w+dim, dp_vi, 0.f);
                 float *hij = H+i*m+j;
 
-                cudaMemcpy(hij, &dot, sizeof(float), cudaMemcpyHostToDevice);
+                cudaMemcpy(hij, dot, sizeof(float), cudaMemcpyHostToDevice);
                 s_x_sub_ay<<<blocks, threads>>>(w, (V+i*dim), hij, dim);
+                cudaDeviceSynchronize();
+
+                free(dot);
             }
 
             //H.set(j+1, j, w.norm2());
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
-            float *out = H+(j+1)*m+j;
             thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
-            
-            // DEBUG
-            if(nit < 2){
-                std::cout << "w:\n";
-                mem_log(w, dim);
-            }
 
             // s_x_dot_y<<<blocks, threads>>>(out, w, w, dim);
             // s_x_sqrt<<<1,1>>>(tmp1, out, 1);
             *temp_host_float = l2norm(dp_w, dp_w + dim);
             cudaMemcpy(tmp1, temp_host_float, sizeof(float), cudaMemcpyHostToDevice);
 
+            cudaMemcpy(H+(j+1)*m+j, temp_host_float, sizeof(float), cudaMemcpyHostToDevice);
             s_x_div_a<<<blocks, threads>>>(V+(j+1)*dim, w, tmp1, dim);
 
 
             // tKrylov += CycleTimer::currentSeconds() - tStart;
             // tStart = CycleTimer::currentSeconds();
 
-            if(nit < 2){
+            if(nit < 3){
                 std::cout << "H:\n";
                 mem_log_2d(H, j+2, j+1, m);
+
+                std::cout << "V:\n";
+                mem_log_2d(V, j+2, dim, dim);
             }
-            
+
 
 	        // TODO: make cuda version LLS
             // Vector y = leastSquareWithQR(H, j+1, beta);
@@ -402,24 +421,24 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
             Vector y_host_vec = leastSquareWithQR(H_host_mat, j+1, *beta_host);
             cudaMemcpy(y, y_host_vec.getData(), y_bytes, cudaMemcpyHostToDevice);
 
-            if(nit < 2){
+            if(nit < 3){
                 std::cout << "y:\n";
                 printVector(y_host_vec);
             }
 
             // x = x0.add(V.mulPartialT(y, j+1));
             // float res_norm = A.mul(x).sub(b).norm2();
-            gmres_update_x<<<blocks, threads>>>(x, V, y, j+1, dim);
+            gmres_update_x<<<blocks, threads>>>(x, x0, V, y, j+1, dim);
 
 
-            if(nit < 2){
+            if(nit < 3){
                 std::cout << "x:\n";
                 mem_log(x, dim);
             }
 
 
-            gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
-            float res_norm = std::sqrt(thrust::reduce(dp_tmp1, dp_tmp1+dim));
+            gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec);
+            float res_norm = l2norm(dp_r0, dp_r0 + dim);
 
             nit++;
             innit++;
@@ -431,7 +450,7 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
                      << res_norm / b_norm2 << " at iteration " << nit
                      << " (out: " << outnit << ", in: " << innit << ")" << std::endl;
 
-                cudaMemcpy(res.value, x, dim, cudaMemcpyDeviceToHost);
+                cudaMemcpy(res.value, x, dim * sizeof(float), cudaMemcpyDeviceToHost);
 
                 // sprintf(buf, "[%.3f] ms in Krylov \n", tKrylov * 1000);
                 // std::cout << buf;
@@ -441,9 +460,10 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
                 break;
             }
         }
-        outnit++;
 
-        break;
+        // x0 = x;
+        cudaMemcpy(x0, x, dim * sizeof(float), cudaMemcpyDeviceToDevice);
+        outnit++;
     }
 
     HANDLE_ERROR(cudaFree(H));

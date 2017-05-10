@@ -35,7 +35,7 @@ LDFRAMEWORKS := $(addprefix -framework , $(FRAMEWORKS))
 
 NVCC=nvcc
 OBJS=gmres.o mtxvec.o qr.o utils.o
-TESTOBJS=test.o gmres.o
+TESTOBJS=test.o gmres.o mtxvec.o qr.o utils.o
 
 .PHONY: clean
 
