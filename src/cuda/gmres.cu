@@ -16,35 +16,11 @@
 #include "utils.h"
 
 #define WARP_SIZE               32
-#define MAX_THREAD_NUM          1024
+#define MAX_THREAD_NUM          256
 #define KRYLOV_M                100
 #define INDEX( i, j, dim )      (i * dim + j)
 #define ROUND( num, base )      ((num + base - 1)/base)
 #define HANDLE_ERROR( err )     (cuda_handle_error(err, __FILE__, __LINE__))
-
-/*
-__inline__ __device__
-float warp_reduce_sum(float val) {
-
-    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2)
-        val += __shfl_down(val, offset);
-    return val;
-}
-
-__global__
-void device_reduce_warp_atomic_kernel(float *in, float* out, int N) {
-
-    float sum = float(0);
-    for(int i = blockIdx.x * blockDim.x + threadIdx.x;
-            i < N;
-            i += blockDim.x * gridDim.x) {
-        sum += in[i];
-    }
-    sum = warp_reduce_sum(sum);
-    if (threadIdx.x & (WARP_SIZE - 1) == 0)
-        atomicAdd(out, sum);
-}
-*/
 
 /* kernel functions */
 
@@ -164,10 +140,9 @@ struct square
 };
 
 template <class T>
-struct saxpy_functor : public thrust::binary_function<T, T, T>
+struct saxpy_functor: public thrust::binary_function<T, T, T>
 {
     const T a;
-
     saxpy_functor(T _a) : a(_a) {}
 
     __host__ __device__
@@ -176,10 +151,46 @@ struct saxpy_functor : public thrust::binary_function<T, T, T>
     }
 };
 
+template <class T>
+struct sysax_functor: public thrust::binary_function<T, T, T>
+{
+    const T a;
+    sysax_functor(T _a) : a(_a) {}
+
+    __host__ __device__
+    T operator()(const T& x, const T& y) const {
+        return y - a * x;
+    }
+};
+
+template <class T>
+struct sax_functor: public thrust::unary_function<T, T> // Arguement, Result
+{
+    const T a;
+    sax_functor(T _a) : a(_a) {}
+
+    __host__ __device__
+    T operator()(const T& x) const {
+        return a * x;
+    }
+};
+
 template <class Iteratable>
-void saxpy_fast(float a, Iteratable& X, Iteratable& Y) {
+void saxpy(float a, Iteratable& X, Iteratable& Y) {
     // Y <- A * X + Y
     thrust::transform(X.begin(), X.end(), Y.begin(), Y.begin(), saxpy_functor<float>(a));
+}
+
+template <class Iterator>
+void sax(float a, Iterator xbegin, Iterator xend, Iterator ybegin) {
+    // Y <- A * X
+    thrust::transform(xbegin, xend, ybegin, sax_functor<float>(a));
+}
+
+template <class Iterator>
+void sysax(float a, Iterator xbegin, Iterator xend, Iterator ybegin) {
+    // Y <- Y - A * X
+    thrust::transform(xbegin, xend, ybegin, ybegin, sysax_functor<float>(a));
 }
 
 template <class Iterator>
@@ -331,7 +342,6 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
     float b_norm2 = l2norm(dp_b, dp_b + dim);
 
     thrust::fill(dp_x0, dp_x0+dim, .0);
-
     thrust::fill(dp_H, dp_H + (m+1)*m, .0);
 
     while(nit < maxit) {
@@ -482,6 +492,155 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
     HANDLE_ERROR(cudaFree(beta));
 }
 
+template <typename Mat, typename Vec>
+static void gmres_new(Mat& A, Vec& x, Vec& b){
+
+    float t_start;
+    float t_temp;
+    float t_krylov = 0;
+    float t_lls = 0;
+    float t_overall = 0;
+    char buf[1024];
+
+    int m = 100;
+    int maxit = 10000;
+    float tol = 1e-6;
+
+    int nit = 0;
+    int innit = 0;
+    int outnit = 0;
+    bool terminate = false;
+
+    int nrow = A.num_rows;
+    int ncol = A.num_cols;
+
+    int blocks = ROUND(nrow, MAX_THREAD_NUM);
+    int threads = MAX_THREAD_NUM;
+
+    size_t H_bytes = (m+1) * m * sizeof(float);
+    size_t y_bytes = m * sizeof(float);
+    float *H_host_data = (float *)calloc((m+1) * m, sizeof(float));
+    float *y_host_data = (float *)calloc(m, sizeof(float));
+    float *beta_host = (float *)malloc(sizeof(float));
+
+    thrust::device_vector<float> dv_x0(ncol);
+    thrust::device_vector<float> dv_x(ncol);
+    thrust::device_vector<float> dv_r0(ncol);
+    thrust::device_vector<float> dv_w(ncol);
+
+    thrust::device_vector<float> dv_H((m+1)*m);
+    thrust::device_vector<float> dv_V((m+1)*ncol);
+    thrust::device_vector<float> dv_y(m);
+    
+    thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(dv_w.data());
+    
+    float *rp_x = thrust::raw_pointer_cast(dv_x.data());
+    float *rp_x0 = thrust::raw_pointer_cast(dv_x0.data());
+    float *rp_w = thrust::raw_pointer_cast(dv_w.data());
+    float *rp_r0 = thrust::raw_pointer_cast(dv_r0.data());
+    float *rp_H = thrust::raw_pointer_cast(dv_H.data());
+    float *rp_V = thrust::raw_pointer_cast(dv_V.data());
+    float *rp_y = thrust::raw_pointer_cast(dv_y.data());
+
+    std::cout << "\nOur GMRES solution:\n\n";
+    
+    // get raw pointer
+    csr_mat_t mat_A;
+    mat_A.nrow = A.num_rows;
+    mat_A.ncol = A.num_cols;
+    mat_A.nnz = A.values.size();
+    mat_A.value = thrust::raw_pointer_cast(A.values.data());
+    mat_A.cindex = thrust::raw_pointer_cast(A.column_indices.data());
+    mat_A.rowstart = thrust::raw_pointer_cast(A.row_offsets.data());
+
+    vec_t vec_b;
+    vec_b.value = thrust::raw_pointer_cast(b.data());
+    vec_b.size = b.size();
+
+    t_start = CycleTimer::currentSeconds();
+
+    float b_norm2 = l2norm(b.begin(), b.end());
+
+    thrust::fill(dv_x0.begin(), dv_x0.end(), .0);
+    thrust::fill(dv_H.begin(), dv_H.end(), .0);
+
+    while(nit < maxit) {
+
+        gmres_compute_r0<<<blocks, threads>>>(rp_r0, mat_A, rp_x0, vec_b);
+        float beta = l2norm(dv_r0.begin(), dv_r0.end());
+        sax(1.0/beta, dv_r0.begin(), dv_r0.end(), dv_V.begin());
+
+        innit = 0;
+
+        for(int j = 0; j < m; j++){
+            
+            t_temp = CycleTimer::currentSeconds();
+
+            s_mat_mul_x<<<blocks, threads>>>(rp_w, mat_A, (rp_V + j*ncol));
+
+            for(size_t i = 0; i < j; i++){
+                thrust::device_ptr<float> dp_vi = thrust::device_pointer_cast(rp_V+i*ncol);
+                float dot = thrust::inner_product(dv_w.begin(), dv_w.end(), dp_vi, 0.f);
+                float *hij = rp_H+i*m+j;
+
+                sysax(dot, dp_vi, (dp_vi+ncol), dp_w);
+                cudaMemcpy(hij, &dot, sizeof(float), cudaMemcpyHostToDevice);
+            }
+            float w_norm2 = l2norm(dv_w.begin(), dv_w.end());
+            cudaMemcpy(rp_H+(j+1)*m+j, &w_norm2, sizeof(float), cudaMemcpyHostToDevice);
+
+
+            thrust::device_ptr<float> dp_vjp1 = thrust::device_pointer_cast(rp_V+(j+1)*ncol);
+            sax(1.0/w_norm2, dp_w, dp_w+ncol, dp_vjp1);
+
+            t_krylov += CycleTimer::currentSeconds() - t_temp;
+            t_temp = CycleTimer::currentSeconds();
+
+            cudaMemcpy(H_host_data, rp_H, H_bytes, cudaMemcpyDeviceToHost);
+            Matrix H_host_mat(m+1, m, H_host_data);
+            Vector y_host_vec = leastSquareWithQR(H_host_mat, j+1, beta);
+            cudaMemcpy(rp_y, y_host_vec.getData(), y_bytes, cudaMemcpyHostToDevice);
+ 
+            t_lls += CycleTimer::currentSeconds() - t_temp;
+
+            gmres_update_x<<<blocks, threads>>>(rp_x, rp_x0, rp_V, rp_y, j+1, ncol);
+            gmres_compute_r0<<<blocks, threads>>>(rp_r0, mat_A, rp_x, vec_b);
+            float res_norm = l2norm(dv_r0.begin(), dv_r0.end());
+
+            nit++;
+            innit++;
+            if (res_norm < tol * b_norm2) {
+
+                t_overall = CycleTimer::currentSeconds() - t_start;
+
+                std::cout << "FGMRES converged to relative tolerance: "
+                     << res_norm / b_norm2 << " at iteration " << nit
+                     << " (out: " << outnit << ", in: " << innit << ")" << std::endl;
+
+                sprintf(buf, "[%.3f] ms in Krylov \n", t_krylov * 1000);
+                std::cout << buf;
+                sprintf(buf, "[%.3f] ms in LLS \n", t_lls * 1000);
+                std::cout << buf;
+                sprintf(buf, "[%.3f] ms in Overall \n", t_overall * 1000);
+                std::cout << buf;
+
+                terminate = true;
+                break;;
+            }
+        }
+        if (terminate)
+            break;
+
+        thrust::copy(dv_x.begin(), dv_x.end(), dv_x0.begin());
+        outnit++;
+    }
+
+    thrust::copy(dv_x.begin(), dv_x.end(), x.begin());
+
+    // print out result for debug
+    cusp::print(x);
+}
+
 template <typename Matrix, typename Vector>
 static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
 
@@ -529,22 +688,23 @@ void run(void) {
     cusp::print(b);
 
     // get raw pointer
-    csr_mat_t csr_mat;
-    csr_mat.nrow = A.num_rows;
-    csr_mat.ncol = A.num_cols;
-    csr_mat.nnz = A.values.size();
-    csr_mat.value = thrust::raw_pointer_cast(A.values.data());
-    csr_mat.cindex = thrust::raw_pointer_cast(A.column_indices.data());
-    csr_mat.rowstart = thrust::raw_pointer_cast(A.row_offsets.data());
+    // csr_mat_t csr_mat;
+    // csr_mat.nrow = A.num_rows;
+    // csr_mat.ncol = A.num_cols;
+    // csr_mat.nnz = A.values.size();
+    // csr_mat.value = thrust::raw_pointer_cast(A.values.data());
+    // csr_mat.cindex = thrust::raw_pointer_cast(A.column_indices.data());
+    // csr_mat.rowstart = thrust::raw_pointer_cast(A.row_offsets.data());
 
-    vec_t vec_x, vec_b;
-    vec_b.value = thrust::raw_pointer_cast(b.data());
-    vec_b.size = b.size();
-    vec_x.value = thrust::raw_pointer_cast(x.data());
-    vec_x.size = x.size();
+    // vec_t vec_x, vec_b;
+    // vec_b.value = thrust::raw_pointer_cast(b.data());
+    // vec_b.size = b.size();
+    // vec_x.value = thrust::raw_pointer_cast(x.data());
+    // vec_x.size = x.size();
 
-    gmres(csr_mat, vec_x, vec_b, 100, 1e-6, 1000);
-    cusp::print(x);
+    //gmres(csr_mat, vec_x, vec_b, 100, 1e-6, 1000);
+    //cusp::print(x);
 
+    gmres_new(A, x, b);
     gmres_ref(A, x, b);
 }
