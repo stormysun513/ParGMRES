@@ -220,6 +220,25 @@ void mem_log(float* device, int N) {
     std::cout << buf << std::endl;
 }
 
+void mem_log_2d(float* device, int M, int N, int dim) {
+
+    float host[1024];
+    char buf[4096];
+    int min = std::min(1024, N);
+
+    assert(min >= 0);
+
+    HANDLE_ERROR(cudaMemcpy(host, device, M*dim*sizeof(float), cudaMemcpyDeviceToHost));
+
+    for(int i = 0; i < M; i++){
+        for(int j = 0; j < N; j++){
+            sprintf(buf, "%s%lf, ", buf, host[i]);
+        }
+        sprintf(buf, "%s\n", buf);
+    }
+    std::cout << buf << std::endl;
+}
+
 static void display_gpu_info() {
 
     const int kb = 1024;
@@ -303,7 +322,6 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
     float b_norm2 = l2norm(dp_b, dp_b + dim);
 
-    // s_mem_init<<<blocks, threads>>>(x, .0, dim);
     thrust::fill(dp_x, dp_x+dim, .0);
 
     while(nit < maxit){
@@ -312,7 +330,6 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
         gmres_compute_r0<<<blocks, threads>>>(r0, mat, x, vec, tmp1);
 
         // s_x_sqrt<<<1,1>>>(beta, tmp1, 1);
-
         thrust::device_ptr<float> dp_r0 = thrust::device_pointer_cast(r0);
         *temp_host_float = l2norm(dp_r0, dp_r0 + dim);
 
@@ -343,7 +360,7 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
                 thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
                 thrust::device_ptr<float> dp_vi = thrust::device_pointer_cast(V+i*dim);
                 float dot = thrust::inner_product(dp_w, dp_w+dim, dp_vi, 0);
-                float *hij = H+i*(KRYLOV_M+1)+j;
+                float *hij = H+i*m+j;
 
                 cudaMemcpy(hij, &dot, sizeof(float), cudaMemcpyHostToDevice);
                 s_x_sub_ay<<<blocks, threads>>>(w, (V+i*dim), hij, dim);
@@ -351,7 +368,7 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
             //H.set(j+1, j, w.norm2());
             //V.setCol(j+1, w.mulS(1.0 / H.get(j+1, j)));
-            float *out = H+(j+1)*(KRYLOV_M+1)+j;
+            float *out = H+(j+1)*m+j;
             thrust::device_ptr<float> dp_w = thrust::device_pointer_cast(w);
             
             // DEBUG
@@ -370,6 +387,12 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
 
             // tKrylov += CycleTimer::currentSeconds() - tStart;
             // tStart = CycleTimer::currentSeconds();
+
+            if(nit < 2){
+                std::cout << "H:\n";
+                mem_log_2d(H, j+2, j+1, m);
+            }
+            
 
 	        // TODO: make cuda version LLS
             // Vector y = leastSquareWithQR(H, j+1, beta);
