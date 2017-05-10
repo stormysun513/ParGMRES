@@ -283,6 +283,8 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
     int innit = 0;
     int outnit = 0;
 
+    bool terminate = false;
+
     float *H;
     float *V;
 
@@ -457,9 +459,13 @@ void gmres(csr_mat_t mat, vec_t res, vec_t vec, int m, float tol, int maxit){
                 // sprintf(buf, "[%.3f] ms in LLS \n", tLLS * 1000);
                 // std::cout << buf;
 
+                terminate = true;
                 break;
             }
         }
+
+        if (terminate)
+            break;
 
         // x0 = x;
         cudaMemcpy(x0, x, dim * sizeof(float), cudaMemcpyDeviceToDevice);
