@@ -46,18 +46,18 @@ are memory bound. In order to improve the performance, we have to identify
 the part in code where we waste the bandwidth. 
 
 
-// ## Background
-// 
-// Describe the algorithm, application, or system you parallelized in computer 
-// science terms. (Recall our discussion from the last day of class.) Figure(s) 
-// would be really useful here.
-// 
-// ## Approach
-// 
-// Tell us how your implementation works. Your description should be sufficiently 
-// detailed to provide the course staff a basic understanding of your approach. 
-// Again, it might be very useful to include a figure here illustrating components 
-// of the system and/or their mapping to parallel hardware.
+<!-- ## Background -->
+
+<!-- Describe the algorithm, application, or system you parallelized in computer -->
+<!-- science terms. (Recall our discussion from the last day of class.) Figure(s) -->
+<!-- would be really useful here. -->
+
+<!-- ## Approach -->
+
+<!-- Tell us how your implementation works. Your description should be sufficiently -->
+<!-- detailed to provide the course staff a basic understanding of your approach. -->
+<!-- Again, it might be very useful to include a figure here illustrating components -->
+<!-- of the system and/or their mapping to parallel hardware. -->
 
 ## Result
 
