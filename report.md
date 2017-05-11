@@ -37,10 +37,9 @@ of the system and/or their mapping to parallel hardware.
 
 ## Result
 
-How successful were you at achieving your goals? We expect results sections to 
-differ from project to project, but we expect your evaluation to be very 
-thorough (your project evaluation is a great way to demonstrate you understood 
-topics from this course).
+![CPU_CAGE](imgs/cpu_cage.png) 
+
+![CPU_CAGE](imgs/cpu_bcspwr.png) 
 
 ## References
 
