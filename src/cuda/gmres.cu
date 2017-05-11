@@ -636,9 +636,12 @@ static void gmres_new(Mat& A, Vec& x, Vec& b){
     }
 
     thrust::copy(dv_x.begin(), dv_x.end(), x.begin());
-
+    
+    if(!terminate)
+        std::cout << "Not converged\n";
+    
     // print out result for debug
-    cusp::print(x);
+    // cusp::print(x);
 }
 
 template <typename Matrix, typename Vector>
@@ -658,6 +661,7 @@ static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
     // run gmres to solve
     start_time = CycleTimer::currentSeconds();
     cusp::krylov::gmres(A, x, b, restart, monitor);
+    cudaDeviceSynchronize();
     end_time = CycleTimer::currentSeconds();
 
     // print the performance
@@ -666,10 +670,10 @@ static void gmres_ref(const Matrix& A, Vector& x, const Vector& b){
     std::cout << buf;
 
     // print out result for debug
-    cusp::print(x);
+    // cusp::print(x);
 }
 
-void run(void) {
+void run(char *filename) {
 
     display_gpu_info();
 
@@ -677,7 +681,8 @@ void run(void) {
     cusp::csr_matrix<int, float, cusp::device_memory> A;
 
     // load a matrix stored in MatrixMarket format
-    cusp::io::read_matrix_market_file(A, "../../data/cage4.mtx");
+    //cusp::io::read_matrix_market_file(A, "../../data/cage4.mtx");
+    cusp::io::read_matrix_market_file(A, filename);
 
     // allocate storage for solution (x) and right hand side (b)
     cusp::array1d<float, cusp::device_memory> x(A.num_cols, 0);     // 0
@@ -685,7 +690,7 @@ void run(void) {
 
     b[0] = 1;
 
-    cusp::print(b);
+    // cusp::print(b);
 
     // get raw pointer
     // csr_mat_t csr_mat;
