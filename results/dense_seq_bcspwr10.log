@@ -1,0 +1,90 @@
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 6.22354e-07 at iteration 332 (out: 3, in: 32)
+[9554.540] ms in Krylov 
+[243.486] ms in LLS 
+[9411.504] ms in Get Residual 
+[19325.158] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 6.86549e-07 at iteration 326 (out: 3, in: 26)
+[9337.935] ms in Krylov 
+[240.875] ms in LLS 
+[9218.079] ms in Get Residual 
+[18913.376] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.91087e-07 at iteration 332 (out: 3, in: 32)
+[9564.357] ms in Krylov 
+[245.202] ms in LLS 
+[9422.166] ms in Get Residual 
+[19348.947] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.9041e-07 at iteration 334 (out: 3, in: 34)
+[9582.644] ms in Krylov 
+[242.094] ms in LLS 
+[9432.164] ms in Get Residual 
+[19372.310] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.32769e-07 at iteration 356 (out: 3, in: 56)
+[10243.102] ms in Krylov 
+[251.600] ms in LLS 
+[10081.586] ms in Get Residual 
+[20695.567] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.62018e-07 at iteration 329 (out: 3, in: 29)
+[9473.405] ms in Krylov 
+[241.187] ms in LLS 
+[9344.516] ms in Get Residual 
+[19174.812] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.72593e-07 at iteration 374 (out: 3, in: 74)
+[14634.224] ms in Krylov 
+[271.434] ms in LLS 
+[14386.246] ms in Get Residual 
+[29443.742] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.28309e-07 at iteration 328 (out: 3, in: 28)
+[9465.961] ms in Krylov 
+[240.147] ms in LLS 
+[9329.618] ms in Get Residual 
+[19152.080] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.23513e-07 at iteration 317 (out: 3, in: 17)
+[9364.455] ms in Krylov 
+[242.711] ms in LLS 
+[9211.455] ms in Get Residual 
+[18934.508] ms in total (Dense w/o OMP)
+
+A: ../data/bcspwr/bcspwr10.mtx 5300x5300
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.45876e-07 at iteration 342 (out: 3, in: 42)
+[14125.173] ms in Krylov 
+[250.355] ms in LLS 
+[13976.196] ms in Get Residual 
+[28511.379] ms in total (Dense w/o OMP)
+

@@ -1,0 +1,90 @@
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.04697e-07 at iteration 437 (out: 4, in: 37)
+[4.859] ms in Krylov 
+[329.193] ms in LLS 
+[1.467] ms in Get Residual 
+[335.705] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.63637e-07 at iteration 416 (out: 4, in: 16)
+[4.767] ms in Krylov 
+[327.240] ms in LLS 
+[1.404] ms in Get Residual 
+[333.572] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.14097e-07 at iteration 440 (out: 4, in: 40)
+[4.853] ms in Krylov 
+[328.715] ms in LLS 
+[1.465] ms in Get Residual 
+[335.198] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.4464e-07 at iteration 502 (out: 5, in: 2)
+[5.864] ms in Krylov 
+[416.350] ms in LLS 
+[1.750] ms in Get Residual 
+[424.146] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.66619e-07 at iteration 385 (out: 3, in: 85)
+[4.329] ms in Krylov 
+[288.604] ms in LLS 
+[1.292] ms in Get Residual 
+[294.391] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.54286e-07 at iteration 424 (out: 4, in: 24)
+[4.738] ms in Krylov 
+[325.487] ms in LLS 
+[1.410] ms in Get Residual 
+[331.806] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.8557e-07 at iteration 404 (out: 4, in: 4)
+[4.768] ms in Krylov 
+[328.078] ms in LLS 
+[1.417] ms in Get Residual 
+[334.427] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.79997e-07 at iteration 473 (out: 4, in: 73)
+[5.317] ms in Krylov 
+[351.860] ms in LLS 
+[1.585] ms in Get Residual 
+[358.930] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.8704e-07 at iteration 434 (out: 4, in: 34)
+[4.937] ms in Krylov 
+[330.692] ms in LLS 
+[1.463] ms in Get Residual 
+[337.262] ms in total (Dense w/o OMP)
+
+A: ../data/cage5.mtx 37x37
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.21993e-07 at iteration 399 (out: 3, in: 99)
+[4.644] ms in Krylov 
+[323.451] ms in LLS 
+[1.367] ms in Get Residual 
+[329.624] ms in total (Dense w/o OMP)
+

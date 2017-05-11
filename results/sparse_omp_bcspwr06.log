@@ -1,0 +1,69 @@
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 4.824e-07 at iteration 421 (out: 4, in: 21)
+[111.491] ms in Krylov 
+[567.532] ms in LLS 
+[35.167] ms in Get Residual 
+[718.005] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.99821e-07 at iteration 395 (out: 3, in: 95)
+[107.278] ms in Krylov 
+[532.932] ms in LLS 
+[30.254] ms in Get Residual 
+[674.209] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.96263e-07 at iteration 422 (out: 4, in: 22)
+[200.950] ms in Krylov 
+[564.146] ms in LLS 
+[224.949] ms in Get Residual 
+[996.413] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.6571e-07 at iteration 403 (out: 4, in: 3)
+[155.730] ms in Krylov 
+[566.135] ms in LLS 
+[123.530] ms in Get Residual 
+[853.478] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.10118e-07 at iteration 329 (out: 3, in: 29)
+[181.041] ms in Krylov 
+[413.536] ms in LLS 
+[172.409] ms in Get Residual 
+[772.915] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.94256e-07 at iteration 383 (out: 3, in: 83)
+[101.725] ms in Krylov 
+[503.116] ms in LLS 
+[42.289] ms in Get Residual 
+[650.947] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.8486e-07 at iteration 331 (out: 3, in: 31)
+[91.513] ms in Krylov 
+[432.066] ms in LLS 
+[36.059] ms in Get Residual 
+[563.276] ms in total (Sparse w/ OMP) 
+

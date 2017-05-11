@@ -1,0 +1,81 @@
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 6.10159e-07 at iteration 430 (out: 4, in: 30)
+[166.945] ms in Krylov 
+[551.717] ms in LLS 
+[108.598] ms in Get Residual 
+[833.454] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.88793e-07 at iteration 329 (out: 3, in: 29)
+[228.889] ms in Krylov 
+[419.676] ms in LLS 
+[258.481] ms in Get Residual 
+[913.703] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.40718e-07 at iteration 407 (out: 4, in: 7)
+[159.130] ms in Krylov 
+[558.876] ms in LLS 
+[80.803] ms in Get Residual 
+[806.216] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.91218e-07 at iteration 367 (out: 3, in: 67)
+[185.822] ms in Krylov 
+[457.052] ms in LLS 
+[143.073] ms in Get Residual 
+[791.790] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.18428e-07 at iteration 388 (out: 3, in: 88)
+[149.145] ms in Krylov 
+[514.943] ms in LLS 
+[89.788] ms in Get Residual 
+[759.701] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.39641e-07 at iteration 428 (out: 4, in: 28)
+[161.009] ms in Krylov 
+[564.410] ms in LLS 
+[89.214] ms in Get Residual 
+[820.441] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.89505e-07 at iteration 378 (out: 3, in: 78)
+[195.708] ms in Krylov 
+[484.087] ms in LLS 
+[158.223] ms in Get Residual 
+[843.911] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.38598e-07 at iteration 388 (out: 3, in: 88)
+[152.809] ms in Krylov 
+[514.343] ms in LLS 
+[81.183] ms in Get Residual 
+[754.140] ms in total (Dense w OMP)
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.83263e-07 at iteration 427 (out: 4, in: 27)
+[165.078] ms in Krylov 
+[557.931] ms in LLS 
+[93.486] ms in Get Residual 
+[822.687] ms in total (Dense w OMP)
+
