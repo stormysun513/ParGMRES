@@ -18,22 +18,46 @@ ParGMRES: A parallel linear solver
 
 ## Summary
 
-short (no more than a paragraph) project summary. If applicable, the summary 
-should list your project deliverables (including what you plan to show at the 
-parallelism competition) and what machines they ran on.
+We implemented the generalized minimal residual (GMRES) algorithm using both 
+OpenMP and CUDA. We compared the performance of the OpenMP code between dense 
+and compressed sparse row representation. Regarding the CUDA version, although 
+we only have one version, we are trying to identify bottlenecks and compare 
+the difference between GPU and CPU implementation.
 
-## Background
 
-Describe the algorithm, application, or system you parallelized in computer 
-science terms. (Recall our discussion from the last day of class.) Figure(s) 
-would be really useful here.
+## Challenges
 
-## Approach
+One of the challenge here is implementation of linear algebra algorithm. We 
+thought that the most complex part of the program is the part that compute 
+the Krylov space. However, after we start implementing the algorithm, we 
+realized that there is a linear least square part at the end of each iteration. 
+We implemented three version to solve these problem: the power method for SVD, 
+the Jacobian method for SVD, and QR householder reduction. We finally picked 
+QR reduction to solve the LLS because it is not an iterative method and its 
+complexity depends directly on the size of matrix. Besides, the Jacobian SVD 
+consists of operations on small 2x2 matrices constructed by accessing 
+different (i, j) locations. We considered it hard to being parallelized.   
 
-Tell us how your implementation works. Your description should be sufficiently 
-detailed to provide the course staff a basic understanding of your approach. 
-Again, it might be very useful to include a figure here illustrating components 
-of the system and/or their mapping to parallel hardware.
+
+The benefit of parallelize matrix operations becomes significant only when 
+the matrix size is large enough. However, when the size increases, the memory 
+footprints impact the overall performance as well. Most of our operations 
+are memory bound. In order to improve the performance, we have to identify 
+the part in code where we waste the bandwidth. 
+
+
+// ## Background
+// 
+// Describe the algorithm, application, or system you parallelized in computer 
+// science terms. (Recall our discussion from the last day of class.) Figure(s) 
+// would be really useful here.
+// 
+// ## Approach
+// 
+// Tell us how your implementation works. Your description should be sufficiently 
+// detailed to provide the course staff a basic understanding of your approach. 
+// Again, it might be very useful to include a figure here illustrating components 
+// of the system and/or their mapping to parallel hardware.
 
 ## Result
 
