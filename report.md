@@ -85,6 +85,22 @@ Matrix details for Cage:
 The results of Cage is shown as following, the y-axis is log-scale.
 ![CPU_CAGE](imgs/cpu_cage.png) 
 
+Besides, we also conduct the detail experiment on the following matrix:
+- Cage 9: we examine the elapsed time for each part of our program, in which we
+  can better understand the bottlenecks and the effectiveness or the overhead of
+  parallelism.
+![CAGE_9_DETAIL](imgs/cage9_detail.png) 
+
+First, we can see from the graph that LLS (linear least square) part does not
+change too much among three different setting, and it does not consist of a
+major part for the elapsed time. Therefore, we did not put our focus on the
+optimization for the LLS.
+
+On the other hand, the graph indicates that the major bottlenecks will be the
+Krylov process and calculating the residual after each iteration. Therefore,
+we can gain some improvement on the performance by working out the parallelism
+in these two parts.
+
 ## References
 
 Please provide a list of references used in the project.
