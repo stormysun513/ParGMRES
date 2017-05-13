@@ -83,10 +83,21 @@ Matrix details for BCSPWR:
 The results of BCSPWR of dense matrix is shown as following
 ![CPU_CAGE](imgs/bcspwr_dense.png) 
 
-The results of the sparse one is shown as following
+For the dense format, the results are quite straightforward as the OMP improves
+the performance after the matrix size is large enough, which compensates the
+overhead of spinning up threads.
+
+However, it is not really the case for the sparse matrix format, the results of which
+are shown below:
 ![CPU_CAGE](imgs/bcspwr_sparse.png) 
 
-Matrix details for Cage:
+The reason behind this behavior might be that the workloads of dense matrix is quite
+evenly distributed, while the workloads of sparse matrix can be quite skew and
+sparsity-dependent. This uneven workloads distribution can actually reduce the potential
+performance gain by using OMP.
+
+Besides, the BCSPWR matrix family, we also conduct our experiments on the Cage matrix family.
+The details for Cage family are as listed:
 - Cage4: 9-by-9, 49 non-zero entries.
 - Cage5: 37-by-37, 233 non-zero entries.
 - Cage7: 340-by-340, 3084 non-zero entries.
@@ -94,13 +105,17 @@ Matrix details for Cage:
 - Cage9: 3534-by-3534, 41,594 non-zero entries.
 - Cage10: 11,397-by-11,397, 150,645 non-zero entries.
 
-The results of Cage in dense format is shown as following.
+The results of Cage in dense format is shown as following. Note that the y-axis is of log-scale.
 ![CPU_CAGE](imgs/cage_dense.png) 
 
-The sparse results is as following.
+We can notice the similar pattern in BCSPWR matrix family that OMP starts to improve the overall
+performance after the size of matrix exceeds a threshold.
+
+On the other hand, in sparse matrix case, the performance gain is not consistent regarding the size
+of matrix, but more likely be the sparsity.
 ![CPU_CAGE](imgs/cage_sparse.png) 
 
-Besides, we also conduct the detail experiment on the following matrix Cage9 and
+Finally, we also conduct the detail experiment on the following matrix Cage9 and
 Cage 10. We examine the elapsed time for each part of our program, in which we
 can better understand the bottlenecks and the effectiveness or the overhead of
 parallelism.
