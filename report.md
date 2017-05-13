@@ -64,15 +64,27 @@ the part in code where we waste the bandwidth.
 We run our code on two sets of matrix: BCSPWR and Cage. The size of these matrix
 varies cross a very large range, in which we can better test the scalability of
 our algorithm. Also, the difference between the size scale can also show us the
-effectiveness of parallization.
+effectiveness of parallelization.
+
+For the performance metrics, we originally used total elapsed time as the
+measurement. However, we quickly find that, since our algorithm is an iterative
+one, which means each testing case will take a different number of iterations
+before converge, we need to normalize over the number of iterations to get a
+precise measurement. Therefore, we end up in dividing the total elapsed time
+by the number of iterations to measure our performance. In the following
+results graph, the y-axis is average of `elapsed_time / num_iterations` over 20
+runs.
 
 Matrix details for BCSPWR:
 - BCSPWR01: 39-by-39, 85 non-zero entries.
 - BCSPWR03: 118-by-118, 297 non-zero entries.
 - BCSPWR06: 1454-by-1454, 3377 non-zero entries.
 
-The results of BCSPWR is shown as following, the y-axis is linear-scale.
-![CPU_CAGE](imgs/cpu_bcspwr.png) 
+The results of BCSPWR of dense matrix is shown as following
+![CPU_CAGE](imgs/bcspwr_dense.png) 
+
+The results of the sparse one is shown as following
+![CPU_CAGE](imgs/bcspwr_sparse.png) 
 
 Matrix details for Cage:
 - Cage4: 9-by-9, 49 non-zero entries.
@@ -82,14 +94,21 @@ Matrix details for Cage:
 - Cage9: 3534-by-3534, 41,594 non-zero entries.
 - Cage10: 11,397-by-11,397, 150,645 non-zero entries.
 
-The results of Cage is shown as following, the y-axis is log-scale.
-![CPU_CAGE](imgs/cpu_cage.png) 
+The results of Cage in dense format is shown as following.
+![CPU_CAGE](imgs/cage_dense.png) 
 
-Besides, we also conduct the detail experiment on the following matrix:
-- Cage 9: we examine the elapsed time for each part of our program, in which we
-  can better understand the bottlenecks and the effectiveness or the overhead of
-  parallelism.
-![CAGE_9_DETAIL](imgs/cage9_detail.png) 
+The sparse results is as following.
+![CPU_CAGE](imgs/cage_sparse.png) 
+
+Besides, we also conduct the detail experiment on the following matrix Cage9 and
+Cage 10. We examine the elapsed time for each part of our program, in which we
+can better understand the bottlenecks and the effectiveness or the overhead of
+parallelism.
+
+- Cage 9
+  ![CAGE_9_DETAIL](imgs/cage9_case.png) 
+- Cage 10
+  ![CAGE_10_DETAIL](imgs/cage10_case.png) 
 
 First, we can see from the graph that LLS (linear least square) part does not
 change too much among three different setting, and it does not consist of a
