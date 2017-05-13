@@ -1,4 +1,4 @@
-SUBDIRS = dense_seq dense_omp sparse_omp
+SUBDIRS = dense_seq dense_omp sparse_omp sparse_seq
 SUBDIRSCLEAN=$(addsuffix .clean, $(SUBDIRS))
 
 .PHONY: $(SUBDIRS) clean

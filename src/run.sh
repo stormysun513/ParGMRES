@@ -1,6 +1,26 @@
 #!/bin/bash
 
-rm logs/*
+for line in cage4.mtx cage5.mtx cage7.mtx cage8.mtx cage9.mtx cage10.mtx; do
+    echo "===Matrix: $line==="
+
+    for i in {1..10}; do
+        ./sparse_seq/sparse_seq ../data/$line 2>&1 | tee -a logs/sparse_seq_${line%.mtx}.log
+    done
+
+    printf "\n"
+done
+
+for line in bcspwr01.mtx  bcspwr03.mtx  bcspwr06.mtx  bcspwr10.mtx; do
+    echo "===Matrix: $line==="
+
+    for i in {1..10}; do
+        ./sparse_seq/sparse_seq ../data/bcspwr/$line 2>&1 | tee -a logs/sparse_seq_${line%.mtx}.log
+    done
+
+    printf "\n"
+done
+
+# rm logs/*
 
 for line in cage4.mtx cage5.mtx cage7.mtx cage8.mtx cage9.mtx cage10.mtx; do
     echo "===Matrix: $line==="

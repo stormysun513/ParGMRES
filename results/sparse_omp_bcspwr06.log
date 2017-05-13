@@ -55,8 +55,11 @@ FGMRES converged to relative tolerance: 9.94256e-07 at iteration 383 (out: 3, in
 A: ../data/bcspwr/bcspwr06.mtx 1454x1454
 m=100, tol=1e-06, maxit=100000
 
-A: ../data/bcspwr/bcspwr06.mtx 1454x1454
-m=100, tol=1e-06, maxit=100000
+FGMRES converged to relative tolerance: 9.60629e-07 at iteration 404 (out: 4, in: 4)
+[374.082] ms in Krylov 
+[561.680] ms in LLS 
+[470.010] ms in Get Residual 
+[1412.102] ms in total (Sparse w/ OMP) 
 
 A: ../data/bcspwr/bcspwr06.mtx 1454x1454
 m=100, tol=1e-06, maxit=100000
@@ -66,4 +69,94 @@ FGMRES converged to relative tolerance: 9.8486e-07 at iteration 331 (out: 3, in:
 [432.066] ms in LLS 
 [36.059] ms in Get Residual 
 [563.276] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.93873e-07 at iteration 422 (out: 4, in: 22)
+[518.278] ms in Krylov 
+[575.591] ms in LLS 
+[741.004] ms in Get Residual 
+[1844.303] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.13609e-07 at iteration 514 (out: 5, in: 14)
+[835.216] ms in Krylov 
+[711.445] ms in LLS 
+[1315.943] ms in Get Residual 
+[2875.836] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.45175e-07 at iteration 342 (out: 3, in: 42)
+[87.801] ms in Krylov 
+[435.761] ms in LLS 
+[21.589] ms in Get Residual 
+[548.860] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.93463e-07 at iteration 403 (out: 4, in: 3)
+[109.987] ms in Krylov 
+[570.483] ms in LLS 
+[31.534] ms in Get Residual 
+[715.819] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.98983e-07 at iteration 494 (out: 4, in: 94)
+[134.503] ms in Krylov 
+[679.624] ms in LLS 
+[40.416] ms in Get Residual 
+[858.513] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.9814e-07 at iteration 406 (out: 4, in: 6)
+[110.528] ms in Krylov 
+[564.343] ms in LLS 
+[44.514] ms in Get Residual 
+[723.193] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.94578e-07 at iteration 408 (out: 4, in: 8)
+[110.541] ms in Krylov 
+[560.887] ms in LLS 
+[35.367] ms in Get Residual 
+[710.572] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.97775e-07 at iteration 433 (out: 4, in: 33)
+[113.254] ms in Krylov 
+[572.150] ms in LLS 
+[31.056] ms in Get Residual 
+[720.322] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.48836e-07 at iteration 427 (out: 4, in: 27)
+[401.714] ms in Krylov 
+[564.222] ms in LLS 
+[519.856] ms in Get Residual 
+[1493.955] ms in total (Sparse w/ OMP) 
+
+A: ../data/bcspwr/bcspwr06.mtx 1454x1454
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.2128e-07 at iteration 425 (out: 4, in: 25)
+[111.959] ms in Krylov 
+[555.459] ms in LLS 
+[30.517] ms in Get Residual 
+[701.815] ms in total (Sparse w/ OMP) 
 

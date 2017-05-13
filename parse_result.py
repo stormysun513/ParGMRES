@@ -11,9 +11,13 @@ with open(log_file, "r") as f:
     i = 0
     while i < len(lines):
         if lines[i][:6] == "FGMRES":
+            n_iter = float(re.findall("\d+", lines[i])[-3])
+            print(n_iter)
+
             for j in range(1, 5):
                 line = lines[i+j]
-                nums[j-1].append(float(re.findall("\d+\.\d+", line)[0]))
+                nums[j-1].append((float(re.findall("\d+\.\d+", line)[0]))
+                                 / n_iter)
 
             i += 5
         else:

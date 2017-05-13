@@ -1,0 +1,180 @@
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.76203e-07 at iteration 906 (out: 9, in: 6)
+[41.393] ms in Krylov 
+[709.909] ms in LLS 
+[19.887] ms in Get Residual 
+[771.734] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.69945e-07 at iteration 919 (out: 9, in: 19)
+[41.664] ms in Krylov 
+[706.785] ms in LLS 
+[20.117] ms in Get Residual 
+[769.123] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.88989e-07 at iteration 958 (out: 9, in: 58)
+[42.930] ms in Krylov 
+[723.012] ms in LLS 
+[20.608] ms in Get Residual 
+[787.128] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.85368e-07 at iteration 979 (out: 9, in: 79)
+[44.902] ms in Krylov 
+[748.703] ms in LLS 
+[21.544] ms in Get Residual 
+[815.767] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.72822e-07 at iteration 702 (out: 7, in: 2)
+[32.306] ms in Krylov 
+[554.557] ms in LLS 
+[15.424] ms in Get Residual 
+[602.765] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.89856e-07 at iteration 887 (out: 8, in: 87)
+[40.752] ms in Krylov 
+[681.854] ms in LLS 
+[19.371] ms in Get Residual 
+[742.524] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.77271e-07 at iteration 906 (out: 9, in: 6)
+[41.479] ms in Krylov 
+[711.901] ms in LLS 
+[19.790] ms in Get Residual 
+[773.725] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.93604e-07 at iteration 981 (out: 9, in: 81)
+[45.365] ms in Krylov 
+[760.799] ms in LLS 
+[21.709] ms in Get Residual 
+[828.455] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.98125e-07 at iteration 993 (out: 9, in: 93)
+[45.516] ms in Krylov 
+[778.476] ms in LLS 
+[21.912] ms in Get Residual 
+[846.488] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.92726e-07 at iteration 961 (out: 9, in: 61)
+[43.557] ms in Krylov 
+[724.901] ms in LLS 
+[20.682] ms in Get Residual 
+[789.730] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.52086e-07 at iteration 804 (out: 8, in: 4)
+[86.305] ms in Krylov 
+[1622.420] ms in LLS 
+[36.839] ms in Get Residual 
+[1746.416] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.66823e-07 at iteration 804 (out: 8, in: 4)
+[76.040] ms in Krylov 
+[1382.776] ms in LLS 
+[37.059] ms in Get Residual 
+[1496.686] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.6217e-07 at iteration 804 (out: 8, in: 4)
+[71.780] ms in Krylov 
+[1287.726] ms in LLS 
+[34.750] ms in Get Residual 
+[1395.032] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 8.8242e-07 at iteration 904 (out: 9, in: 4)
+[74.842] ms in Krylov 
+[1351.334] ms in LLS 
+[36.315] ms in Get Residual 
+[1463.270] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.88051e-07 at iteration 877 (out: 8, in: 77)
+[60.190] ms in Krylov 
+[1020.723] ms in LLS 
+[28.661] ms in Get Residual 
+[1110.310] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.8795e-07 at iteration 964 (out: 9, in: 64)
+[58.539] ms in Krylov 
+[978.167] ms in LLS 
+[27.767] ms in Get Residual 
+[1065.273] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.98308e-07 at iteration 879 (out: 8, in: 79)
+[48.574] ms in Krylov 
+[809.569] ms in LLS 
+[22.898] ms in Get Residual 
+[881.680] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.57118e-07 at iteration 824 (out: 8, in: 24)
+[44.770] ms in Krylov 
+[757.546] ms in LLS 
+[21.335] ms in Get Residual 
+[824.244] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 9.28868e-07 at iteration 909 (out: 9, in: 9)
+[49.240] ms in Krylov 
+[840.971] ms in LLS 
+[23.207] ms in Get Residual 
+[914.063] ms in total (Sparse w/o OMP) 
+
+A: ../data/cage7.mtx 340x340
+m=100, tol=1e-06, maxit=100000
+
+FGMRES converged to relative tolerance: 7.57298e-07 at iteration 704 (out: 7, in: 4)
+[35.824] ms in Krylov 
+[615.254] ms in LLS 
+[16.910] ms in Get Residual 
+[668.550] ms in total (Sparse w/o OMP) 
+
