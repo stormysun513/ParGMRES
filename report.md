@@ -46,7 +46,44 @@ are memory bound. In order to improve the performance, we have to identify
 the part in code where we waste the bandwidth. 
 
 
-<!-- ## Background -->
+## Background
+
+Our project is to parallelize the generalized minimal residual method (GMRES). 
+GMRES is by itself an iterative method, in which the main flow of the algorithm 
+is inherently sequential. Therefore, we can only parallelize matrix operations 
+but the entire algorithm. Its algorithm can be divided into three parts: constructing 
+Krylov space, solving linear least square problem, and computing the residual 
+between target vector. The first part consists of iterative matrix-vector 
+multiplications. The second one consists of matrix multiplications and subtractions. 
+The last one consists of matrix multiplication, subtraction and vector norm. 
+These are operations that can be parallelized potentially. Our implementation 
+focus on how to efficiently compute these operations. 
+
+The performance of a program depends on how a data is stored as well. We tried 
+two data structures in our project: dense representation and compressed sparse 
+representation. The first one keep the original layout of a 2D matrix and the 
+latter one only store non-zero indices and values. Matrix operations are memory 
+bound so we anticipate that the dense representation does not perform as well as 
+the compressed sparse format. If we categorize matrix operations into different 
+asymptotic complexities, matrix operations are O(n^2) and most vector operations 
+are O(n). It is important to identify the boundary that is able to benefit from 
+parallelism and check whether an operation fulfills this condition. If it is not, 
+a sequential version may be better compared to those overheads.
+
+There are three challenges for this project. The first one is hard to find a baseline. 
+Most implementation focus on constructing Krylov space and exchanging precondition 
+matrix. They use external library to solve the LLS part, which we do not have access 
+to the original code. The bottleneck is not just Krylov but it may be the LLS part 
+so we decide to implement the entire GMRES algorithm by ourselves. The second 
+challenge is that the test cases are hard to randomly generate. Whether an iterative 
+method is capable to solve a large linear system depends on how you choose the 
+precondition matrix. There are bunches of research to identify suitable precondition 
+matrix. Therefore, we can only use a set of matrix collection that is published by 
+other one such as matrix market. Also, the test cases from these source may not have 
+an suitable range for experiments. The third challenge is that benefit of parallelism 
+is not significant if the matrix size is small. However, our larger matrix test cases 
+may not be allowed to run on the late days cluster. It consume too much memory and be 
+killed by the system.
 
 <!-- Describe the algorithm, application, or system you parallelized in computer -->
 <!-- science terms. (Recall our discussion from the last day of class.) Figure(s) -->
@@ -137,4 +174,4 @@ in these two parts.
 
 ## References
 
-Please provide a list of references used in the project.
+[1] Saad, Yousef. Iterative methods for sparse linear systems. Society for Industrial and Applied Mathematics, 2003.
