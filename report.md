@@ -92,18 +92,31 @@ killed by the system.
 
 ## Approach
 
-As we mentioned in the background part, we don’t have a suitable baseline that 
-implemented by other developers so we build our own GMRES from scratch. We use C++, 
-OpenMP, and CUDA to implement the algorithm. We also use Matlab to verify our 
-correctness. In our proposal, we choose OpenMP as our parallel method. However, 
-we eventually realized that OpenMP is not suitable in this context. The GMRES is 
-an iterative method. If we use OpenMP as parallel machines, it has to launch a 
-lot of threads every iteration, which introduces a huge overheads. What we should 
-do is to use techniques like vectorized operations or loop unrolling to avoid 
-unnecessary overheads. Although, we choose the wrong tool for optimization. 
-We still follow a reasonable way to tune the performance. We identify the capacity 
-of a cache line and set the OpenMP parallel chunk size accordingly. Most of matrix 
-operations have equal workloads. Use static scheduling is fine in this context. 
+As we mentioned in the background part, we don't have a suitable baseline that 
+implemented by other developers so we build our own sequential GMRES from
+scratch. We use C++, OpenMP, and CUDA to implement the algorithm. We also use
+Matlab to verify our correctness.
+
+At first, we implemented the sequential version directly without any
+optimization. After we got correct implementation, we started improve the
+performance by utilizing locality, optimize computations, and switch to more
+efficient data structure (such as using CSR sparse matrix format). Only when we
+have a reasonably fast sequential code, we then try to implement parallel
+version code. Additionally, before we try to implement the parallel version, we
+also conduct some experiment to identify the major workloads (bottlenecks) in
+our algorithm. In this way, we can better understand which part should we
+parallelize first, and we can also have a more reasonable expectation on the
+speed up.
+
+In our proposal, we choose OpenMP as our parallel method. However, we eventually
+realized that OpenMP is not suitable in this context. The GMRES is an iterative
+method. If we use OpenMP as parallel machines, it has to launch a lot of threads
+every iteration, which introduces a huge overheads. What we should do is to use
+techniques like vectorized operations or loop unrolling to avoid unnecessary
+overheads. Although, we choose the wrong tool for optimization. We still follow
+a reasonable way to tune the performance. We identify the capacity of a cache
+line and set the OpenMP parallel chunk size accordingly. Most of matrix
+operations have equal workloads. Use static scheduling is fine in this context.
 
 ## Result
 
