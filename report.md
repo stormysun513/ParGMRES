@@ -16,6 +16,10 @@ ParGMRES: A parallel linear solver
 - Yu-Lun Tsai (yulunt)
 - Chih-Wei Chang (cchang3)
 
+
+Equal work was performed by both project members.
+
+
 ## Summary
 
 We implemented the generalized minimal residual (GMRES) algorithm using both 
@@ -25,25 +29,22 @@ we only have one version, we are trying to identify bottlenecks and compare
 the difference between GPU and CPU implementation.
 
 
-## Challenges
-
-One of the challenge here is implementation of linear algebra algorithm. We 
-thought that the most complex part of the program is the part that compute 
-the Krylov space. However, after we start implementing the algorithm, we 
-realized that there is a linear least square part at the end of each iteration. 
-We implemented three version to solve these problem: the power method for SVD, 
-the Jacobian method for SVD, and QR householder reduction. We finally picked 
-QR reduction to solve the LLS because it is not an iterative method and its 
-complexity depends directly on the size of matrix. Besides, the Jacobian SVD 
-consists of operations on small 2x2 matrices constructed by accessing 
-different (i, j) locations. We considered it hard to being parallelized.   
-
-
-The benefit of parallelize matrix operations becomes significant only when 
-the matrix size is large enough. However, when the size increases, the memory 
-footprints impact the overall performance as well. Most of our operations 
-are memory bound. In order to improve the performance, we have to identify 
-the part in code where we waste the bandwidth. 
+<!-- ## Challenges -->
+<!-- One of the challenge here is implementation of linear algebra algorithm. We --> 
+<!-- thought that the most complex part of the program is the part that compute  -->
+<!-- the Krylov space. However, after we start implementing the algorithm, we    -->
+<!-- realized that there is a linear least square part at the end of each iteration. --> 
+<!-- We implemented three version to solve these problem: the power method for SVD,  -->
+<!-- the Jacobian method for SVD, and QR householder reduction. We finally picked    -->
+<!-- QR reduction to solve the LLS because it is not an iterative method and its     -->
+<!-- complexity depends directly on the size of matrix. Besides, the Jacobian SVD    -->
+<!-- consists of operations on small 2x2 matrices constructed by accessing           -->
+<!-- different (i, j) locations. We considered it hard to being parallelized.        -->
+<!-- The benefit of parallelize matrix operations becomes significant only when      -->
+<!-- the matrix size is large enough. However, when the size increases, the memory   -->
+<!-- footprints impact the overall performance as well. Most of our operations       -->
+<!-- are memory bound. In order to improve the performance, we have to identify      -->
+<!-- the part in code where we waste the bandwidth.                                  -->
 
 
 ## Background
@@ -89,12 +90,20 @@ killed by the system.
 <!-- science terms. (Recall our discussion from the last day of class.) Figure(s) -->
 <!-- would be really useful here. -->
 
-<!-- ## Approach -->
+## Approach
 
-<!-- Tell us how your implementation works. Your description should be sufficiently -->
-<!-- detailed to provide the course staff a basic understanding of your approach. -->
-<!-- Again, it might be very useful to include a figure here illustrating components -->
-<!-- of the system and/or their mapping to parallel hardware. -->
+As we mentioned in the background part, we don’t have a suitable baseline that 
+implemented by other developers so we build our own GMRES from scratch. We use C++, 
+OpenMP, and CUDA to implement the algorithm. We also use Matlab to verify our 
+correctness. In our proposal, we choose OpenMP as our parallel method. However, 
+we eventually realized that OpenMP is not suitable in this context. The GMRES is 
+an iterative method. If we use OpenMP as parallel machines, it has to launch a 
+lot of threads every iteration, which introduces a huge overheads. What we should 
+do is to use techniques like vectorized operations or loop unrolling to avoid 
+unnecessary overheads. Although, we choose the wrong tool for optimization. 
+We still follow a reasonable way to tune the performance. We identify the capacity 
+of a cache line and set the OpenMP parallel chunk size accordingly. Most of matrix 
+operations have equal workloads. Use static scheduling is fine in this context. 
 
 ## Result
 
