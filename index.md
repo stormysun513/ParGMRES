@@ -1,6 +1,6 @@
 ---
 title: Project Report
-permalink: report.html
+permalink: index.html
 ---
 
 

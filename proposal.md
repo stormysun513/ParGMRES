@@ -1,6 +1,6 @@
 ---
 title: Project Proposal
-permalink: index.html
+permalink: proposal.html
 ---
 
 
